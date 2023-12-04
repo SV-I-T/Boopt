@@ -21,7 +21,7 @@ from bson import ObjectId
 import pendulum
 from icecream import ic
 
-from .utils.cpf import layout_cpf
+from .funcoes.cpf import layout_cpf
 from utils.banco_dados import mongo
 
 explicacao_teste = dcc.Markdown(

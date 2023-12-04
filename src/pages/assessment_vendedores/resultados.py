@@ -4,10 +4,10 @@ from bson import ObjectId
 from pymongo import ASCENDING
 import polars as pl
 
-from .utils.cpf import layout_cpf
 from utils.cache import cache
 from utils.banco_dados import mongo
-from .utils.graficos import (
+from .funcoes.cpf import layout_cpf
+from .funcoes.graficos import (
     radar_etapas,
     radar_comp,
     rosca_grupo,
