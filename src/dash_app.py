@@ -1,5 +1,18 @@
-from dash import Dash, dcc, page_container, get_asset_url
+from dash import (
+    Dash,
+    html,
+    dcc,
+    page_container,
+    get_asset_url,
+    page_registry,
+    callback,
+    Output,
+    Input,
+)
+from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
+
+from components.header import layout_header
 
 app = Dash(
     __name__,
@@ -13,7 +26,9 @@ app = Dash(
 app.layout = dmc.MantineProvider(
     dmc.NotificationsProvider(
         [
+            html.Div(id="notifications"),
             dcc.Location(id="url", refresh=True),
+            layout_header(),
             dmc.Container(
                 [
                     dmc.Paper(
@@ -45,10 +60,10 @@ app.layout = dmc.MantineProvider(
                         withBorder=True,
                     )
                 ],
-                my="2rem",
+                mb="2rem",
+                mt=100,
             ),
-        ],
-        id="notification-provider",
+        ]
     ),
     id="mantine-provider",
     theme={
