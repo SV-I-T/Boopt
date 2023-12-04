@@ -1,6 +1,21 @@
+:root {
+    --azul-sv: #1618ff;
+    --laranja-boopt: #FF7730
+}
+
+html {
+    min-height: 100vh;
+}
+
 body {
-    background-image: linear-gradient(135deg, #d9d9f4, #e7e7e7, #f5ded2) !important;
+    background-image: linear-gradient(135deg, color-mix(in srgb, var(--azul-sv) 10%, transparent), #e7e7e7, color-mix(in srgb, var(--laranja-boopt) 10%, transparent)) !important;
     background-attachment: scroll;
+}
+
+#header {
+    border-bottom: 2px solid;
+    border-image-slice: 3;
+    border-image-source: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
 }
 
 
