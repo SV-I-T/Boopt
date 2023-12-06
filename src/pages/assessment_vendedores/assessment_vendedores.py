@@ -378,7 +378,7 @@ def salvar_resposta(n, frases, search):
             ],
             "dt": dt,
             "cpf": cpf,
-            "id_aplicacao": id,
+            "id_aplicacao": ObjectId(id),
         }
         ic(dados_resposta)
         resposta = tb_respostas.insert_one(dados_resposta)
