@@ -65,22 +65,19 @@ def layout(id: str = None, cpf: str = None):
                 color="red",
             )
 
-        id_form = aplicacao[0]["id_form"]
-        nome = aplicacao[0]["participantes"]["Nome"]
-        cliente = aplicacao[0]["cliente"]
+        aplicacao = aplicacao[0]
+        id_form = aplicacao["id_form"]
+        nome = aplicacao["participantes"]["Nome"]
+        cliente = aplicacao["cliente"]
 
-        check_respondeu = mongo.cx["AssessmentVendedores"]["Respostas"].find_one(
-            {"cpf": cpf, "id_aplicacao": id}, {"_id": 1}
-        )
-
-        if check_respondeu is not None:
+        if "resposta" in aplicacao.keys():
             # ADICIONAR O NOME/DATA DA APLICAÇÃO
             return dmc.Alert(
                 f"O CPF {cpf} já respondeu esta aplicação.", color="yellow"
             )
 
         formulario_frases = mongo.cx["AssessmentVendedores"]["Formulários"].find_one(
-            {"_id": ObjectId(id_form)},
+            {"_id": id_form},
             {
                 "_id": 0,
                 "competencias.frases.desc": 1,
@@ -319,17 +316,37 @@ def buscar_aplicacao(cpf, id):
     return list(
         mongo.cx["AssessmentVendedores"]["Aplicações"].aggregate(
             [
-                # "Desmonta" a lista de participantes para poder filtrar dentro dela
                 {"$unwind": "$participantes"},
-                # Busca documentos com o id_aplicação, e participantes dentro da lista com o cpf
                 {"$match": {"participantes.CPF": cpf, "_id": ObjectId(id)}},
+                {"$limit": 1},
+                {"$unwind": "$participantes"},
                 {
-                    # Retorna somente Nome e id_form
+                    "$lookup": {
+                        "from": "Respostas",
+                        "let": {"cpf": cpf, "id": "$_id"},
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            {"$eq": ["$cpf", "$$cpf"]},
+                                            {"$eq": ["$id_aplicacao", "$$id"]},
+                                        ]
+                                    }
+                                }
+                            }
+                        ],
+                        "as": "resposta",
+                    }
+                },
+                {"$unwind": {"path": "$resposta", "preserveNullAndEmptyArrays": True}},
+                {
                     "$project": {
+                        "id_form": 1,
                         "participantes": {"Nome": 1},
                         "cliente": 1,
                         "_id": 0,
-                        "id_form": 1,
+                        "resposta": {"_id": 1},
                     }
                 },
             ]

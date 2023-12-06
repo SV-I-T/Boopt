@@ -1,7 +1,5 @@
 from dash import dcc, register_page
 import dash_mantine_components as dmc
-from bson import ObjectId
-from pymongo import ASCENDING
 import polars as pl
 
 from utils.cache import cache
@@ -147,68 +145,100 @@ def layout(cpf: str = None):
 
 @cache.memoize(timeout=6000)
 def buscar_resposta(cpf: str):
-    resposta = mongo.cx["AssessmentVendedores"]["Respostas"].find_one(
-        {"cpf": cpf},
-        {"id_aplicacao": 1, "_id": 0, "notas": 1},
-        sort=([("dt", ASCENDING)]),
+    respostas = list(
+        mongo.cx["AssessmentVendedores"]["Respostas"].aggregate(
+            [
+                {"$match": {"cpf": cpf}},
+                {"$sort": {"dt": 1}},
+                {
+                    "$lookup": {
+                        "from": "Aplicações",
+                        "localField": "id_aplicacao",
+                        "foreignField": "_id",
+                        "as": "aplicação",
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "Formulários",
+                        "localField": "aplicação.id_form",
+                        "foreignField": "_id",
+                        "as": "form",
+                    }
+                },
+                {"$unwind": {"path": "$aplicação", "preserveNullAndEmptyArrays": True}},
+                {"$unwind": {"path": "$form", "preserveNullAndEmptyArrays": True}},
+                {
+                    "$project": {
+                        "id_aplicacao": 1,
+                        "_id": 0,
+                        "notas": 1,
+                        # "aplicação": {'_id':0,"id_form": 1},
+                        "form": {
+                            "competencias": {
+                                "nome": 1,
+                                "frases": {"id": 1, "notas": 1},
+                            },
+                            "etapas": 1,
+                        },
+                    },
+                },
+            ]
+        )
     )
 
-    if not resposta:
+    if len(respostas) == 0:
         return None
     else:
-        id_aplicacao = resposta["id_aplicacao"]
+        df_notas_etapas = pl.DataFrame()
+        df_notas_competencias = pl.DataFrame()
 
-        aplicacao_respondida = mongo.cx["AssessmentVendedores"]["Aplicações"].find_one(
-            {"_id": ObjectId(id_aplicacao)}, {"id_form": 1, "_id": 0, "cliente": 1}
-        )
+        for resposta in respostas:
+            form = resposta["form"]
 
-        id_form = aplicacao_respondida["id_form"]
-
-        form = mongo.cx["AssessmentVendedores"]["Formulários"].find_one(
-            {"_id": ObjectId(id_form)},
-            {
-                "_id": 0,
-                "competencias": {"nome": 1, "frases": {"id": 1, "notas": 1}},
-                "etapas": 1,
-            },
-        )
-
-        df_notas = pl.DataFrame(resposta["notas"])
-        df_competencias = (
-            pl.DataFrame(form["competencias"]).explode("frases").unnest("frases")
-        )
-        df_etapas = pl.DataFrame(form["etapas"]).explode("competencias")
-
-        df_notas_competencias = (
-            df_competencias.join(df_notas, on="id", how="left")
-            .group_by("nome")
-            .agg(pl.col("notas").list.get(pl.col("nota").sub(1)).mean())
-        ).with_columns(
-            pl.when(pl.col("notas").lt(5))
-            .then(pl.lit("Baixa"))
-            .when(pl.col("notas").lt(8))
-            .then(pl.lit("Média"))
-            .otherwise(pl.lit("Alta"))
-            .alias("grupo")
-        )
-        df_notas_etapas = (
-            df_etapas.join(
-                df_notas_competencias,
-                left_on="competencias",
-                right_on="nome",
-                how="left",
+            df_notas = pl.DataFrame(resposta["notas"])
+            df_competencias = (
+                pl.DataFrame(form["competencias"]).explode("frases").unnest("frases")
             )
-            .group_by("nome")
-            .agg(
-                [
-                    pl.col("peso")
-                    .mul(pl.col("notas"))
-                    .sum()
-                    .truediv(pl.col("peso").sum())
-                    .alias("nota"),
-                    pl.col("id").max(),
-                ]
+            df_etapas = pl.DataFrame(form["etapas"]).explode("competencias")
+
+            _df_notas_competencias = (
+                df_competencias.join(df_notas, on="id", how="left")
+                .group_by("nome")
+                .agg(pl.col("notas").list.get(pl.col("nota").sub(1)).mean())
+            ).with_columns(
+                pl.when(pl.col("notas").lt(5))
+                .then(pl.lit("Baixa"))
+                .when(pl.col("notas").lt(8))
+                .then(pl.lit("Média"))
+                .otherwise(pl.lit("Alta"))
+                .alias("grupo")
             )
-        )
+            _df_notas_etapas = (
+                df_etapas.join(
+                    _df_notas_competencias,
+                    left_on="competencias",
+                    right_on="nome",
+                    how="left",
+                )
+                .group_by("nome")
+                .agg(
+                    [
+                        pl.col("peso")
+                        .mul(pl.col("notas"))
+                        .sum()
+                        .truediv(pl.col("peso").sum())
+                        .alias("nota"),
+                        pl.col("id").max(),
+                    ]
+                )
+            )
+
+            df_notas_competencias = pl.concat(
+                [df_notas_competencias, _df_notas_competencias], how="diagonal_relaxed"
+            ).drop_nulls("nome")
+            df_notas_etapas = pl.concat(
+                [df_notas_etapas, _df_notas_etapas], how="diagonal_relaxed"
+            ).drop_nulls("nome")
 
         return df_notas_etapas, df_notas_competencias
