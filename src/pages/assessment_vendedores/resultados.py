@@ -149,6 +149,7 @@ def buscar_resposta(cpf: str):
         mongo.cx["AssessmentVendedores"]["Respostas"].aggregate(
             [
                 {"$match": {"cpf": cpf}},
+                {"$addFields": {"dt": {"$toDate": "$_id"}}},
                 {"$sort": {"dt": 1}},
                 {
                     "$lookup": {
@@ -173,7 +174,6 @@ def buscar_resposta(cpf: str):
                         "id_aplicacao": 1,
                         "_id": 0,
                         "notas": 1,
-                        # "aplicação": {'_id':0,"id_form": 1},
                         "form": {
                             "competencias": {
                                 "nome": 1,
