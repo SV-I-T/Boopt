@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from dash import get_asset_url, html, dcc, callback, Output, Input, page_registry
+from dash import Input, Output, callback, dcc, get_asset_url, html, page_registry
 
 
 def layout_header():
@@ -13,7 +13,7 @@ def layout_header():
                 dmc.Col(
                     html.Div(
                         id="container-paginas",
-                        style={"overflowY": "scroll", "height": 50},
+                        style={"height": 50},
                     ),
                     span="content",
                 ),
@@ -36,11 +36,21 @@ def layout_header():
     )
 
 
-@callback(Output("container-paginas", "children"), Input("url", "href"))
-def listar_paginas(_):
-    return [
-        html.Div(
-            [page["name"], "-", dcc.Link(href=page["path"])], style={"font-size": 10}
-        )
-        for page in page_registry.values()
-    ]
+@callback(Output("container-paginas", "children"), Input("url", "pathname"))
+def listar_paginas(path):
+    return dmc.Menu(
+        [
+            dmc.MenuTarget(dmc.Button("Páginas", variant="light")),
+            dmc.MenuDropdown(
+                [
+                    dmc.MenuItem(
+                        f'{page["name"]} [~{page["path"]}]',
+                        href=page["path"],
+                        target="_self",
+                        color="grey" if path == page["path"] else False,
+                    )
+                    for page in page_registry.values()
+                ]
+            ),
+        ]
+    )
