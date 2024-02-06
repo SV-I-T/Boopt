@@ -1,5 +1,12 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        abrir_modal_novo_usr: function (n) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            } else {
+                return true;
+            }
+        },
         iniciar_teste: function (n) {
             if (!n) {
                 throw window.dash_clientside.PreventUpdate;
