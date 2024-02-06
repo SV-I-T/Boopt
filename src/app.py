@@ -1,6 +1,4 @@
 import locale
-import os
-import secrets
 
 from dash import Dash
 from dash_app import layout
@@ -14,8 +12,7 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 load_dotenv()
 
 server = Flask(__name__)
-server.config["SECRET_KEY"] = secrets.token_hex()
-server.config["MONGO_URI"] = os.environ.get("MONGO_URI")
+server.config.from_prefixed_env()
 
 app = Dash(
     __name__,
@@ -23,7 +20,11 @@ app = Dash(
     suppress_callback_exceptions=True,
     prevent_initial_callbacks="initial_duplicate",
     use_pages=True,
-    update_title=None,
+    update_title="Carregando...",
+    external_scripts=[
+        "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/locale/pt-br.min.js",
+    ],
 )
 
 mongo.init_app(server)
@@ -31,7 +32,8 @@ cache.init_app(server)
 login_manager.init_app(server)
 
 app.layout = layout()
+app.enable_dev_tools(debug=False)
 
 
 if __name__ == "__main__":
-    server.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    server.run(load_dotenv=True)
