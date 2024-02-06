@@ -1,28 +1,28 @@
-from random import sample
 import re
+from random import choice, sample
 
+import dash_mantine_components as dmc
+import pendulum
+from bson import ObjectId
 from dash import (
-    html,
-    dcc,
-    register_page,
+    ClientsideFunction,
     Input,
     Output,
     State,
-    no_update,
     callback,
     callback_context,
     clientside_callback,
-    ClientsideFunction,
+    dcc,
+    html,
+    no_update,
+    register_page,
 )
 from dash.exceptions import PreventUpdate
-import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from bson import ObjectId
-import pendulum
-from icecream import ic
+from icecream import ic  # noqa: F401
+from utils.banco_dados import mongo
 
 from .funcoes.cpf import layout_cpf
-from utils.banco_dados import mongo
 
 explicacao_teste = dcc.Markdown(
     """
@@ -38,7 +38,9 @@ explicacao_teste = dcc.Markdown(
 """
 )
 
-register_page(__name__, path="/assessment-vendedor", title="Assessment Vendedor")
+register_page(
+    __name__, path="/assessment-vendedor/assessment", title="Assessment Vendedor"
+)
 
 
 def layout(id: str = None, cpf: str = None):
@@ -123,20 +125,21 @@ def layout(id: str = None, cpf: str = None):
         )
 
 
-# @callback(
-#     Output("store-ordem-frase-atual", "data", allow_duplicate=True),
-#     Output("store-frases", "data", allow_duplicate=True),
-#     Input("btn-last", "n_clicks"),
-#     State("store-frases", "data"),
-#     prevent_initial_call=True,
-# )
-# def preencher_auto(n, frases):
-#     if not n:
-#         raise PreventUpdate
-#     else:
-#         for k in frases:
-#             frases[k]["valor"] = choice([1, 2, 3, 4, 5])
-#         return 62, frases
+# CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
+@callback(
+    Output("store-ordem-frase-atual", "data", allow_duplicate=True),
+    Output("store-frases", "data", allow_duplicate=True),
+    Input("btn-last", "n_clicks"),
+    State("store-frases", "data"),
+    prevent_initial_call=True,
+)
+def preencher_auto(n, frases):
+    if not n:
+        raise PreventUpdate
+    else:
+        for k in frases:
+            frases[k]["valor"] = choice([1, 2, 3, 4, 5])
+        return 62, frases
 
 
 # INICIA O TESTE AO CLICAR NO BOTÃO DE INICIAR
@@ -243,6 +246,11 @@ def atualizar_container_frase(status_comecou, _, ordem_atual, frases, ordem):
                 dmc.Progress(id="progress-bar", size="xl", striped=True), span="auto"
             ),
             dmc.Col(dmc.Text(id="progress-text"), span="content"),
+            dmc.Col(
+                dmc.Button("Auto-preencher", id="btn-last", variant="subtle"),
+                span="content",
+                p=0,
+            ),
         ]
 
 
@@ -380,7 +388,6 @@ def salvar_resposta(n, frases, search):
             "cpf": cpf,
             "id_aplicacao": ObjectId(id),
         }
-        ic(dados_resposta)
         resposta = tb_respostas.insert_one(dados_resposta)
         if resposta.inserted_id is not None:
             return (
