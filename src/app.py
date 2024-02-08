@@ -22,6 +22,7 @@ app = Dash(
     use_pages=True,
     update_title="Carregando...",
     external_scripts=[
+        "https://cdn.plot.ly/plotly-locale-pt-br-latest.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/locale/pt-br.min.js",
     ],
