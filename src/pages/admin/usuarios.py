@@ -128,11 +128,15 @@ def modal_novo_usr_massa():
         children=[
             dmc.Group(
                 [
-                    dmc.Button(
-                        id="usr-massa-upload",
-                        children="Escolha o arquivo",
-                        leftIcon=DashIconify(
-                            icon="fluent:arrow-upload-16-filled", width=24
+                    dcc.Upload(
+                        id="upload-cadastro-massa",
+                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        children=dmc.Button(
+                            id="usr-massa-upload",
+                            children="Escolha o arquivo",
+                            leftIcon=DashIconify(
+                                icon="fluent:arrow-upload-16-filled", width=24
+                            ),
                         ),
                     ),
                     dmc.Text(
@@ -226,7 +230,7 @@ def baixar_template_cadastro_massa(n):
     return dcc.send_bytes(
         src=io.BytesIO(tmp.read()),
         filename="template_cadastro.xlsx",
-        type="application/vnd.ms-excel",
+        type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -245,7 +249,6 @@ def baixar_template_cadastro_massa(n):
 def criar_novo_usr(
     n, nome: str, sobrenome: str, cpf: str, data: str, email: str, cargo: str
 ):
-    print(get_asset_url("modelo_novos_usuarios.xlsx"))
     if not n:
         raise PreventUpdate
     return dmc.Notification(

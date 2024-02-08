@@ -48,7 +48,6 @@ def layout():
             children=[
                 html.Div(id="notificacoes"),
                 dcc.Download(id="download"),
-                dcc.Upload(id="upload"),
                 dcc.Location(id="url", refresh=True),
                 layout_header(),
                 html.Div(
