@@ -1,4 +1,6 @@
+import io
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 
 import dash_mantine_components as dmc
 import openpyxl
@@ -9,6 +11,7 @@ from dash import (
     State,
     callback,
     clientside_callback,
+    dcc,
     get_asset_url,
     html,
     register_page,
@@ -30,22 +33,6 @@ CARGOS_PADROES = sorted(
         "Regional",
     ]
 )
-
-
-def gerar_template_cadastro():
-    caminho = get_asset_url("modelo_novos_usuarios.xlsx")
-    wb = openpyxl.load_workbook(caminho)
-    ws = wb["Plan1"]
-    rule = DataValidation(
-        type="list",
-        formula1=f'"{",".join(CARGOS_PADROES)}"',
-        allow_blank=True,
-        showErrorMessage=False,
-    )
-    ws.add_data_validation(rule)
-    rule.add("F2")
-    wb.save(caminho)
-    wb.close()
 
 
 def modal_novo_usr():
@@ -212,6 +199,35 @@ clientside_callback(
     Output("modal-usr-massa", "opened"),
     Input("btn-modal-usr-massa", "n_clicks"),
 )
+
+
+@callback(
+    Output("download", "data", allow_duplicate=True),
+    Input("usr-massa-download-template", "n_clicks"),
+    prevent_initial_call=True,
+)
+def baixar_template_cadastro_massa(n):
+    if not n:
+        raise PreventUpdate
+    caminho = get_asset_url("modelo_novos_usuarios.xlsx")
+    wb = openpyxl.load_workbook(caminho)
+    ws = wb["Plan1"]
+    rule = DataValidation(
+        type="list",
+        formula1=f'"{",".join(CARGOS_PADROES)}"',
+        allow_blank=True,
+        showErrorMessage=False,
+    )
+    ws.add_data_validation(rule)
+    rule.add("F2")
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+    return dcc.send_bytes(
+        src=io.BytesIO(tmp.read()),
+        filename="template_cadastro.xlsx",
+        type="application/vnd.ms-excel",
+    )
 
 
 @callback(
