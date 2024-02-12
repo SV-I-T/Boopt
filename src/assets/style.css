@@ -8,7 +8,7 @@ html {
 }
 
 body {
-    background-image: linear-gradient(135deg, color-mix(in srgb, var(--azul-sv) 10%, transparent), #e7e7e7, color-mix(in srgb, var(--laranja-boopt) 10%, transparent)) !important;
+    background-image: linear-gradient(135deg, color-mix(in srgb, var(--azul-sv) 5%, transparent), #e7e7e7, color-mix(in srgb, var(--laranja-boopt) 10%, transparent)) !important;
     background-attachment: scroll;
 }
 
@@ -33,4 +33,8 @@ body {
 
 input::invalid {
     outline: none !important;
+}
+
+#usr-massa-download-template .mantine-Button-label:hover {
+    text-decoration: underline;
 }

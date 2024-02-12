@@ -31,7 +31,8 @@ TEMA_PADRAO = {
     },
     "primaryColor": "SVAzul",
     "colorScheme": "light",
-    "defaultRadius": "md",
+    "defaultRadius": "xl",
+    "defaultGradient": {"from": "SVAzul", "to": "BooptLaranja"},
 }
 
 

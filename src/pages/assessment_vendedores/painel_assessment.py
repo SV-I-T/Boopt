@@ -1,6 +1,17 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, dcc, html, register_page
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    dcc,
+    html,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
+from dash_iconify import DashIconify
 from utils.banco_dados import mongo
 
 register_page(__name__, "/assessment-vendedor/painel", title="Painel Assessment")
@@ -13,6 +24,14 @@ def carregar_aplicacoes():
         )
     )
     return aplicacoes
+
+
+def modal_nova_aplicacao():
+    return dmc.Modal(
+        id="modal-novo-assessment",
+        title=dmc.Title("Nova aplicação", weight=600, order=2),
+        zIndex=10000,
+    )
 
 
 def layout():
@@ -49,25 +68,21 @@ def layout():
     )
 
     return [
-        dmc.Title("Aplicações", order=3, weight=700),
+        dmc.Title("Aplicações", order=1, weight=700),
+        dmc.Button(
+            "Nova aplicação",
+            id="btn-novo-assessment",
+            leftIcon=DashIconify(icon="fluent:add-12-filled", width=24),
+            variant="gradient",
+        ),
+        modal_nova_aplicacao(),
         tabela_aplicacoes,
         dmc.Divider(),
-        dmc.Button("Criar nova aplicação", id="btn-novo-assessment"),
-        dmc.Modal(
-            id="modal-novo-assessment",
-            title="Nova aplicação",
-            zIndex=10000,
-        ),
     ]
 
 
-@callback(
+clientside_callback(
+    ClientsideFunction(namespace="clientside", function_name="abrir_modal"),
     Output("modal-novo-assessment", "opened"),
     Input("btn-novo-assessment", "n_clicks"),
-    State("modal-novo-assessment", "opened"),
-    prevent_initial_call=True,
 )
-def abrir_modal_novo_assessment(n, open):
-    if not n:
-        raise PreventUpdate
-    return not open

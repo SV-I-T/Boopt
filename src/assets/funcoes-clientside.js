@@ -1,6 +1,6 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
-        abrir_modal_novo_usr: function (n) {
+        abrir_modal: function (n) {
             if (!n) {
                 throw window.dash_clientside.PreventUpdate;
             } else {
@@ -15,7 +15,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
         },
         alterar_frase: function (n_next, n_back, ordem_atual) {
-            var triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
+            const triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
             switch (triggered[0]) {
                 case "btn-next.n_clicks":
                     if (n_next) { return ordem_atual + 1; } else { throw window.dash_clientside.PreventUpdate; }
