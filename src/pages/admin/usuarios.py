@@ -1,6 +1,5 @@
 import io
 from datetime import datetime
-from tempfile import NamedTemporaryFile
 
 import dash_mantine_components as dmc
 import openpyxl
@@ -12,14 +11,17 @@ from dash import (
     callback,
     clientside_callback,
     dcc,
-    get_asset_url,
     html,
+    no_update,
     register_page,
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask import url_for
 from openpyxl.worksheet.datavalidation import DataValidation
-from utils.banco_dados import mongo
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from pydantic import ValidationError
+from utils.modelo_usuario import NovoUsuario
 
 register_page(__name__, "/admin/usuarios", name="Gerenciamento de usuários")
 
@@ -107,14 +109,20 @@ def modal_novo_usr():
                 label="Cargo/Função",
                 required=True,
                 description="Selecione a opção que melhor se encaixa ao cargo",
-                data=sorted(CARGOS_PADROES),
+                data=CARGOS_PADROES,
                 creatable=True,
                 clearable=False,
                 searchable=True,
                 icon=DashIconify(icon="fluent:person-wrench-20-filled", width=24),
                 name="cargo",
             ),
+            dmc.Checkbox(
+                id="recruta-novo-usr",
+                label="Seleção e Recrutamento",
+                checked=False,
+            ),
             dmc.Button(id="btn-criar-novo-usr", children="Criar"),
+            html.Div(id="error-container-novo-usr"),
         ],
     )
 
@@ -133,7 +141,7 @@ def modal_novo_usr_massa():
                         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         children=dmc.Button(
                             id="usr-massa-upload",
-                            children="Escolha o arquivo",
+                            children="Escolha o arquivo (.xlsx)",
                             leftIcon=DashIconify(
                                 icon="fluent:arrow-upload-16-filled", width=24
                             ),
@@ -146,34 +154,36 @@ def modal_novo_usr_massa():
             ),
             dmc.Button(
                 id="usr-massa-download-template",
-                children="Baixar modelo XLSX",
+                children="Baixar modelo (.xlsx)",
                 variant="subtle",
                 compact=True,
-                leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=24),
+                leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
             ),
         ],
     )
 
 
-def layout():
+def layout(empresa: str = "Empresa"):
     return [
-        dmc.Group(
+        dmc.Title("Gerenciamento de usuários", order=1, weight=700),
+        dmc.Title(id="text-empresa", children=empresa, order=3, weight=500),
+        dmc.ButtonGroup(
             [
                 dmc.Button(
                     id="btn-modal-novo-usr",
                     children="Novo Usuário",
                     leftIcon=DashIconify(icon="fluent:add-12-filled", width=24),
+                    variant="gradient",
                 ),
                 dmc.Button(
                     id="btn-modal-usr-massa",
                     children="Cadastro em massa",
-                    variant="outline",
+                    variant="light",
                 ),
             ]
         ),
         modal_novo_usr(),
         modal_novo_usr_massa(),
-        dmc.Text("Gerenciamento de usuários", size="xl", weight=700),
         dmc.Table(
             [
                 html.Thead(
@@ -193,13 +203,13 @@ def layout():
 
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="abrir_modal_novo_usr"),
+    ClientsideFunction(namespace="clientside", function_name="abrir_modal"),
     Output("modal-novo-usr", "opened"),
     Input("btn-modal-novo-usr", "n_clicks"),
 )
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="abrir_modal_novo_usr"),
+    ClientsideFunction(namespace="clientside", function_name="abrir_modal"),
     Output("modal-usr-massa", "opened"),
     Input("btn-modal-usr-massa", "n_clicks"),
 )
@@ -213,22 +223,52 @@ clientside_callback(
 def baixar_template_cadastro_massa(n):
     if not n:
         raise PreventUpdate
-    caminho = get_asset_url("modelo_novos_usuarios.xlsx")
-    wb = openpyxl.load_workbook(caminho)
-    ws = wb["Plan1"]
-    rule = DataValidation(
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Cadastro"
+    ws.append(
+        [
+            "Primeiro Nome",
+            "Sobrenome",
+            "CPF",
+            "Data de Nascimento",
+            "Email",
+            "Cargo/Função",
+        ]
+    )
+    ws.column_dimensions["C"].number_format = "@"
+    ws.column_dimensions["D"].number_format = "DD/MM/YYYY"
+    for col in ("A", "B", "E"):
+        ws.column_dimensions[col].width = 32
+    for col in ("C", "D", "F"):
+        ws.column_dimensions[col].width = 16
+
+    tabela = Table(
+        displayName="Usuarios",
+        ref="A1:F2",
+        tableStyleInfo=TableStyleInfo(
+            name="TableStyleMedium2",
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+        ),
+    )
+
+    val_cargos = DataValidation(
         type="list",
         formula1=f'"{",".join(CARGOS_PADROES)}"',
         allow_blank=True,
         showErrorMessage=False,
     )
-    ws.add_data_validation(rule)
-    rule.add("F2")
 
-    with NamedTemporaryFile() as tmp:
-        wb.save(tmp.name)
+    ws.add_table(tabela)
+    ws.add_data_validation(val_cargos)
+    val_cargos.add("F2")
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
     return dcc.send_bytes(
-        src=io.BytesIO(tmp.read()),
+        src=buffer.getvalue(),
         filename="template_cadastro.xlsx",
         type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
@@ -237,6 +277,7 @@ def baixar_template_cadastro_massa(n):
 @callback(
     Output("notificacoes", "children"),
     Output("modal-novo-usr", "opened", allow_duplicate=True),
+    Output("error-container-novo-usr", "children"),
     Input("btn-criar-novo-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
@@ -244,17 +285,58 @@ def baixar_template_cadastro_massa(n):
     State("data-novo-usr", "value"),
     State("email-novo-usr", "value"),
     State("cargo-novo-usr", "value"),
+    State("recruta-novo-usr", "checked"),
+    State("text-empresa", "children"),
     prevent_initial_call=True,
 )
 def criar_novo_usr(
-    n, nome: str, sobrenome: str, cpf: str, data: str, email: str, cargo: str
+    n,
+    nome: str,
+    sobrenome: str,
+    cpf: str,
+    data: str,
+    email: str,
+    cargo: str,
+    recruta: bool,
+    empresa: str,
 ):
     if not n:
         raise PreventUpdate
+
+    try:
+        usr = NovoUsuario(
+            nome=nome,
+            sobrenome=sobrenome,
+            cpf=cpf,
+            data=data,
+            email=email,
+            cargo=cargo,
+            recruta=recruta,
+            empresa=empresa,
+        )
+        usr.registrar()
+
+    except ValidationError as e:
+        print(e)
+        erro = e.errors()[0]["ctx"]["error"]
+        return no_update, no_update, dmc.Alert(str(erro), color="red", variant="filled")
+
+    except AssertionError as e:
+        return no_update, no_update, dmc.Alert(
+            color="red",
+            variant="filled",
+            mt="1rem",
+            children=str(e),
+        )
+
     return dmc.Notification(
         id="notificacao-novo-usr-suc",
         title="Sucesso!",
-        message=f"O usuário '{nome}', de CPF '{cpf}' foi criado com sucesso.",
+        message=[
+            dmc.Text(span=True, children="O usuário "),
+            dmc.Text(span=True, children=nome, weight=700),
+            dmc.Text(span=True, children=" foi criado com sucesso."),
+        ],
         color="green",
         action="show",
-    ), False
+    ), False, no_update

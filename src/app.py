@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from utils.banco_dados import mongo
 from utils.cache import cache
-from utils.login import login_manager
+from utils.modelo_usuario import login_manager
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 load_dotenv()
