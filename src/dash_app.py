@@ -48,6 +48,7 @@ def layout():
             position="bottom-center",
             children=[
                 html.Div(id="notificacoes"),
+                dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh=True),
                 layout_header(),
