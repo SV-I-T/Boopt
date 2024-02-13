@@ -1,5 +1,4 @@
 import dash_mantine_components as dmc
-from components.alertas import criar_alerta
 from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
@@ -39,5 +38,15 @@ def alterar_senha(n, atual, nova, nova_check):
     try:
         current_user.alterar_senha(atual, nova, nova_check)
     except AssertionError as e:
-        return criar_alerta(str(e), "red")
-    return criar_alerta("Sua senha foi alterada com sucesso!", "green")
+        return dmc.Alert(
+            color="red",
+            variant="filled",
+            mt="1rem",
+            children=str(e),
+        )
+    return dmc.Alert(
+        color="green",
+        variant="filled",
+        mt="1rem",
+        children="A senha foi alterada com sucesso!",
+    )

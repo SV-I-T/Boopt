@@ -3,7 +3,6 @@ from datetime import datetime
 
 import dash_mantine_components as dmc
 import openpyxl
-from components.alertas import criar_alerta
 from dash import (
     ClientsideFunction,
     Input,
@@ -320,10 +319,15 @@ def criar_novo_usr(
     except ValidationError as e:
         print(e)
         erro = e.errors()[0]["ctx"]["error"]
-        return no_update, no_update, criar_alerta(str(erro), "red")
+        return no_update, no_update, dmc.Alert(str(erro), color="red", variant="filled")
 
     except AssertionError as e:
-        return no_update, no_update, criar_alerta(str(e), "red")
+        return no_update, no_update, dmc.Alert(
+            color="red",
+            variant="filled",
+            mt="1rem",
+            children=str(e),
+        )
 
     return dmc.Notification(
         id="notificacao-novo-usr-suc",
