@@ -12,14 +12,14 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from utils.banco_dados import mongo
+from utils.banco_dados import db
 
 register_page(__name__, "/assessment-vendedor/painel", title="Painel Assessment")
 
 
 def carregar_aplicacoes():
     aplicacoes = list(
-        mongo.cx["AssessmentVendedores"]["Aplicações"].find(
+        db("AssessmentVendedores", "Aplicações").find(
             {}, {"_id": 1, "cliente": 1, "data": 1}
         )
     )

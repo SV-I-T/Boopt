@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
-from utils.banco_dados import mongo
+from utils.banco_dados import db
 
 
 class Empresa(BaseModel):
@@ -13,6 +13,7 @@ class Empresa(BaseModel):
 
     class Config:
         str_strip_whitespace = True
+        arbitrary_types_allowed = True
 
     @field_validator("nome", mode="before")
     @classmethod
@@ -21,8 +22,8 @@ class Empresa(BaseModel):
         return v
 
     def registrar(self) -> None:
-        assert not mongo.cx["Boopt"]["Empresas"].find_one(
+        assert not db("Boopt", "Empresas").find_one(
             {"nome": self.nome}
         ), "Já existe uma empresa come esse nome."
-        r = mongo.cx["Boopt"]["Empresas"].insert_one(self.model_dump())
+        r = db("Boopt", "Empresas").insert_one(self.model_dump())
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."

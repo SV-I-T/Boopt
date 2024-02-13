@@ -20,7 +20,7 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from icecream import ic  # noqa: F401
-from utils.banco_dados import mongo
+from utils.banco_dados import db
 
 from .funcoes.cpf import layout_cpf
 
@@ -78,7 +78,7 @@ def layout(id: str = None, cpf: str = None):
                 f"O CPF {cpf} já respondeu esta aplicação.", color="yellow"
             )
 
-        formulario_frases = mongo.cx["AssessmentVendedores"]["Formulários"].find_one(
+        formulario_frases = db("AssessmentVendedores", "Formulários").find_one(
             {"_id": id_form},
             {
                 "_id": 0,
@@ -322,7 +322,7 @@ def habilitar_envio(status_pronto):
 
 def buscar_aplicacao(cpf, id):
     return list(
-        mongo.cx["AssessmentVendedores"]["Aplicações"].aggregate(
+        db("AssessmentVendedores", "Aplicações").aggregate(
             [
                 {"$unwind": "$participantes"},
                 {"$match": {"participantes.CPF": cpf, "_id": ObjectId(id)}},
@@ -379,7 +379,6 @@ def salvar_resposta(n, frases, search):
         id = re.search("id\=([a-zA-Z0-9]*)\&?", search).group(1)
         cpf = re.search("cpf\=([0-9]{11})\&?", search).group(1)
         dt = pendulum.now("America/Sao_Paulo")
-        tb_respostas = mongo.cx["AssessmentVendedores"]["Respostas"]
         dados_resposta = {
             "notas": [
                 {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
@@ -388,7 +387,7 @@ def salvar_resposta(n, frases, search):
             "cpf": cpf,
             "id_aplicacao": ObjectId(id),
         }
-        resposta = tb_respostas.insert_one(dados_resposta)
+        resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
         if resposta.inserted_id is not None:
             return (
                 [

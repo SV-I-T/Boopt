@@ -1,16 +1,16 @@
-from dash import dcc, register_page
 import dash_mantine_components as dmc
 import polars as pl
-
+from dash import dcc, register_page
+from utils.banco_dados import db
 from utils.cache import cache
-from utils.banco_dados import mongo
+
 from .funcoes.cpf import layout_cpf
 from .funcoes.graficos import (
-    radar_etapas,
+    cartao_nota_total_etapas,
     radar_comp,
+    radar_etapas,
     rosca_grupo,
     tabela_competencias,
-    cartao_nota_total_etapas,
 )
 
 register_page(
@@ -146,7 +146,7 @@ def layout(cpf: str = None):
 @cache.memoize(timeout=6000)
 def buscar_resposta(cpf: str):
     respostas = list(
-        mongo.cx["AssessmentVendedores"]["Respostas"].aggregate(
+        db("AssessmentVendedores", "Respostas").aggregate(
             [
                 {"$match": {"cpf": cpf}},
                 {"$addFields": {"dt": {"$toDate": "$_id"}}},

@@ -5,7 +5,7 @@ import dash_mantine_components as dmc
 from bson import ObjectId
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
 from pydantic import BaseModel, Field, computed_field, field_validator
-from utils.banco_dados import mongo
+from utils.banco_dados import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -62,11 +62,11 @@ class NovoUsuario(BaseModel):
         return generate_password_hash("".join(self.data.split("-")[::-1]))
 
     def registrar(self) -> None:
-        assert not mongo.cx["Boopt"]["Usuários"].find_one(
+        assert not db("Boopt", "Usuários").find_one(
             {"cpf": self.cpf}
         ), "Este CPF já está cadastrado"
 
-        r = mongo.cx["Boopt"]["Usuários"].insert_one(self.model_dump())
+        r = db("Boopt", "Usuários").insert_one(self.model_dump())
         assert (
             r.acknowledged
         ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
@@ -97,7 +97,7 @@ class Usuario(BaseModel, UserMixin):
     ):
         if identificador == "_id":
             valor = ObjectId(valor)
-        usr = mongo.cx["Boopt"]["Usuários"].find_one({identificador: valor})
+        usr = db("Boopt", "Usuários").find_one({identificador: valor})
         assert usr, "Usuário não existe."
         assert check_password_hash(usr["senha_hash"], senha), "Senha incorreta"
 
@@ -106,7 +106,7 @@ class Usuario(BaseModel, UserMixin):
     def alterar_senha(
         self, senha_atual: str, senha_nova: str, senha_nova_check: str
     ) -> bool:
-        senha_hash = mongo.cx["Boopt"]["Usuários"].find_one(
+        senha_hash = db("Boopt", "Usuários").find_one(
             {"_id": self.id_}, {"_id": 0, "senha_hash": 1}
         )["senha_hash"]
         assert check_password_hash(
@@ -121,7 +121,7 @@ class Usuario(BaseModel, UserMixin):
             senha_nova == senha_nova_check
         ), "As senhas novas inseridas não são iguais."
 
-        r = mongo.cx["Boopt"]["Usuários"].update_one(
+        r = db("Boopt", "Usuários").update_one(
             {"_id": self.id_},
             {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
         )
@@ -137,7 +137,7 @@ login_manager.login_view = "/login"
 def carregar_usuario(_id):
     if _id == "None":
         return None
-    usr = mongo.cx["Boopt"]["Usuários"].find_one(
+    usr = db("Boopt", "Usuários").find_one(
         {"_id": ObjectId(_id)},
     )
     if not usr:
