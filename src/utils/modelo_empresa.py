@@ -25,5 +25,5 @@ class Empresa(BaseModel):
         assert not db("Boopt", "Empresas").find_one(
             {"nome": self.nome}
         ), "Já existe uma empresa come esse nome."
-        r = db("Boopt", "Empresas").insert_one(self.model_dump())
+        r = db("Boopt", "Empresas").insert_one(self.model_dump(exclude={"id_"}))
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."

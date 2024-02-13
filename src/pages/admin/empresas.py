@@ -12,6 +12,7 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from pydantic import ValidationError
 from utils.modelo_empresa import Empresa
 from utils.modelo_usuario import checar_login
 
@@ -36,7 +37,6 @@ def moval_nova_empresa():
                 searchable=True,
                 clearable=True,
             ),
-            dmc.TransferList(),
             dmc.Button(id="btn-criar-nova-empresa", children="Criar"),
             html.Div(id="feedback-modal-nova-empresa"),
         ],
@@ -67,6 +67,7 @@ clientside_callback(
 @callback(
     Output("modal-nova-empresa", "opened", allow_duplicate=True),
     Output("feedback-modal-nova-empresa", "children"),
+    Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-criar-nova-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
     State("segmento-nova-empresa", "value"),
@@ -79,4 +80,20 @@ def criar_empresa(n, nome: str, segmento: str):
         empresa = Empresa(nome=nome, segmento=segmento)
         empresa.registrar()
     except AssertionError as e:
-        return no_update, dmc.Alert(color="red", variant="filled", children=str(e))
+        return no_update, dmc.Alert(str(e), "Atenção!", color="red"), no_update
+    except ValidationError as e:
+        return no_update, dmc.Alert(
+            str(e.errors()[0]["ctx"]["error"]), "Atenção!", color="red"
+        ), no_update
+
+    return False, no_update, dmc.Notification(
+        id="empresa-criada",
+        color="green",
+        title="Pronto!",
+        action="show",
+        message=[
+            dmc.Text("A empresa ", span=True),
+            dmc.Text(nome, span=True, weight=700),
+            dmc.Text(" foi criada com sucesso.", span=True),
+        ],
+    )
