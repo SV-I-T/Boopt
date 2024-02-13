@@ -74,4 +74,4 @@ def logar(n, login, senha, lembrar, login_data):
         ), no_update
 
     login_user(usr, remember=lembrar, force=True)
-    return "/usuario/dashboard", no_update, login_data + 1
+    return "/", no_update, login_data + 1

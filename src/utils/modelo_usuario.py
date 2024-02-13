@@ -165,9 +165,9 @@ def checar_login(_func=None, *, admin: bool = False, gestao: bool = False):
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated:
-                return func(*args, **kwargs)
-            else:
-                return layout_nao_autorizado()
+                if admin and current_user.admin or not admin:
+                    return func(*args, **kwargs)
+            return layout_nao_autorizado()
 
         return wrapper
 

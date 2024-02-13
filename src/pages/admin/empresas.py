@@ -43,7 +43,7 @@ def moval_nova_empresa():
     )
 
 
-@checar_login
+@checar_login(admin=True)
 def layout():
     return [
         dmc.Title("Gerenciamento de empresas", order=1, weight=700),
