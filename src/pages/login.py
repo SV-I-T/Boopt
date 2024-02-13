@@ -68,10 +68,8 @@ def logar(n, login, senha, lembrar, login_data):
         usr = Usuario.buscar(identificador=identificador, valor=login, senha=senha)
     except AssertionError as e:
         return no_update, dmc.Alert(
-            "Verifique as suas credenciais!",
+            "Verifique as suas credenciais e tente novamente.",
             color="red",
-            variant="filled",
-            mt="1rem",
             title=str(e),
         ), no_update
 

@@ -317,21 +317,20 @@ def criar_novo_usr(
         usr.registrar()
 
     except ValidationError as e:
-        print(e)
-        erro = e.errors()[0]["ctx"]["error"]
-        return no_update, no_update, dmc.Alert(str(erro), color="red", variant="filled")
+        return no_update, no_update, dmc.Alert(
+            str(e.errors()[0]["ctx"]["error"]), "Atenção!", color="red"
+        )
 
     except AssertionError as e:
         return no_update, no_update, dmc.Alert(
+            str(e),
+            "Atenção!",
             color="red",
-            variant="filled",
-            mt="1rem",
-            children=str(e),
         )
 
     return dmc.Notification(
         id="notificacao-novo-usr-suc",
-        title="Sucesso!",
+        title="Pronto!",
         message=[
             dmc.Text(span=True, children="O usuário "),
             dmc.Text(span=True, children=nome, weight=700),
