@@ -1,4 +1,5 @@
 import dash_mantine_components as dmc
+from components.alertas import criar_alerta
 from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
@@ -67,12 +68,8 @@ def logar(n, login, senha, lembrar, login_data):
     try:
         usr = Usuario.buscar(identificador=identificador, valor=login, senha=senha)
     except AssertionError as e:
-        return no_update, dmc.Alert(
-            "Verifique as suas credenciais!",
-            color="red",
-            variant="filled",
-            mt="1rem",
-            title=str(e),
+        return no_update, criar_alerta(
+            str(e), "red", "Verifique as suas credenciais"
         ), no_update
 
     login_user(usr, remember=lembrar, force=True)
