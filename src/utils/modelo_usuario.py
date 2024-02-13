@@ -161,11 +161,17 @@ def layout_nao_autorizado():
     ]
 
 
-def checar_login(func: callable, admin: bool = False, gestao: bool = False):
-    def wrapper(*args, **kwargs):
-        if current_user.is_authenticated:
-            return func(*args, **kwargs)
-        else:
-            return layout_nao_autorizado()
+def checar_login(_func=None, *, admin: bool = False, gestao: bool = False):
+    def decorador(func: callable):
+        def wrapper(*args, **kwargs):
+            if current_user.is_authenticated:
+                return func(*args, **kwargs)
+            else:
+                return layout_nao_autorizado()
 
-    return wrapper
+        return wrapper
+
+    if _func is None:
+        return decorador
+    else:
+        return decorador(_func)
