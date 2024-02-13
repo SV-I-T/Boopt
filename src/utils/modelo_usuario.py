@@ -4,7 +4,7 @@ from typing import Any, Literal, Optional
 import dash_mantine_components as dmc
 from bson import ObjectId
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, Field, computed_field, field_validator
 from utils.banco_dados import mongo
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -20,6 +20,9 @@ class NovoUsuario(BaseModel):
     admin: bool = False
     gestor: bool = False
     recruta: bool = False
+
+    class Config:
+        str_strip_whitespace = True
 
     @field_validator("nome", "sobrenome", "cpf", "data", "cargo", mode="before")
     @classmethod
@@ -65,42 +68,65 @@ class NovoUsuario(BaseModel):
 
         r = mongo.cx["Boopt"]["Usuários"].insert_one(self.model_dump())
         assert (
-            r.inserted_id
+            r.acknowledged
         ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
-        # print("Registrando usuário...")
 
 
-class Usuario(UserMixin, BaseModel):
-    _id: Optional[ObjectId] = None
+class Usuario(BaseModel, UserMixin):
+    id_: ObjectId = Field(alias="_id")
     nome: str
     sobrenome: str
     cpf: str
-    email: Optional[str] = None
+    email: str
     cargo: str
     empresa: str
     admin: bool = False
     gestor: bool = False
 
+    class Config:
+        arbitrary_types_allowed = True
+
     @computed_field
     @property
     def id(self) -> str:
-        return str(self._id)
+        return str(self.id_)
 
     @classmethod
-    def entrar(
+    def buscar(
         cls, identificador: Literal["_id", "email", "cpf"], valor: str, senha: str
     ):
         if identificador == "_id":
             valor = ObjectId(valor)
-        usuario = mongo.cx["Boopt"]["Usuários"].find_one({identificador: valor})
-        assert usuario, "Usuário não existe"
-        assert check_password_hash(usuario["senha_hash"], senha), "Senha incorreta"
+        usr = mongo.cx["Boopt"]["Usuários"].find_one({identificador: valor})
+        assert usr, "Usuário não existe."
+        assert check_password_hash(usr["senha_hash"], senha), "Senha incorreta"
 
-        return Usuario(**usuario)
+        return cls(**usr)
 
-    def sair(self) -> None:
-        assert current_user.is_authenticated, "Não logado no momento"
-        logout_user()
+    def alterar_senha(
+        self, senha_atual: str, senha_nova: str, senha_nova_check: str
+    ) -> bool:
+        senha_hash = mongo.cx["Boopt"]["Usuários"].find_one(
+            {"_id": self.id_}, {"_id": 0, "senha_hash": 1}
+        )["senha_hash"]
+        assert check_password_hash(
+            senha_hash, senha_atual
+        ), "A senha atual não está correta."
+
+        assert not check_password_hash(
+            senha_hash, senha_nova
+        ), "A senha nova não pode ser igual à senha atual."
+
+        assert (
+            senha_nova == senha_nova_check
+        ), "As senhas novas inseridas não são iguais."
+
+        r = mongo.cx["Boopt"]["Usuários"].update_one(
+            {"_id": self.id_},
+            {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
+        )
+        assert r.acknowledged, "Ocorreu algum problema, tente novamente mais tarde."
+        return True
 
 
 login_manager = LoginManager()
@@ -109,14 +135,33 @@ login_manager.login_view = "/login"
 
 @login_manager.user_loader
 def carregar_usuario(_id):
-    return Usuario.carregar(identificador="_id", valor=_id)
+    if _id == "None":
+        return None
+    usr = mongo.cx["Boopt"]["Usuários"].find_one(
+        {"_id": ObjectId(_id)},
+    )
+    if not usr:
+        return None
+    return Usuario(**usr)
 
 
 def layout_nao_autorizado():
-    return dmc.Container(children=dmc.Text(children="Não autorizado"))
+    return [
+        dmc.Title(children="Ops!", order=1),
+        dmc.Title(
+            children="Parece que você não tem autorização para acessar essa página",
+            order=3,
+            weight=500,
+        ),
+        dmc.Anchor(
+            children="Clique aqui para voltar à página inicial",
+            href="/",
+            underline=True,
+        ),
+    ]
 
 
-def checar_login(func: callable):
+def checar_login(func: callable, admin: bool = False, gestao: bool = False):
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated:
             return func(*args, **kwargs)

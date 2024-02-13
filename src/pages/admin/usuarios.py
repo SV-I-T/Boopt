@@ -17,11 +17,10 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask import url_for
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pydantic import ValidationError
-from utils.modelo_usuario import NovoUsuario
+from utils.modelo_usuario import NovoUsuario, checar_login
 
 register_page(__name__, "/admin/usuarios", name="Gerenciamento de usuários")
 
@@ -37,7 +36,7 @@ CARGOS_PADROES = sorted(
 )
 
 
-def modal_novo_usr():
+def modal_edicao_usr():
     return dmc.Modal(
         title=dmc.Title("Novo Usuário", weight=600, order=2),
         id="modal-novo-usr",
@@ -122,12 +121,12 @@ def modal_novo_usr():
                 checked=False,
             ),
             dmc.Button(id="btn-criar-novo-usr", children="Criar"),
-            html.Div(id="error-container-novo-usr"),
+            html.Div(id="feedback-modal-novo-usr"),
         ],
     )
 
 
-def modal_novo_usr_massa():
+def modal_cadastro_massa():
     return dmc.Modal(
         id="modal-usr-massa",
         title=dmc.Title("Cadastro em massa", weight=600, order=2),
@@ -163,6 +162,7 @@ def modal_novo_usr_massa():
     )
 
 
+@checar_login
 def layout(empresa: str = "Empresa"):
     return [
         dmc.Title("Gerenciamento de usuários", order=1, weight=700),
@@ -182,8 +182,8 @@ def layout(empresa: str = "Empresa"):
                 ),
             ]
         ),
-        modal_novo_usr(),
-        modal_novo_usr_massa(),
+        modal_edicao_usr(),
+        modal_cadastro_massa(),
         dmc.Table(
             [
                 html.Thead(
@@ -277,7 +277,7 @@ def baixar_template_cadastro_massa(n):
 @callback(
     Output("notificacoes", "children"),
     Output("modal-novo-usr", "opened", allow_duplicate=True),
-    Output("error-container-novo-usr", "children"),
+    Output("feedback-modal-novo-usr", "children"),
     Input("btn-criar-novo-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
