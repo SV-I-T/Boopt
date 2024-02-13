@@ -18,7 +18,7 @@ app = Dash(
     __name__,
     server=server,
     suppress_callback_exceptions=True,
-    prevent_initial_callbacks="initial_duplicate",
+    prevent_initial_callbacks=True,
     use_pages=True,
     update_title="Carregando...",
     external_scripts=[
@@ -32,7 +32,7 @@ mongo.init_app(server)
 cache.init_app(server)
 login_manager.init_app(server)
 
-app.layout = layout()
+app.layout = layout
 app.enable_dev_tools(debug=False)
 
 
