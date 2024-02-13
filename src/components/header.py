@@ -1,5 +1,7 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, dcc, get_asset_url, html, page_registry
+from dash import Input, Output, State, callback, get_asset_url, html, page_registry
+from dash.exceptions import PreventUpdate
+from flask_login import current_user, logout_user
 
 
 def layout_header():
@@ -11,10 +13,7 @@ def layout_header():
                     span="content",
                 ),
                 dmc.Col(
-                    html.Div(
-                        id="container-paginas",
-                        style={"height": 50},
-                    ),
+                    id="comp-usr",
                     span="content",
                 ),
                 dmc.Col(
@@ -36,21 +35,62 @@ def layout_header():
     )
 
 
-@callback(Output("container-paginas", "children"), Input("url", "pathname"))
-def listar_paginas(path):
-    return dmc.Menu(
-        [
-            dmc.MenuTarget(dmc.Button("Páginas", variant="light")),
-            dmc.MenuDropdown(
-                [
-                    dmc.MenuItem(
-                        f'{page["name"]} [~{page["path"]}]',
-                        href=page["path"],
-                        target="_self",
-                        color="grey" if path == page["path"] else False,
-                    )
-                    for page in page_registry.values()
-                ]
-            ),
+@callback(
+    Output("comp-usr", "children"),
+    Input("login-data", "data"),
+)
+def listar_paginas(_):
+    if current_user.is_authenticated:
+        nome = f"Olá, {current_user.nome} :)"
+        opcao = [
+            dmc.MenuItem("Alterar senha", href="/configuracoes/senha"),
+            dmc.MenuItem("Sair", id="logout-btn", color="red"),
         ]
+    else:
+        nome = "Olá!"
+        opcao = [dmc.MenuItem("Entrar", href="/login")]
+
+    paginas = [
+        dmc.MenuItem(
+            f'{page["name"]} [~{page["path"]}]',
+            href=page["path"],
+            target="_self",
+        )
+        for page in page_registry.values()
+    ]
+
+    menu = (
+        dmc.Menu(
+            radius="lg",
+            children=[
+                dmc.MenuTarget(
+                    dmc.Button(children=nome, variant="light", compact=True)
+                ),
+                dmc.MenuDropdown(
+                    [
+                        dmc.MenuLabel("Minha conta"),
+                        *opcao,
+                        dmc.MenuDivider(),
+                        dmc.MenuLabel("Páginas"),
+                        *paginas,
+                    ]
+                ),
+                html.Div(id="logout-timer"),
+            ],
+        ),
     )
+    return menu
+
+
+@callback(
+    Output("logout-timer", "children", allow_duplicate=True),
+    Output("login-data", "data", allow_duplicate=True),
+    Input("logout-btn", "n_clicks"),
+    State("login-data", "data"),
+    prevent_initial_call=True,
+)
+def sair(n, login_data):
+    if not n:
+        raise PreventUpdate
+    logout_user()
+    return html.Meta(httpEquiv="refresh", content="0.1"), login_data + 1
