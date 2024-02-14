@@ -36,96 +36,6 @@ CARGOS_PADROES = sorted(
 )
 
 
-def modal_edicao_usr():
-    return dmc.Modal(
-        title=dmc.Title("Novo Usuário", weight=600, order=2),
-        id="modal-novo-usr",
-        zIndex=100000,
-        size=600,
-        children=[
-            dmc.Group(
-                grow=True,
-                children=[
-                    dmc.TextInput(
-                        id="nome-novo-usr",
-                        label="Primeiro Nome",
-                        type="text",
-                        required=True,
-                        icon=DashIconify(icon="fluent:person-12-filled", width=24),
-                        name="nome",
-                    ),
-                    dmc.TextInput(
-                        id="sobrenome-novo-usr",
-                        label="Sobrenome",
-                        type="text",
-                        required=True,
-                        name="sobrenome",
-                    ),
-                ],
-            ),
-            dmc.Group(
-                grow=True,
-                children=[
-                    dmc.TextInput(
-                        id="cpf-novo-usr",
-                        label="CPF",
-                        type="number",
-                        required=True,
-                        description="Somente números",
-                        placeholder="12345678910",
-                        icon=DashIconify(icon="tabler:numbers", width=24),
-                        name="cpf",
-                    ),
-                    dmc.DatePicker(
-                        id="data-novo-usr",
-                        label="Data de Nascimento",
-                        required=True,
-                        description="Será a senha do usuário",
-                        locale="pt-br",
-                        inputFormat="DD [de] MMMM [de] YYYY",
-                        firstDayOfWeek="sunday",
-                        initialLevel="year",
-                        clearable=False,
-                        placeholder=datetime.now().strftime(r"%d de %B de %Y"),
-                        icon=DashIconify(
-                            icon="fluent:calendar-date-20-filled", width=24
-                        ),
-                        name="data",
-                    ),
-                ],
-            ),
-            dmc.TextInput(
-                id="email-novo-usr",
-                label="E-mail",
-                type="email",
-                description="(Opcional)",
-                placeholder="nome@dominio.com",
-                icon=DashIconify(icon="fluent:mail-12-filled", width=24),
-                name="email",
-            ),
-            dmc.Select(
-                id="cargo-novo-usr",
-                label="Cargo/Função",
-                required=True,
-                description="Selecione a opção que melhor se encaixa ao cargo",
-                data=CARGOS_PADROES,
-                creatable=True,
-                clearable=False,
-                searchable=True,
-                icon=DashIconify(icon="fluent:person-wrench-20-filled", width=24),
-                name="cargo",
-            ),
-            dmc.Checkbox(
-                id="recruta-novo-usr",
-                label="Seleção e Recrutamento",
-                checked=False,
-            ),
-            dmc.Button(id="btn-criar-novo-usr", children="Criar"),
-            html.Div(id="feedback-modal-novo-usr"),
-        ],
-    )
-
-
 def modal_cadastro_massa():
     return dmc.Modal(
         id="modal-usr-massa",
@@ -163,14 +73,13 @@ def modal_cadastro_massa():
 
 
 @checar_login
-def layout(empresa: str = "Empresa"):
+def layout():
     return [
         dmc.Title("Gerenciamento de usuários", order=1, weight=700),
-        dmc.Title(id="text-empresa", children=empresa, order=3, weight=500),
         dmc.ButtonGroup(
             [
                 dmc.Button(
-                    id="btn-modal-novo-usr",
+                    id="btn-novo-usr",
                     children="Novo Usuário",
                     leftIcon=DashIconify(icon="fluent:add-12-filled", width=24),
                     variant="gradient",
@@ -182,7 +91,6 @@ def layout(empresa: str = "Empresa"):
                 ),
             ]
         ),
-        modal_edicao_usr(),
         modal_cadastro_massa(),
         dmc.Table(
             [
@@ -203,9 +111,9 @@ def layout(empresa: str = "Empresa"):
 
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="abrir_modal"),
-    Output("modal-novo-usr", "opened"),
-    Input("btn-modal-novo-usr", "n_clicks"),
+    ClientsideFunction(namespace="clientside", function_name="redirect_usuarios_edit"),
+    Output("url", "pathname"),
+    Input("btn-novo-usr", "n_clicks"),
 )
 
 clientside_callback(
@@ -272,70 +180,3 @@ def baixar_template_cadastro_massa(n):
         filename="template_cadastro.xlsx",
         type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-
-
-@callback(
-    Output("notificacoes", "children"),
-    Output("modal-novo-usr", "opened", allow_duplicate=True),
-    Output("feedback-modal-novo-usr", "children"),
-    Input("btn-criar-novo-usr", "n_clicks"),
-    State("nome-novo-usr", "value"),
-    State("sobrenome-novo-usr", "value"),
-    State("cpf-novo-usr", "value"),
-    State("data-novo-usr", "value"),
-    State("email-novo-usr", "value"),
-    State("cargo-novo-usr", "value"),
-    State("recruta-novo-usr", "checked"),
-    State("text-empresa", "children"),
-    prevent_initial_call=True,
-)
-def criar_novo_usr(
-    n,
-    nome: str,
-    sobrenome: str,
-    cpf: str,
-    data: str,
-    email: str,
-    cargo: str,
-    recruta: bool,
-    empresa: str,
-):
-    if not n:
-        raise PreventUpdate
-
-    try:
-        usr = NovoUsuario(
-            nome=nome,
-            sobrenome=sobrenome,
-            cpf=cpf,
-            data=data,
-            email=email,
-            cargo=cargo,
-            recruta=recruta,
-            empresa=empresa,
-        )
-        usr.registrar()
-
-    except ValidationError as e:
-        return no_update, no_update, dmc.Alert(
-            str(e.errors()[0]["ctx"]["error"]), "Atenção!", color="red"
-        )
-
-    except AssertionError as e:
-        return no_update, no_update, dmc.Alert(
-            str(e),
-            "Atenção!",
-            color="red",
-        )
-
-    return dmc.Notification(
-        id="notificacao-novo-usr-suc",
-        title="Pronto!",
-        message=[
-            dmc.Text(span=True, children="O usuário "),
-            dmc.Text(span=True, children=nome, weight=700),
-            dmc.Text(span=True, children=" foi criado com sucesso."),
-        ],
-        color="green",
-        action="show",
-    ), False, no_update
