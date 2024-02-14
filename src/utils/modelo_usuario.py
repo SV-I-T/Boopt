@@ -76,10 +76,13 @@ class Usuario(BaseModel, UserMixin):
     id_: ObjectId = Field(alias="_id")
     nome: str
     sobrenome: str
+    data: str
+    senha_hash: str
     cpf: str
     email: str
     cargo: str
     empresa: str
+    recruta: bool = False
     admin: bool = False
     gestor: bool = False
 
@@ -92,16 +95,16 @@ class Usuario(BaseModel, UserMixin):
         return str(self.id_)
 
     @classmethod
-    def buscar(
-        cls, identificador: Literal["_id", "email", "cpf"], valor: str, senha: str
-    ):
+    def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):
         if identificador == "_id":
             valor = ObjectId(valor)
         usr = db("Boopt", "Usuários").find_one({identificador: valor})
         assert usr, "Usuário não existe."
-        assert check_password_hash(usr["senha_hash"], senha), "Senha incorreta"
 
         return cls(**usr)
+
+    def validar_senha(self, senha: str) -> None:
+        assert check_password_hash(self.senha_hash, senha), "Senha incorreta."
 
     def alterar_senha(
         self, senha_atual: str, senha_nova: str, senha_nova_check: str
