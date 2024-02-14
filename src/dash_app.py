@@ -1,6 +1,14 @@
 import dash_mantine_components as dmc
 from components.header import layout_header
-from dash import dcc, html, page_container
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    clientside_callback,
+    dcc,
+    html,
+    page_container,
+)
 
 TEMA_PADRAO = {
     "colors": {
@@ -48,6 +56,7 @@ def layout():
             position="bottom-center",
             children=[
                 html.Div(id="notificacoes"),
+                dcc.Store(id="refresh"),
                 dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh=True),
@@ -58,3 +67,11 @@ def layout():
             ],
         ),
     )
+
+
+clientside_callback(
+    ClientsideFunction("clientside", "atualizar_pagina"),
+    Output("refresh", "data"),
+    Input("refresh", "data"),
+    prevent_initial_call=True,
+)

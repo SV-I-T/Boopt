@@ -1,5 +1,16 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        atualizar_pagina: function (_) {
+            location.reload();
+            throw window.dash_clientside.PreventUpdate;
+        },
+        redirect_usuarios_edit: function (n) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            } else {
+                return "/admin/usuarios/edit"
+            }
+        },
         abrir_modal: function (n) {
             if (!n) {
                 throw window.dash_clientside.PreventUpdate;
