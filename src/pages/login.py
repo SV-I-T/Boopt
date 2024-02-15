@@ -57,21 +57,27 @@ def layout():
     State("login-usr", "value"),
     State("login-senha", "value"),
     State("login-check-lembrar", "checked"),
-    State("login-data", "data"),
     prevent_initial_call=True,
 )
-def logar(n, login, senha, lembrar, login_data):
+def logar(n, login, senha, lembrar):
     if not n:
         raise PreventUpdate
     identificador = "email" if "@" in login else "cpf"
     try:
-        usr = Usuario.buscar(identificador=identificador, valor=login, senha=senha)
+        usr = Usuario.buscar(identificador=identificador, valor=login)
+        usr.validar_senha(senha)
     except AssertionError as e:
-        return no_update, dmc.Alert(
+        URL = no_update
+        ALERTA = dmc.Alert(
             "Verifique as suas credenciais e tente novamente.",
             color="red",
             title=str(e),
-        ), no_update
+        )
+        LOGIN_DATA = no_update
+    else:
+        login_user(usr, remember=lembrar, force=True)
+        URL = "/"
+        ALERTA = no_update
+        LOGIN_DATA = 1
 
-    login_user(usr, remember=lembrar, force=True)
-    return "/", no_update, login_data + 1
+    return URL, ALERTA, LOGIN_DATA
