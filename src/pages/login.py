@@ -25,12 +25,12 @@ def layout():
                 id="login-usr",
                 label="CPF ou E-mail",
                 type="login",
-                icon=DashIconify(icon="fluent:person-12-filled", width=24),
+                icon=DashIconify(icon="fluent:person-24-filled", width=24),
             ),
             dmc.PasswordInput(
                 id="login-senha",
                 label="Senha",
-                icon=DashIconify(icon="fluent:password-16-filled", width=24),
+                icon=DashIconify(icon="fluent:key-24-filled", width=24),
                 name="password",
             ),
             dmc.Checkbox(
