@@ -106,6 +106,14 @@ class Usuario(BaseModel, UserMixin):
     def validar_senha(self, senha: str) -> None:
         assert check_password_hash(self.senha_hash, senha), "Senha incorreta."
 
+    def atualizar(self, novos_dados: dict[str, str]) -> None:
+        r = db("Boopt", "Usuários").update_one(
+            {"_id": self.id_},
+            {"$set": {campo: valor for campo, valor in novos_dados.items()}},
+        )
+
+        assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
+
     def alterar_senha(
         self, senha_atual: str, senha_nova: str, senha_nova_check: str
     ) -> bool:

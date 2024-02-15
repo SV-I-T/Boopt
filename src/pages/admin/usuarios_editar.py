@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 from bson import ObjectId
@@ -6,7 +7,6 @@ from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
-from utils.banco_dados import db
 from utils.modelo_usuario import NovoUsuario, Usuario
 
 from .usuarios import CARGOS_PADROES
@@ -34,7 +34,7 @@ def layout_edicao_usr(
                         label="Primeiro Nome",
                         type="text",
                         required=True,
-                        icon=DashIconify(icon="fluent:person-12-filled", width=24),
+                        icon=DashIconify(icon="fluent:person-24-filled", width=24),
                         name="nome",
                         value=nome,
                     ),
@@ -74,10 +74,10 @@ def layout_edicao_usr(
                         clearable=False,
                         placeholder=datetime.now().strftime(r"%d de %B de %Y"),
                         icon=DashIconify(
-                            icon="fluent:calendar-date-20-filled", width=24
+                            icon="fluent:calendar-date-24-filled", width=24
                         ),
                         name="data",
-                        value=datetime.strptime(data, "%Y-%m-%d")
+                        value=datetime.strptime(data, "%Y-%m-%d").date()
                         if data is not None
                         else None,
                     ),
@@ -89,7 +89,7 @@ def layout_edicao_usr(
                 type="email",
                 description="(Opcional)",
                 placeholder="nome@dominio.com",
-                icon=DashIconify(icon="fluent:mail-12-filled", width=24),
+                icon=DashIconify(icon="fluent:mail-24-filled", width=24),
                 name="email",
                 value=email,
             ),
@@ -157,6 +157,7 @@ def layout(id: str = None):
     State("email-novo-usr", "value"),
     State("cargo-novo-usr", "value"),
     State("recruta-novo-usr", "checked"),
+    State("url", "search"),
     prevent_initial_call=True,
 )
 def salvar_usr(
@@ -168,14 +169,16 @@ def salvar_usr(
     email: str,
     cargo: str,
     recruta: bool,
+    search: str,
 ):
     if not n:
         raise PreventUpdate
-    # usr = Usuario.buscar('cpf', cpf)
-    r = db("Boopt", "Usuários").update_one(
-        {"cpf": cpf},
-        {
-            "$set": {
+    params = parse_qs(search[1:])
+
+    try:
+        usr = Usuario.buscar("_id", params["id"][0])
+        usr.atualizar(
+            {
                 "nome": nome,
                 "sobrenome": sobrenome,
                 "cpf": cpf,
@@ -184,11 +187,18 @@ def salvar_usr(
                 "cargo": cargo,
                 "recruta": recruta,
             }
-        },
-    )
-
-    if r.acknowledged:
-        return dmc.Notification(
+        )
+    except (ValidationError, AssertionError) as e:
+        match e:
+            case ValidationError():
+                erro = e.errors()[0]["ctx"]["error"]
+            case _:
+                erro = e
+        ALERTA = dmc.Alert(str(erro), color="red", title="Atenção")
+        NOTIFICACAO = no_update
+    else:
+        ALERTA = no_update
+        NOTIFICACAO = dmc.Notification(
             id="notificacao-salvar-usr-suc",
             title="Pronto!",
             message=[
@@ -198,13 +208,9 @@ def salvar_usr(
             ],
             color="green",
             action="show",
-        ), no_update
-    else:
-        return no_update, dmc.Alert(
-            "Ocorreu algum erro. Tente novamente mais tarde.",
-            title="Atenção",
-            color="red",
         )
+
+    return NOTIFICACAO, ALERTA
 
 
 @callback(
@@ -245,26 +251,26 @@ def criar_novo_usr(
         )
         usr.registrar()
 
-    except ValidationError as e:
-        return no_update, dmc.Alert(
-            str(e.errors()[0]["ctx"]["error"]), "Atenção!", color="red"
+    except (ValidationError, AssertionError) as e:
+        match e:
+            case ValidationError():
+                erro = e.errors()[0]["ctx"]["error"]
+            case _:
+                erro = e
+        ALERTA = dmc.Alert(str(erro), color="red", title="Atenção")
+        NOTIFICACAO = no_update
+    else:
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-novo-usr-suc",
+            title="Pronto!",
+            message=[
+                dmc.Text(span=True, children="O usuário "),
+                dmc.Text(span=True, children=nome, weight=700),
+                dmc.Text(span=True, children=" foi criado com sucesso."),
+            ],
+            color="green",
+            action="show",
         )
+        ALERTA = no_update
 
-    except AssertionError as e:
-        return no_update, dmc.Alert(
-            str(e),
-            "Atenção!",
-            color="red",
-        )
-
-    return dmc.Notification(
-        id="notificacao-novo-usr-suc",
-        title="Pronto!",
-        message=[
-            dmc.Text(span=True, children="O usuário "),
-            dmc.Text(span=True, children=nome, weight=700),
-            dmc.Text(span=True, children=" foi criado com sucesso."),
-        ],
-        color="green",
-        action="show",
-    ), no_update
+    return NOTIFICACAO, ALERTA
