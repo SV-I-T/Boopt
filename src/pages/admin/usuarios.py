@@ -1,5 +1,6 @@
 import io
 from datetime import datetime
+from math import ceil
 
 import dash_mantine_components as dmc
 import openpyxl
@@ -7,20 +8,18 @@ from dash import (
     ClientsideFunction,
     Input,
     Output,
-    State,
     callback,
     clientside_callback,
     dcc,
     html,
-    no_update,
     register_page,
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from pydantic import ValidationError
-from utils.modelo_usuario import NovoUsuario, checar_login
+from utils.banco_dados import db
+from utils.modelo_usuario import checar_login
 
 register_page(__name__, "/admin/usuarios", name="Gerenciamento de usuários")
 
@@ -34,6 +33,7 @@ CARGOS_PADROES = sorted(
         "Regional",
     ]
 )
+MAX_PAGINA = 20
 
 
 def modal_cadastro_massa():
@@ -74,6 +74,10 @@ def modal_cadastro_massa():
 
 @checar_login
 def layout():
+    n_empresas: int = list(db("Boopt", "Empresas").aggregate([{"$count": "nome"}]))[0][
+        "nome"
+    ]
+    n_paginas = ceil(n_empresas / MAX_PAGINA)
     return [
         dmc.Title("Gerenciamento de usuários", order=1, weight=700),
         dmc.ButtonGroup(
@@ -93,27 +97,33 @@ def layout():
         ),
         modal_cadastro_massa(),
         dmc.Table(
-            [
+            striped=True,
+            withColumnBorders=True,
+            withBorder=True,
+            style={"width": "auto"},
+            children=[
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Usuário"),
-                            html.Th("Empresa"),
-                            html.Th("Cargo"),
-                            html.Th("Ações"),
+                            html.Th("Usuário", style={"width": 200}),
+                            html.Th("Empresa", style={"width": 200}),
+                            html.Th("Cargo", style={"width": 200}),
+                            html.Th("Ações", style={"width": 200}),
                         ]
                     )
                 ),
-                html.Tbody(id="tab-g-usuarios-body"),
-            ]
+                html.Tbody(id="tabela-usuarios-body"),
+            ],
         ),
+        dmc.Pagination(id="tabela-usuarios-nav", total=n_paginas, page=1),
     ]
 
 
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="redirect_usuarios_edit"),
-    Output("url", "pathname"),
+    Output("url", "pathname", allow_duplicate=True),
     Input("btn-novo-usr", "n_clicks"),
+    prevent_initial_call=True,
 )
 
 clientside_callback(
@@ -121,6 +131,34 @@ clientside_callback(
     Output("modal-usr-massa", "opened"),
     Input("btn-modal-usr-massa", "n_clicks"),
 )
+
+
+@callback(
+    Output("tabela-usuarios-body", "children"),
+    Input("url", "pathname"),
+    Input("tabela-usuarios-nav", "page"),
+)
+def atualizar_tabela_empresas(_, pagina):
+    usuarios = db("Boopt", "Usuários").find(
+        skip=(pagina - 1) * MAX_PAGINA, limit=MAX_PAGINA, sort={"nome": 1}
+    )
+    return [
+        *[
+            html.Tr(
+                [
+                    html.Td(f'{usuario["nome"]} {usuario["sobrenome"]}'),
+                    html.Td(usuario["empresa"]),
+                    html.Td(usuario["cargo"]),
+                    html.Td(
+                        dmc.Anchor(
+                            "Editar", href=f'/admin/usuarios/edit?id={usuario["_id"]}'
+                        )
+                    ),
+                ]
+            )
+            for usuario in usuarios
+        ],
+    ]
 
 
 @callback(
