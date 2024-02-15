@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
@@ -27,3 +27,19 @@ class Empresa(BaseModel):
         ), "Já existe uma empresa come esse nome."
         r = db("Boopt", "Empresas").insert_one(self.model_dump(exclude={"id_"}))
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
+
+    def atualizar(self, novos_dados: dict[str, str]) -> None:
+        r = db("Boopt", "Empresas").update_one(
+            {"_id": self.id_},
+            {"$set": {campo: valor for campo, valor in novos_dados.items()}},
+        )
+        assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
+
+    @classmethod
+    def buscar(cls, identificador: Literal["_id", "nome"], valor: str):
+        if identificador == "_id":
+            valor = ObjectId(valor)
+        empresa = db("Boopt", "Empresas").find_one({identificador: valor})
+        assert empresa, "Essa empresa não existe."
+
+        return cls(**empresa)

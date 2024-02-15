@@ -11,6 +11,13 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 return "/admin/usuarios/edit"
             }
         },
+        redirect_empresas_edit: function (n) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            } else {
+                return '/admin/empresas/edit'
+            }
+        },
         abrir_modal: function (n) {
             if (!n) {
                 throw window.dash_clientside.PreventUpdate;
