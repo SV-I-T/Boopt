@@ -74,10 +74,10 @@ def modal_cadastro_massa():
 
 @checar_login
 def layout():
-    n_empresas: int = list(db("Boopt", "Empresas").aggregate([{"$count": "nome"}]))[0][
+    n_usuarios: int = list(db("Boopt", "Usuários").aggregate([{"$count": "nome"}]))[0][
         "nome"
     ]
-    n_paginas = ceil(n_empresas / MAX_PAGINA)
+    n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
         dmc.Title("Gerenciamento de usuários", order=1, weight=700),
         dmc.ButtonGroup(
