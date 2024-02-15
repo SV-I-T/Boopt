@@ -52,7 +52,7 @@ def listar_paginas(_):
 
     paginas = [
         dmc.MenuItem(
-            f'{page["name"]} [~{page["path"]}]',
+            f'{page["title"]} [~{page["path"]}]',
             href=page["path"],
             target="_self",
         )
