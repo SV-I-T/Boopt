@@ -8,6 +8,7 @@ from dash import (
     ClientsideFunction,
     Input,
     Output,
+    State,
     callback,
     clientside_callback,
     dcc,
@@ -85,13 +86,26 @@ def layout():
                 dmc.Button(
                     id="btn-novo-usr",
                     children="Novo Usuário",
-                    leftIcon=DashIconify(icon="fluent:add-12-filled", width=24),
+                    leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
                     variant="gradient",
                 ),
                 dmc.Button(
                     id="btn-modal-usr-massa",
                     children="Cadastro em massa",
                     variant="light",
+                ),
+            ]
+        ),
+        dmc.Group(
+            children=[
+                dmc.TextInput(
+                    id="usuario-filtro-input", placeholder="Pesquisar", w=200
+                ),
+                dmc.ActionIcon(
+                    id="usuario-filtro-btn",
+                    children=DashIconify(icon="fluent:search-20-filled", width=20),
+                    color="theme.primaryColor",
+                    variant="filled",
                 ),
             ]
         ),
@@ -137,10 +151,21 @@ clientside_callback(
     Output("tabela-usuarios-body", "children"),
     Input("url", "pathname"),
     Input("tabela-usuarios-nav", "page"),
+    Input("usuario-filtro-btn", "n_clicks"),
+    State("usuario-filtro-input", "value"),
 )
-def atualizar_tabela_empresas(_, pagina):
+def atualizar_tabela_empresas(_, pagina, n, busca):
+    busca_regex = {"$regex": busca, "$options": "i"}
     usuarios = db("Boopt", "Usuários").find(
-        skip=(pagina - 1) * MAX_PAGINA, limit=MAX_PAGINA, sort={"nome": 1}
+        filter={
+            "$or": [
+                {campo: busca_regex}
+                for campo in ("nome", "sobrenome", "empresa", "cargo")
+            ]
+        },
+        skip=(pagina - 1) * MAX_PAGINA,
+        limit=MAX_PAGINA,
+        sort={"nome": 1},
     )
     return [
         *[

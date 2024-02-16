@@ -5,6 +5,7 @@ from dash import (
     ClientsideFunction,
     Input,
     Output,
+    State,
     callback,
     clientside_callback,
     html,
@@ -31,7 +32,7 @@ def layout():
         dmc.Button(
             id="btn-nova-empresa",
             children="Nova empresa",
-            leftIcon=DashIconify(icon="fluent:add-12-filled", width=24),
+            leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
             variant="gradient",
         ),
         dmc.Group(
@@ -83,10 +84,16 @@ clientside_callback(
     Output("tabela-empresas-body", "children"),
     Input("url", "pathname"),
     Input("tabela-empresas-nav", "page"),
+    Input("empresa-filtro-btn", "n_clicks"),
+    State("empresa-filtro-input", "value"),
 )
-def atualizar_tabela_empresas(_, pagina):
+def atualizar_tabela_empresas(_, pagina, n, busca):
+    busca_regex = {"$regex": busca, "$options": "i"}
     empresas = db("Boopt", "Empresas").find(
-        skip=(pagina - 1) * MAX_PAGINA, limit=MAX_PAGINA, sort={"nome": 1}
+        filter={"$or": [{campo: busca_regex} for campo in ("nome", "segmento")]},
+        skip=(pagina - 1) * MAX_PAGINA,
+        limit=MAX_PAGINA,
+        sort={"nome": 1},
     )
     return [
         *[
