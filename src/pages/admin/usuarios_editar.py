@@ -7,6 +7,7 @@ from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
+from utils.banco_dados import db
 from utils.modelo_usuario import NovoUsuario, Usuario
 
 from .usuarios import CARGOS_PADROES
@@ -21,8 +22,15 @@ def layout_edicao_usr(
     data: str = None,
     email: str = None,
     cargo: str = None,
+    gestor: bool = False,
     recruta: bool = False,
 ):
+    data_empresas = [
+        {"value": str(empresa["_id"]), "label": empresa["nome"]}
+        for empresa in db("Boopt", "Empresas").find(
+            projection={"_id": 1, "nome": 1}, sort={"nome": 1}
+        )
+    ]
     return html.Div(
         style={"maxWidth": 600},
         children=[
@@ -85,28 +93,56 @@ def layout_edicao_usr(
                     ),
                 ],
             ),
-            dmc.TextInput(
-                id="email-novo-usr",
-                label="E-mail",
-                type="email",
-                description="(Opcional)",
-                placeholder="nome@dominio.com",
-                icon=DashIconify(icon="fluent:mail-24-filled", width=24),
-                name="email",
-                value=email,
+            dmc.Group(
+                grow=True,
+                align="end",
+                children=[
+                    dmc.TextInput(
+                        id="email-novo-usr",
+                        label="E-mail",
+                        type="email",
+                        placeholder="nome@dominio.com",
+                        icon=DashIconify(icon="fluent:mail-24-filled", width=24),
+                        name="email",
+                        value=email,
+                    ),
+                    dmc.Select(
+                        id="cargo-novo-usr",
+                        label="Cargo/Função",
+                        required=True,
+                        description="Selecione a opção que melhor se encaixa ao cargo",
+                        data=CARGOS_PADROES,
+                        creatable=True,
+                        clearable=False,
+                        searchable=True,
+                        icon=DashIconify(
+                            icon="fluent:person-wrench-20-filled", width=24
+                        ),
+                        name="cargo",
+                        value=cargo,
+                    ),
+                ],
             ),
-            dmc.Select(
-                id="cargo-novo-usr",
-                label="Cargo/Função",
-                required=True,
-                description="Selecione a opção que melhor se encaixa ao cargo",
-                data=CARGOS_PADROES,
-                creatable=True,
-                clearable=False,
-                searchable=True,
-                icon=DashIconify(icon="fluent:person-wrench-20-filled", width=24),
-                name="cargo",
-                value=cargo,
+            dmc.Group(
+                grow=True,
+                align="center",
+                children=[
+                    dmc.Select(
+                        id="empresa-novo-usr",
+                        label="Empresa",
+                        icon=DashIconify(icon="fluent:building-24-filled", width=24),
+                        name="empresa",
+                        data=data_empresas,
+                        required=True,
+                        searchable=True,
+                        nothingFound="Não encontrei nada",
+                    ),
+                    dmc.Switch(
+                        id="gestor-novo-usr",
+                        label="Permissão de Gestão",
+                        checked=gestor,
+                    ),
+                ],
             ),
             dmc.Checkbox(
                 id="recruta-novo-usr", label="Seleção e Recrutamento", checked=recruta
@@ -137,6 +173,7 @@ def layout(id: str = None):
             usr.data,
             usr.email,
             usr.cargo,
+            usr.gestor,
             usr.recruta,
         )
     return [
@@ -160,7 +197,9 @@ def layout(id: str = None):
     State("cpf-novo-usr", "value"),
     State("data-novo-usr", "value"),
     State("email-novo-usr", "value"),
+    State("empresa-novo-usr", "value"),
     State("cargo-novo-usr", "value"),
+    State("gestor-novo-usr", "checked"),
     State("recruta-novo-usr", "checked"),
     State("url", "search"),
     prevent_initial_call=True,
@@ -172,7 +211,9 @@ def salvar_usr(
     cpf: str,
     data: str,
     email: str,
+    empresa: str,
     cargo: str,
+    gestor: bool,
     recruta: bool,
     search: str,
 ):
@@ -189,7 +230,9 @@ def salvar_usr(
                 "cpf": cpf,
                 "data": data,
                 "email": email,
+                "empresa": ObjectId(empresa),
                 "cargo": cargo,
+                "gestor": gestor,
                 "recruta": recruta,
             }
         )
@@ -227,7 +270,9 @@ def salvar_usr(
     State("cpf-novo-usr", "value"),
     State("data-novo-usr", "value"),
     State("email-novo-usr", "value"),
+    State("empresa-novo-usr", "value"),
     State("cargo-novo-usr", "value"),
+    State("gestor-novo-usr", "checked"),
     State("recruta-novo-usr", "checked"),
     prevent_initial_call=True,
 )
@@ -238,7 +283,9 @@ def criar_novo_usr(
     cpf: str,
     data: str,
     email: str,
+    empresa: str,
     cargo: str,
+    gestor: bool,
     recruta: bool,
 ):
     if not n:
@@ -251,7 +298,9 @@ def criar_novo_usr(
             cpf=cpf,
             data=data,
             email=email,
+            empresa=ObjectId(empresa),
             cargo=cargo,
+            gestor=gestor,
             recruta=recruta,
         )
         usr.registrar()
