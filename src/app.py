@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 from flask import Flask
 from utils.banco_dados import mongo
 from utils.cache import cache
+from utils.email import mail
 from utils.modelo_usuario import login_manager
 
-locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
+locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
 
 server = Flask(__name__)
@@ -31,9 +32,10 @@ app = Dash(
 mongo.init_app(server)
 cache.init_app(server)
 login_manager.init_app(server)
+mail.init_app(server)
 
 app.layout = layout
-app.enable_dev_tools(debug=False)
+app.enable_dev_tools(debug=True)
 
 
 if __name__ == "__main__":
