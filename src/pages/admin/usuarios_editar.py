@@ -58,7 +58,9 @@ def layout_edicao_usr(
                         required=True,
                         description="Somente números",
                         placeholder="12345678910",
-                        icon=DashIconify(icon="tabler:numbers", width=24),
+                        icon=DashIconify(
+                            icon="fluent:slide-text-person-24-filled", width=24
+                        ),
                         name="cpf",
                         value=cpf,
                     ),

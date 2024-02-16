@@ -29,14 +29,14 @@ def layout():
     n_paginas = ceil(n_empresas / MAX_PAGINA)
     return [
         dmc.Title("Gerenciamento de empresas", order=1, weight=700),
-        dmc.Button(
-            id="btn-nova-empresa",
-            children="Nova empresa",
-            leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
-            variant="gradient",
-        ),
         dmc.Group(
             children=[
+                dmc.Button(
+                    id="btn-nova-empresa",
+                    children="Nova empresa",
+                    leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                    variant="gradient",
+                ),
                 dmc.TextInput(
                     id="empresa-filtro-input", placeholder="Pesquisar", w=200
                 ),

@@ -81,23 +81,23 @@ def layout():
     n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
         dmc.Title("Gerenciamento de usuários", order=1, weight=700),
-        dmc.ButtonGroup(
-            [
-                dmc.Button(
-                    id="btn-novo-usr",
-                    children="Novo Usuário",
-                    leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
-                    variant="gradient",
-                ),
-                dmc.Button(
-                    id="btn-modal-usr-massa",
-                    children="Cadastro em massa",
-                    variant="light",
-                ),
-            ]
-        ),
         dmc.Group(
             children=[
+                dmc.ButtonGroup(
+                    [
+                        dmc.Button(
+                            id="btn-novo-usr",
+                            children="Novo Usuário",
+                            leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                            variant="gradient",
+                        ),
+                        dmc.Button(
+                            id="btn-modal-usr-massa",
+                            children="Cadastro em massa",
+                            variant="light",
+                        ),
+                    ]
+                ),
                 dmc.TextInput(
                     id="usuario-filtro-input", placeholder="Pesquisar", w=200
                 ),
