@@ -3,6 +3,7 @@ from urllib.parse import parse_qs
 import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
+from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.modelo_empresa import Empresa
 
@@ -38,11 +39,16 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
 
 def layout(id: str = None):
     if not id:
-        texto_titulo = ("Nova Empresa",)
+        texto_titulo = [
+            "Nova Empresa",
+        ]
         layout_edicao = layout_nova_empresa()
     else:
         empresa = Empresa.buscar("_id", id)
-        texto_titulo = empresa.nome
+        texto_titulo = [
+            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+            empresa.nome,
+        ]
         layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
 
     return [

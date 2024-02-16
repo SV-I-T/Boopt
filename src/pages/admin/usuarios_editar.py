@@ -124,7 +124,10 @@ def layout(id: str = None):
         layout_edicao = layout_edicao_usr()
     else:
         usr = Usuario.buscar("_id", ObjectId(id))
-        texto_titulo = f"{usr.nome} {usr.sobrenome}"
+        texto_titulo = [
+            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+            f"{usr.nome} {usr.sobrenome}",
+        ]
         layout_edicao = layout_edicao_usr(
             usr.nome,
             usr.sobrenome,
