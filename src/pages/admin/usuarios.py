@@ -1,5 +1,4 @@
 import io
-from datetime import datetime
 from math import ceil
 
 import dash_mantine_components as dmc
@@ -154,18 +153,37 @@ clientside_callback(
     Input("usuario-filtro-btn", "n_clicks"),
     State("usuario-filtro-input", "value"),
 )
-def atualizar_tabela_empresas(_, pagina, n, busca):
+def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
     busca_regex = {"$regex": busca, "$options": "i"}
-    usuarios = db("Boopt", "Usuários").find(
-        filter={
-            "$or": [
-                {campo: busca_regex}
-                for campo in ("nome", "sobrenome", "empresa", "cargo")
-            ]
-        },
-        skip=(pagina - 1) * MAX_PAGINA,
-        limit=MAX_PAGINA,
-        sort={"nome": 1},
+
+    usuarios = db("Boopt", "Usuários").aggregate(
+        [
+            {"$sort": {"nome": 1}},
+            {
+                "$lookup": {
+                    "from": "Empresas",
+                    "localField": "empresa",
+                    "foreignField": "_id",
+                    "as": "empresa",
+                }
+            },
+            {"$set": {"empresa": {"$first": "$empresa.nome"}}},
+            {
+                "$match": {
+                    "$or": [
+                        {campo: busca_regex}
+                        for campo in ("nome", "sobrenome", "cargo", "empresa")
+                    ]
+                }
+            },
+            {"$skip": (pagina - 1) * MAX_PAGINA},
+            {"$limit": MAX_PAGINA},
+            {
+                "$project": {
+                    campo: 1 for campo in ("nome", "sobrenome", "cargo", "empresa")
+                }
+            },
+        ]
     )
     return [
         *[
