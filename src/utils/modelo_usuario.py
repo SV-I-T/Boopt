@@ -3,7 +3,7 @@ from typing import Any, Literal, Optional
 
 import dash_mantine_components as dmc
 from bson import ObjectId
-from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
+from flask_login import LoginManager, UserMixin, current_user
 from pydantic import BaseModel, Field, computed_field, field_validator
 from utils.banco_dados import db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -16,12 +16,13 @@ class NovoUsuario(BaseModel):
     email: Optional[str] = None
     data: str
     cargo: str
-    empresa: str
+    empresa: Optional[ObjectId] = None
     admin: bool = False
     gestor: bool = False
     recruta: bool = False
 
     class Config:
+        arbitrary_types_allowed = True
         str_strip_whitespace = True
 
     @field_validator("nome", "sobrenome", "cpf", "data", "cargo", mode="before")
@@ -81,10 +82,10 @@ class Usuario(BaseModel, UserMixin):
     cpf: str
     email: str
     cargo: str
-    empresa: str
-    recruta: bool = False
+    empresa: ObjectId
     admin: bool = False
     gestor: bool = False
+    recruta: bool = False
 
     class Config:
         arbitrary_types_allowed = True
