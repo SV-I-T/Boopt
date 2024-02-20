@@ -17,14 +17,6 @@ body {
     background-size: 500px;
 }
 
-
-#header {
-    border-bottom: 1px solid;
-    border-image-slice: 3;
-    border-color: #ddd;
-    /* border-image-source: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt)); */
-}
-
 #page-container {
     margin-top: 40px;
     padding-top: 1rem;
