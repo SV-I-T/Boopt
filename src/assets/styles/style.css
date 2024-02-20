@@ -1,6 +1,7 @@
 :root {
     --azul-sv: #1618ff;
-    --laranja-boopt: #FF7730
+    --laranja-boopt: #FF7730;
+    --input-bg: #fff;
 }
 
 html {
@@ -8,14 +9,25 @@ html {
 }
 
 body {
-    background-image: linear-gradient(135deg, color-mix(in srgb, var(--azul-sv) 5%, transparent), #e7e7e7, color-mix(in srgb, var(--laranja-boopt) 10%, transparent)) !important;
-    background-attachment: scroll;
+    min-height: calc(100vh - 40px) !important;
+    background-color: #f3f3f3 !important;
+    background-image: url("../imgs/boopt/icone_branco.svg");
+    background-repeat: no-repeat;
+    background-position: bottom -150px right -150px;
+    background-size: 500px;
 }
 
+
 #header {
-    border-bottom: 2px solid;
+    border-bottom: 1px solid;
     border-image-slice: 3;
-    border-image-source: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
+    border-color: #ddd;
+    /* border-image-source: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt)); */
+}
+
+#page-container {
+    margin-top: 40px;
+    padding-top: 1rem;
 }
 
 
