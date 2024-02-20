@@ -62,7 +62,8 @@ def layout():
                 dcc.Location(id="url", refresh=True),
                 layout_header(),
                 html.Div(
-                    page_container, style={"margin": "2rem", "margin-top": "5rem"}
+                    id="page-container",
+                    children=page_container,
                 ),
             ],
         ),
