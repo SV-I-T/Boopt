@@ -1,5 +1,12 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        ativar: function (x) {
+            if (!x) {
+                throw window.dash_clientside.PreventUpdate;
+            } else {
+                return true;
+            }
+        },
         atualizar_pagina: function (_) {
             location.reload();
             throw window.dash_clientside.PreventUpdate;
@@ -16,13 +23,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 throw window.dash_clientside.PreventUpdate;
             } else {
                 return '/admin/empresas/edit'
-            }
-        },
-        abrir_modal: function (n) {
-            if (!n) {
-                throw window.dash_clientside.PreventUpdate;
-            } else {
-                return true;
             }
         },
         iniciar_teste: function (n) {
