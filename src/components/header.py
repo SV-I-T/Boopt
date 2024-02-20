@@ -71,10 +71,11 @@ def listar_paginas(_):
                 dmc.ActionIcon(
                     DashIconify(
                         icon="fluent:caret-down-20-filled",
+                        width=20,
                     ),
-                    variant="filled",
+                    variant="light",
                     color="theme.colors.primaryColor",
-                    size=20,
+                    size=26,
                 )
             ),
             dmc.MenuDropdown(
@@ -90,7 +91,7 @@ def listar_paginas(_):
         ],
     )
 
-    return dmc.Group([minha_area, menu])
+    return dmc.Group([minha_area, menu], id="group-btn-header")
 
 
 @callback(

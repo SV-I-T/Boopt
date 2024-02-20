@@ -22,6 +22,20 @@ body {
     padding-top: 1rem;
 }
 
+#group-btn-header {
+    gap: 0 !important;
+}
+
+#group-btn-header a button {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+#group-btn-header div button {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
 
 @media only screen and (max-width: 767px) {
     .mantine-Container-root {
