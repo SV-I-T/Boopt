@@ -1,5 +1,16 @@
+from datetime import datetime
+
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, html, no_update, register_page
+from dash import (
+    Input,
+    Output,
+    State,
+    callback,
+    get_asset_url,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user, login_user
@@ -18,34 +29,99 @@ def layout():
                 underline=True,
             ),
         ]
-    return dmc.Container(
-        maw=300,
-        children=[
-            dmc.TextInput(
-                id="login-usr",
-                label="CPF ou E-mail",
-                type="login",
-                icon=DashIconify(icon="fluent:person-24-filled", width=24),
+    return dmc.Group(
+        [
+            html.Div(
+                id="login-side-rect",
+                children=html.Img(
+                    src=get_asset_url("imgs/boopt/horizontal_branco.svg")
+                ),
             ),
-            dmc.PasswordInput(
-                id="login-senha",
-                label="Senha",
-                icon=DashIconify(icon="fluent:key-24-filled", width=24),
-                name="password",
+            dmc.Container(
+                children=dmc.Stack(
+                    miw=300,
+                    children=[
+                        html.Div(
+                            [
+                                dmc.Title("LOGIN", size=40, weight=500),
+                                dmc.HoverCard(
+                                    radius="md",
+                                    shadow="md",
+                                    width=200,
+                                    children=[
+                                        dmc.HoverCardTarget(
+                                            dmc.Text(
+                                                "Primeira vez?",
+                                                color="dimmed",
+                                                size="sm",
+                                            )
+                                        ),
+                                        dmc.HoverCardDropdown(
+                                            children=[
+                                                dmc.Text(
+                                                    size="sm",
+                                                    children="Por padrão, sua senha é a sua data de nascimento no formato DDMMAAAA.",
+                                                ),
+                                                dmc.Text(
+                                                    size="sm",
+                                                    children=f'Exemplo: {datetime.today().strftime("%d%m%Y")}.',
+                                                    weight=700,
+                                                ),
+                                                dmc.Text(
+                                                    size="sm",
+                                                    children="Não se esqueça de trocar uma mais segura depois.",
+                                                ),
+                                            ]
+                                        ),
+                                    ],
+                                ),
+                            ]
+                        ),
+                        dmc.TextInput(
+                            id="login-usr",
+                            label=dmc.Text(
+                                "CPF ou E-mail", size=26, weight=300, color="#5C5C5C"
+                            ),
+                            type="login",
+                            icon=DashIconify(icon="fluent:person-20-filled", width=20),
+                        ),
+                        dmc.PasswordInput(
+                            id="login-senha",
+                            label=dmc.Text(
+                                "Senha", size=26, weight=300, color="#5C5C5C"
+                            ),
+                            icon=DashIconify(icon="fluent:key-20-filled", width=20),
+                            name="password",
+                        ),
+                        dmc.Group(
+                            grow=True,
+                            children=[
+                                dmc.Checkbox(
+                                    id="login-check-lembrar",
+                                    label="Lembrar de mim",
+                                    checked=False,
+                                ),
+                                dmc.Anchor(
+                                    href="/reset",
+                                    children="Esqueci minha senha",
+                                    underline=False,
+                                    size="sm",
+                                    w="fit-content",
+                                ),
+                            ],
+                        ),
+                        dmc.Button(
+                            id="login-btn",
+                            children=dmc.Text("Entrar", size=26, weight=400),
+                            variant="gradient",
+                            fullWidth=True,
+                            h=40,
+                        ),
+                        html.Div(id="login-feedback"),
+                    ],
+                ),
             ),
-            dmc.Checkbox(
-                id="login-check-lembrar", label="Lembrar de mim", checked=False
-            ),
-            dmc.Anchor(href="/reset", children="Esqueci minha senha", underline=True),
-            dmc.Button(
-                id="login-btn",
-                children="Entrar",
-                variant="gradient",
-                size="lg",
-                fullWidth=True,
-            ),
-            html.Div(id="login-feedback"),
-        ],
+        ]
     )
 
 
