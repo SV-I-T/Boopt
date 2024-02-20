@@ -21,6 +21,7 @@ def layout_edicao_usr(
     cpf: str = None,
     data: str = None,
     email: str = None,
+    empresa: ObjectId = None,
     cargo: str = None,
     gestor: bool = False,
     recruta: bool = False,
@@ -136,6 +137,7 @@ def layout_edicao_usr(
                         required=True,
                         searchable=True,
                         nothingFound="Não encontrei nada",
+                        value=str(empresa),
                     ),
                     dmc.Switch(
                         id="gestor-novo-usr",
@@ -172,6 +174,7 @@ def layout(id: str = None):
             usr.cpf,
             usr.data,
             usr.email,
+            usr.empresa,
             usr.cargo,
             usr.gestor,
             usr.recruta,
