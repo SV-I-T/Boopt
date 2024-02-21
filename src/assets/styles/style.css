@@ -4,6 +4,10 @@
     --input-bg: #fff;
 }
 
+* {
+    font-family: "Montserrat", system-ui !important;
+}
+
 html {
     min-height: 100vh;
 }
