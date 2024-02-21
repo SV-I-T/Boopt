@@ -2,6 +2,7 @@ table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
     border-radius: 10px !important;
+    background-color: #fff;
 }
 
 table tr:last-child td:first-child {
