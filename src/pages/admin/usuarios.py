@@ -21,7 +21,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from utils.banco_dados import db
 from utils.modelo_usuario import checar_login
 
-register_page(__name__, "/admin/usuarios", name="Gerenciamento de usuários")
+register_page(__name__, "/admin/usuarios", name="Gerenciar usuários")
 
 CARGOS_PADROES = sorted(
     [
@@ -74,12 +74,10 @@ def modal_cadastro_massa():
 
 @checar_login
 def layout():
-    n_usuarios: int = list(db("Boopt", "Usuários").aggregate([{"$count": "nome"}]))[0][
-        "nome"
-    ]
+    n_usuarios = db("Boopt", "Usuários").count_documents({})
     n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
-        dmc.Title("Gerenciamento de usuários", order=1, weight=700),
+        dmc.Title("Gerenciar usuários", order=1, weight=700),
         dmc.Group(
             children=[
                 dmc.ButtonGroup(

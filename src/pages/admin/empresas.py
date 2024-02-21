@@ -23,9 +23,7 @@ MAX_PAGINA = 20
 
 @checar_login(admin=True)
 def layout():
-    n_empresas: int = list(db("Boopt", "Empresas").aggregate([{"$count": "nome"}]))[0][
-        "nome"
-    ]
+    n_empresas = db("Boopt", "Empresas").count_documents({})
     n_paginas = ceil(n_empresas / MAX_PAGINA)
     return [
         dmc.Title("Gerenciamento de empresas", order=1, weight=700),
