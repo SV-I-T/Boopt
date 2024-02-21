@@ -113,6 +113,7 @@ def layout():
             striped=True,
             withColumnBorders=True,
             withBorder=True,
+            highlightOnHover=True,
             style={"width": "auto"},
             children=[
                 html.Thead(
@@ -140,7 +141,7 @@ clientside_callback(
 )
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="abrir_modal"),
+    ClientsideFunction(namespace="clientside", function_name="ativar"),
     Output("modal-usr-massa", "opened"),
     Input("btn-modal-usr-massa", "n_clicks"),
 )
