@@ -45,6 +45,8 @@ def listar_paginas(_):
             dmc.MenuItem("Alterar senha", href="/configuracoes/senha"),
             dmc.MenuItem("Sair", id="logout-btn", color="red"),
         ]
+        if current_user.admin:
+            opcao.append(dmc.MenuItem("Painel de gestão", href="/admin"))
         minha_area = dmc.Anchor(
             dmc.Button("Minha área", compact=True, variant="light"),
             href="/dashboard",

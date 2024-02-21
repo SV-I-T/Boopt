@@ -21,6 +21,18 @@ body {
     background-size: 500px;
 }
 
+.card-painel-gestao {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 300px;
+    height: 150px;
+}
+
+.mantine-Grid-root {
+    margin: 0;
+}
+
 #page-container {
     margin-top: 40px;
     padding-top: 1rem;
