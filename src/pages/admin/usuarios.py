@@ -36,42 +36,6 @@ CARGOS_PADROES = sorted(
 MAX_PAGINA = 20
 
 
-def modal_cadastro_massa():
-    return dmc.Modal(
-        id="modal-usr-massa",
-        title=dmc.Title("Cadastro em massa", weight=600, order=2),
-        zIndex=10000,
-        size=600,
-        children=[
-            dmc.Group(
-                [
-                    dcc.Upload(
-                        id="upload-cadastro-massa",
-                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        children=dmc.Button(
-                            id="usr-massa-upload",
-                            children="Escolha o arquivo (.xlsx)",
-                            leftIcon=DashIconify(
-                                icon="fluent:arrow-upload-16-filled", width=24
-                            ),
-                        ),
-                    ),
-                    dmc.Text(
-                        id="usr-massa-arquivo", children="Nenhum arquivo escolhido"
-                    ),
-                ]
-            ),
-            dmc.Button(
-                id="usr-massa-download-template",
-                children="Baixar modelo (.xlsx)",
-                variant="subtle",
-                compact=True,
-                leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
-            ),
-        ],
-    )
-
-
 @checar_login
 def layout():
     n_usuarios = db("Boopt", "Usuários").count_documents({})
@@ -129,6 +93,42 @@ def layout():
         ),
         dmc.Pagination(id="tabela-usuarios-nav", total=n_paginas, page=1),
     ]
+
+
+def modal_cadastro_massa():
+    return dmc.Modal(
+        id="modal-usr-massa",
+        title=dmc.Title("Cadastro em massa", weight=600, order=2),
+        zIndex=10000,
+        size=600,
+        children=[
+            dmc.Group(
+                [
+                    dcc.Upload(
+                        id="upload-cadastro-massa",
+                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        children=dmc.Button(
+                            id="usr-massa-upload",
+                            children="Escolha o arquivo (.xlsx)",
+                            leftIcon=DashIconify(
+                                icon="fluent:arrow-upload-16-filled", width=24
+                            ),
+                        ),
+                    ),
+                    dmc.Text(
+                        id="usr-massa-arquivo", children="Nenhum arquivo escolhido"
+                    ),
+                ]
+            ),
+            dmc.Button(
+                id="usr-massa-download-template",
+                children="Baixar modelo (.xlsx)",
+                variant="subtle",
+                compact=True,
+                leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
+            ),
+        ],
+    )
 
 
 clientside_callback(

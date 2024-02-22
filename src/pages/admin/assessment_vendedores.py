@@ -32,26 +32,21 @@ def carregar_aplicacoes():
     return aplicacoes
 
 
-def modal_nova_aplicacao():
-    return dmc.Modal(
-        id="modal-novo-assessment",
-        title=dmc.Title("Nova aplicação", weight=600, order=2),
-        zIndex=10000,
-    )
-
-
 def layout():
     n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
     n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
     return [
-        dmc.Title("Gerenciamento de Assessment Vendedor", order=1, weight=700),
+        dmc.Title("Gerenciar Assessment Vendedor", order=1, weight=700),
         dmc.Group(
             children=[
-                dmc.Button(
-                    id="btn-nova-aplicacao",
-                    children="Nova aplicação",
-                    leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
-                    variant="gradient",
+                dmc.Anchor(
+                    href="/admin/assessment-vendedor/edit",
+                    children=dmc.Button(
+                        id="btn-nova-aplicacao",
+                        children="Nova aplicação",
+                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        variant="gradient",
+                    ),
                 ),
             ]
         ),
@@ -78,13 +73,6 @@ def layout():
         ),
         dmc.Pagination(id="tabela-assessment-nav", total=n_paginas, page=1),
     ]
-
-
-clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="ativar"),
-    Output("modal-novo-assessment", "opened"),
-    Input("btn-novo-assessment", "n_clicks"),
-)
 
 
 # @callback(

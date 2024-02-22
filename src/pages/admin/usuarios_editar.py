@@ -153,7 +153,7 @@ def layout_edicao_usr(
                 id="btn-criar-novo-usr" if nome is None else "btn-salvar-usr",
                 children="Criar" if nome is None else "Salvar",
             ),
-            html.Div(id="feedback-modal-novo-usr"),
+            html.Div(id="feedback-novo-usr"),
         ],
     )
 
@@ -193,7 +193,7 @@ def layout(id: str = None):
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Output("feedback-modal-novo-usr", "children"),
+    Output("feedback-novo-usr", "children"),
     Input("btn-salvar-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
