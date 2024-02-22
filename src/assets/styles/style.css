@@ -4,7 +4,7 @@
     --input-bg: #fff;
 }
 
-* {
+* :not(.ag-root-wrapper *) {
     font-family: Montserrat, Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important
 }
 
