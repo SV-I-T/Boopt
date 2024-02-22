@@ -1,0 +1,13 @@
+#group-btn-header {
+    gap: 0 !important;
+}
+
+#group-btn-header .btn-header-left {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+#group-btn-header .btn-header-right {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}

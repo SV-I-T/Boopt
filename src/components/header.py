@@ -39,24 +39,6 @@ def layout_header():
     Input("login-data", "data"),
 )
 def listar_paginas(_):
-    if current_user.is_authenticated:
-        nome = f"Olá, {current_user.nome} :)"
-        opcao = [
-            dmc.MenuItem("Alterar senha", href="/configuracoes/senha"),
-            dmc.MenuItem("Sair", id="logout-btn", color="red"),
-        ]
-        if current_user.admin:
-            opcao.append(dmc.MenuItem("Painel de gestão", href="/admin"))
-        minha_area = dmc.Anchor(
-            dmc.Button("Minha área", compact=True, variant="light"),
-            href="/dashboard",
-            refresh=True,
-        )
-    else:
-        nome = "Olá!"
-        opcao = [dmc.MenuItem("Entrar", href="/login")]
-        minha_area = None
-
     paginas = [
         dmc.MenuItem(
             f'{page["title"]} [~{page["path"]}]',
@@ -66,32 +48,62 @@ def listar_paginas(_):
         for page in page_registry.values()
     ]
 
-    menu = dmc.Menu(
-        radius="lg",
-        children=[
-            dmc.MenuTarget(
-                dmc.ActionIcon(
-                    DashIconify(
-                        icon="fluent:caret-down-20-filled",
-                        width=20,
-                    ),
-                    variant="light",
-                    color="theme.colors.primaryColor",
-                    size=26,
-                )
+    if current_user.is_authenticated:
+        opcoes = [
+            dmc.MenuItem("Alterar senha", href="/configuracoes/senha"),
+            dmc.MenuItem("Sair", id="logout-btn", color="red"),
+        ]
+
+        if current_user.admin:
+            opcoes.append(dmc.MenuItem("Painel de gestão", href="/admin"))
+
+        minha_area = dmc.Anchor(
+            dmc.Button(
+                "Minha área", compact=True, variant="light", className="btn-header-left"
             ),
-            dmc.MenuDropdown(
-                [
-                    dmc.MenuLabel("Minha conta"),
-                    *opcao,
-                    dmc.MenuDivider(),
-                    dmc.MenuLabel("Páginas"),
-                    *paginas,
-                ]
+            href="/dashboard",
+            refresh=True,
+        )
+
+        menu = dmc.Menu(
+            radius="lg",
+            children=[
+                dmc.MenuTarget(
+                    dmc.ActionIcon(
+                        DashIconify(
+                            icon="fluent:caret-down-20-filled",
+                            width=20,
+                        ),
+                        className="btn-header-right",
+                        variant="light",
+                        color="theme.colors.primaryColor",
+                        size=26,
+                    )
+                ),
+                dmc.MenuDropdown(
+                    [
+                        dmc.MenuLabel("Minha conta"),
+                        *opcoes,
+                        dmc.MenuDivider(),
+                        dmc.MenuLabel("Páginas"),
+                        *paginas,
+                    ]
+                ),
+                html.Div(id="logout-timer"),
+            ],
+        )
+    else:
+        opcoes = [dmc.MenuItem("Entrar", href="/login")]
+        minha_area = dmc.Anchor(
+            dmc.Button(
+                "Entrar",
+                compact=True,
+                variant="light",
             ),
-            html.Div(id="logout-timer"),
-        ],
-    )
+            href="/login",
+            refresh=True,
+        )
+        menu = None
 
     return dmc.Group([minha_area, menu], id="group-btn-header")
 
