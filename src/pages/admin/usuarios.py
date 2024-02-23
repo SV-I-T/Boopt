@@ -1,23 +1,15 @@
-import io
 from math import ceil
 
 import dash_mantine_components as dmc
-import openpyxl
 from dash import (
-    ClientsideFunction,
     Input,
     Output,
     State,
     callback,
-    clientside_callback,
-    dcc,
     html,
     register_page,
 )
-from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from openpyxl.worksheet.datavalidation import DataValidation
-from openpyxl.worksheet.table import Table, TableStyleInfo
 from utils.banco_dados import db
 from utils.modelo_usuario import checar_login
 
@@ -44,20 +36,22 @@ def layout():
         dmc.Title("Gerenciar usuários", order=1, weight=700),
         dmc.Group(
             children=[
-                dmc.ButtonGroup(
-                    [
-                        dmc.Button(
-                            id="btn-novo-usr",
-                            children="Novo Usuário",
-                            leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
-                            variant="gradient",
-                        ),
-                        dmc.Button(
-                            id="btn-modal-usr-massa",
-                            children="Cadastro em massa",
-                            variant="light",
-                        ),
-                    ]
+                dmc.Anchor(
+                    href="/admin/usuarios/edit",
+                    children=dmc.Button(
+                        id="btn-novo-usr",
+                        children="Novo Usuário",
+                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        variant="gradient",
+                    ),
+                ),
+                dmc.Anchor(
+                    href="/admin/usuarios/batelada",
+                    children=dmc.Button(
+                        id="btn-modal-usr-massa",
+                        children="Cadastro em massa",
+                        variant="light",
+                    ),
                 ),
                 dmc.TextInput(
                     id="usuario-filtro-input", placeholder="Pesquisar", w=200
@@ -70,7 +64,6 @@ def layout():
                 ),
             ]
         ),
-        modal_cadastro_massa(),
         dmc.Table(
             striped=True,
             withColumnBorders=True,
@@ -81,7 +74,7 @@ def layout():
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Usuário", style={"width": 200}),
+                            html.Th("Usuário", style={"width": 350}),
                             html.Th("Empresa", style={"width": 200}),
                             html.Th("Cargo", style={"width": 200}),
                             html.Th("Ações", style={"width": 200}),
@@ -93,56 +86,6 @@ def layout():
         ),
         dmc.Pagination(id="tabela-usuarios-nav", total=n_paginas, page=1),
     ]
-
-
-def modal_cadastro_massa():
-    return dmc.Modal(
-        id="modal-usr-massa",
-        title=dmc.Title("Cadastro em massa", weight=600, order=2),
-        zIndex=10000,
-        size=600,
-        children=[
-            dmc.Group(
-                [
-                    dcc.Upload(
-                        id="upload-cadastro-massa",
-                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        children=dmc.Button(
-                            id="usr-massa-upload",
-                            children="Escolha o arquivo (.xlsx)",
-                            leftIcon=DashIconify(
-                                icon="fluent:arrow-upload-16-filled", width=24
-                            ),
-                        ),
-                    ),
-                    dmc.Text(
-                        id="usr-massa-arquivo", children="Nenhum arquivo escolhido"
-                    ),
-                ]
-            ),
-            dmc.Button(
-                id="usr-massa-download-template",
-                children="Baixar modelo (.xlsx)",
-                variant="subtle",
-                compact=True,
-                leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
-            ),
-        ],
-    )
-
-
-clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="redirect_usuarios_edit"),
-    Output("url", "pathname", allow_duplicate=True),
-    Input("btn-novo-usr", "n_clicks"),
-    prevent_initial_call=True,
-)
-
-clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="ativar"),
-    Output("modal-usr-massa", "opened"),
-    Input("btn-modal-usr-massa", "n_clicks"),
-)
 
 
 @callback(
@@ -189,7 +132,7 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
             html.Tr(
                 [
                     html.Td(f'{usuario["nome"]} {usuario["sobrenome"]}'),
-                    html.Td(usuario["empresa"]),
+                    html.Td(usuario.get("empresa", None)),
                     html.Td(usuario["cargo"]),
                     html.Td(
                         dmc.Anchor(
@@ -201,62 +144,3 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
             for usuario in usuarios
         ],
     ]
-
-
-@callback(
-    Output("download", "data", allow_duplicate=True),
-    Input("usr-massa-download-template", "n_clicks"),
-    prevent_initial_call=True,
-)
-def baixar_template_cadastro_massa(n):
-    if not n:
-        raise PreventUpdate
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Cadastro"
-    ws.append(
-        [
-            "Primeiro Nome",
-            "Sobrenome",
-            "CPF",
-            "Data de Nascimento",
-            "Email",
-            "Cargo/Função",
-        ]
-    )
-    ws.column_dimensions["C"].number_format = "@"
-    ws.column_dimensions["D"].number_format = "DD/MM/YYYY"
-    for col in ("A", "B", "E"):
-        ws.column_dimensions[col].width = 32
-    for col in ("C", "D", "F"):
-        ws.column_dimensions[col].width = 16
-
-    tabela = Table(
-        displayName="Usuarios",
-        ref="A1:F2",
-        tableStyleInfo=TableStyleInfo(
-            name="TableStyleMedium2",
-            showFirstColumn=False,
-            showLastColumn=False,
-            showRowStripes=True,
-        ),
-    )
-
-    val_cargos = DataValidation(
-        type="list",
-        formula1=f'"{",".join(CARGOS_PADROES)}"',
-        allow_blank=True,
-        showErrorMessage=False,
-    )
-
-    ws.add_table(tabela)
-    ws.add_data_validation(val_cargos)
-    val_cargos.add("F2")
-
-    buffer = io.BytesIO()
-    wb.save(buffer)
-    return dcc.send_bytes(
-        src=buffer.getvalue(),
-        filename="template_cadastro.xlsx",
-        type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
