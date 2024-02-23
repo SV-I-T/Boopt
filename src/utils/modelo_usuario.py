@@ -2,9 +2,12 @@ import re
 from typing import Any, Literal, Optional
 
 import dash_mantine_components as dmc
+import openpyxl
 from bson import ObjectId
 from flask_login import LoginManager, UserMixin, current_user
-from pydantic import BaseModel, Field, computed_field, field_validator
+from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
 from utils.banco_dados import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -27,8 +30,8 @@ class NovoUsuario(BaseModel):
 
     @field_validator("nome", "sobrenome", "cpf", "data", "cargo", mode="before")
     @classmethod
-    def em_branco(cls, v: Any, field) -> Any:
-        assert bool(v), "Todos os campos marcados com (*) são obrigatórios"
+    def em_branco(cls, v: Any, info: ValidationInfo) -> Any:
+        assert bool(v), f"O campo '{info.field_name.capitalize()}' é obrigatório."
         return v
 
     @field_validator("email")
@@ -38,13 +41,13 @@ class NovoUsuario(BaseModel):
             return None
         assert re.compile(
             r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
-        ).fullmatch(email), "Email inválido"
+        ).fullmatch(email), f"O e-mail '{email}' é inválido."
         return email
 
     @field_validator("cpf")
     @classmethod
     def validar_cpf(cls, cpf: str) -> str:
-        assert len(cpf) == 11 and cpf.isdigit(), "CPF inválido"
+        assert len(cpf) == 11 and cpf.isdigit(), f"O CPF {cpf} é inválido."
         cpf_d = tuple(map(int, cpf))
         resto1 = sum(((10 - i) * n for i, n in enumerate(cpf_d[:9]))) % 11
         regra1 = (resto1 <= 1 and cpf_d[-2] == 0) or (
@@ -54,7 +57,10 @@ class NovoUsuario(BaseModel):
         regra2 = (resto2 <= 1 and cpf_d[-1] == 0) or (
             resto2 >= 2 and cpf_d[-1] == 11 - resto2
         )
-        assert regra1 and regra2, "CPF inválido"
+        assert regra1 and regra2, f"O CPF {cpf} é inválido."
+        assert not db("Boopt", "Usuários").count_documents(
+            {"cpf": cpf}
+        ), f"O CPF '{cpf}' já foi cadastrado."
         return cpf
 
     @computed_field
@@ -63,10 +69,6 @@ class NovoUsuario(BaseModel):
         return generate_password_hash("".join(self.data.split("-")[::-1]))
 
     def registrar(self) -> None:
-        assert not db("Boopt", "Usuários").find_one(
-            {"cpf": self.cpf}
-        ), "Este CPF já está cadastrado"
-
         r = db("Boopt", "Usuários").insert_one(self.model_dump())
         assert (
             r.acknowledged
@@ -100,12 +102,14 @@ class Usuario(BaseModel, UserMixin):
         if identificador == "_id":
             valor = ObjectId(valor)
         usr = db("Boopt", "Usuários").find_one({identificador: valor})
-        assert usr, "Usuário não existe."
+        assert usr, "Este usuário não foi encontrado."
 
         return cls(**usr)
 
     def validar_senha(self, senha: str) -> None:
-        assert check_password_hash(self.senha_hash, senha), "Senha incorreta."
+        assert check_password_hash(
+            self.senha_hash, senha
+        ), "A senha digitada está incorreta."
 
     def atualizar(self, novos_dados: dict[str, str]) -> None:
         r = db("Boopt", "Usuários").update_one(
@@ -113,7 +117,7 @@ class Usuario(BaseModel, UserMixin):
             {"$set": {campo: valor for campo, valor in novos_dados.items()}},
         )
 
-        assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
+        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
 
     def alterar_senha(
         self, senha_atual: str, senha_nova: str, senha_nova_check: str
@@ -129,16 +133,104 @@ class Usuario(BaseModel, UserMixin):
             senha_hash, senha_nova
         ), "A senha nova não pode ser igual à senha atual."
 
-        assert (
-            senha_nova == senha_nova_check
-        ), "As senhas novas inseridas não são iguais."
+        assert senha_nova == senha_nova_check, "As senhas novas não combinam."
 
         r = db("Boopt", "Usuários").update_one(
             {"_id": self.id_},
             {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
         )
-        assert r.acknowledged, "Ocorreu algum problema, tente novamente mais tarde."
+        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
         return True
+
+
+class NovosUsuariosBatelada(BaseModel):
+    usuarios: list[NovoUsuario] = Field(default_factory=list)
+
+    def registrar_usuarios(self, empresa: ObjectId) -> None:
+        for i in len(self.usuarios):
+            self.usuarios[i].empresa = empresa
+
+        r = db("Boopt", "Usuários").insert_many(
+            [usuario.model_dump() for usuario in self.usuarios]
+        )
+        assert (
+            r.acknowledged
+        ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
+
+    @classmethod
+    def gerar_modelo(cls, cargos_padres=list[str]) -> openpyxl.Workbook:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Cadastro"
+        ws.append(
+            [
+                "Primeiro Nome",
+                "Sobrenome",
+                "CPF",
+                "Data de Nascimento",
+                "Email",
+                "Cargo/Função",
+            ]
+        )
+        ws.column_dimensions["C"].number_format = "@"
+        ws.column_dimensions["D"].number_format = "DD/MM/YYYY"
+        for col in ("A", "B", "E"):
+            ws.column_dimensions[col].width = 32
+        for col in ("C", "D", "F"):
+            ws.column_dimensions[col].width = 16
+
+        tabela = Table(
+            displayName="Usuarios",
+            ref="A1:F2",
+            tableStyleInfo=TableStyleInfo(
+                name="TableStyleMedium2",
+                showFirstColumn=False,
+                showLastColumn=False,
+                showRowStripes=True,
+            ),
+        )
+
+        val_cargos = DataValidation(
+            type="list",
+            formula1=f'"{",".join(cargos_padres)}"',
+            allow_blank=True,
+            showErrorMessage=False,
+        )
+
+        ws.add_table(tabela)
+        ws.add_data_validation(val_cargos)
+        val_cargos.add("F2")
+
+        return wb
+
+    @classmethod
+    def carregar_planilha(cls, planilha):
+        wb = openpyxl.load_workbook(planilha)
+        assert "Cadastro" in wb.sheetnames, "A planilha 'Cadastro' não foi encontrada."
+        ws = wb["Cadastro"]
+        linhas = [[cell.value for cell in row] for row in ws.rows]
+        assert [
+            "Primeiro Nome",
+            "Sobrenome",
+            "CPF",
+            "Data de Nascimento",
+            "Email",
+            "Cargo/Função",
+        ] == linhas[0], "O cabeçalho da tabela não segue o modelo fornecido."
+
+        usuarios = [
+            {
+                "nome": linha[0],
+                "sobrenome": linha[1],
+                "cpf": linha[2],
+                "data": linha[3].strftime("%Y-%m-%d"),
+                "email": linha[4],
+                "cargo": linha[5],
+            }
+            for linha in linhas[1:]
+        ]
+
+        return cls(usuarios=usuarios)
 
 
 login_manager = LoginManager()
