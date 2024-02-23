@@ -52,12 +52,6 @@ def layout(id: str = None):
         layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
 
     return [
-        dmc.Anchor(
-            children=dmc.Title("< Gerenciamento de empresas", order=6, weight=500),
-            href="/admin/empresas",
-            color="dimmed",
-            underline=False,
-        ),
         dmc.Title(texto_titulo, order=1, weight=700),
         layout_edicao,
     ]

@@ -180,12 +180,6 @@ def layout(id: str = None):
             usr.recruta,
         )
     return [
-        dmc.Anchor(
-            children=dmc.Title("< Usuários", order=6, weight=500),
-            href="/admin/usuarios",
-            color="dimmed",
-            underline=False,
-        ),
         dmc.Title(texto_titulo, order=1, weight=700),
         layout_edicao,
     ]
@@ -266,7 +260,7 @@ def salvar_usr(
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Output("feedback-modal-novo-usr", "children", allow_duplicate=True),
+    Output("feedback-novo-usr", "children", allow_duplicate=True),
     Input("btn-criar-novo-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
