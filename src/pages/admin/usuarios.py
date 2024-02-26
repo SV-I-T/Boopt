@@ -11,20 +11,11 @@ from dash import (
 )
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import checar_login
+from utils.modelo_usuario import CARGOS_PADROES, checar_login
 
 register_page(__name__, "/admin/usuarios", name="Gerenciar usuários")
 
-CARGOS_PADROES = sorted(
-    [
-        "Vendedor",
-        "Diretor Comercial",
-        "Gerente de Loja",
-        "Atendente",
-        "Supervisor de Loja",
-        "Regional",
-    ]
-)
+
 MAX_PAGINA = 20
 
 

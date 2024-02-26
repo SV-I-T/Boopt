@@ -8,9 +8,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_usuario import NovoUsuario, Usuario
-
-from .usuarios import CARGOS_PADROES
+from utils.modelo_usuario import CARGOS_PADROES, NovoUsuario, Usuario
 
 register_page(__name__, path="/admin/usuarios/edit", title="Editar usuário")
 

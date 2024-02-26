@@ -5,9 +5,7 @@ from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
-from utils.modelo_empresa import Empresa
-
-from .empresas import SEGMENTOS_PADROES
+from utils.modelo_empresa import SEGMENTOS_PADROES, Empresa
 
 register_page(__name__, path="/admin/empresas/edit", title="Editar empresa")
 

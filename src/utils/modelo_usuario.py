@@ -11,6 +11,17 @@ from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_val
 from utils.banco_dados import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
+CARGOS_PADROES = sorted(
+    [
+        "Vendedor",
+        "Diretor Comercial",
+        "Gerente de Loja",
+        "Atendente",
+        "Supervisor de Loja",
+        "Regional",
+    ]
+)
+
 
 class NovoUsuario(BaseModel):
     nome: str

@@ -17,7 +17,6 @@ from utils.modelo_usuario import checar_login
 
 register_page(__name__, path="/admin/empresas", title="Gerenciar Empresas")
 
-SEGMENTOS_PADROES = sorted(["Farmácia", "Eletromóveis", "Automóveis", "Imóveis"])
 MAX_PAGINA = 20
 
 
