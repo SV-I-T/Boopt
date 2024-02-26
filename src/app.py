@@ -38,8 +38,8 @@ login_manager.init_app(server)
 mail.init_app(server)
 
 app.layout = layout
-app.enable_dev_tools(debug=True)
+app.enable_dev_tools(debug=None)
 
 
 if __name__ == "__main__":
-    server.run(load_dotenv=True)
+    server.run(load_dotenv=True, port=8080, host="127.0.0.1")
