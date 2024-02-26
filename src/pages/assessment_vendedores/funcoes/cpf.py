@@ -1,7 +1,8 @@
 import re
-from dash import Output, Input, State, callback, no_update
-from dash.exceptions import PreventUpdate
+
 import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, no_update
+from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
 layout_cpf = dmc.Grid(
@@ -47,7 +48,7 @@ def entrar_cpf(n, cpf, search, path: str):
         raise PreventUpdate
     if (len(cpf) != 11) or (not str.isnumeric(cpf)):
         return no_update, "CPF inválido"
-    id = re.findall("id\=([a-zA-Z0-9]*)\&?", search)
+    id = re.findall(r"id=([a-zA-Z0-9]*)\&?", search)
     if path.startswith("/resultados") or not id:
         return f"cpf={cpf}", no_update
     else:

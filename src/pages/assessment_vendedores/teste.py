@@ -18,7 +18,6 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from icecream import ic  # noqa: F401
 from utils.banco_dados import db
 
 from .funcoes.cpf import layout_cpf
@@ -373,8 +372,8 @@ def salvar_resposta(n, frases, search):
         raise PreventUpdate
 
     else:
-        id = re.search("id\=([a-zA-Z0-9]*)\&?", search).group(1)
-        cpf = re.search("cpf\=([0-9]{11})\&?", search).group(1)
+        id = re.search(r"id=([a-zA-Z0-9]*)\&?", search).group(1)
+        cpf = re.search(r"cpf=([0-9]{11})\&?", search).group(1)
         dados_resposta = {
             "notas": [
                 {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
