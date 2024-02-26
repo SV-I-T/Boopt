@@ -1,5 +1,8 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        bind_valor: function (x) {
+            return x;
+        },
         ativar: function (x) {
             if (!x) {
                 throw window.dash_clientside.PreventUpdate;

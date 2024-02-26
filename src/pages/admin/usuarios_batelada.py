@@ -2,9 +2,22 @@ import base64
 import io
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, dcc, html, no_update, register_page
+from bson import ObjectId
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    dcc,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_usuario import NovosUsuariosBatelada, checar_login
 
@@ -13,7 +26,7 @@ from .usuarios import CARGOS_PADROES
 register_page(__name__, path="/admin/usuarios/batelada", title="Cadastro em Massa")
 
 
-@checar_login
+@checar_login()
 def layout():
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
@@ -51,6 +64,7 @@ def layout():
             compact=True,
             leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
         ),
+        dmc.Button("Criar usuários", id="btn-criar-usrs-batelada"),
         html.Div(id="feedback-usr-massa"),
     ]
 
@@ -75,24 +89,63 @@ def baixar_template_cadastro_massa(n):
     )
 
 
-@callback(
+clientside_callback(
+    ClientsideFunction("clientside", "bind_valor"),
     Output("usr-massa-arquivo", "children"),
+    Input("upload-cadastro-massa", "filename"),
+)
+
+
+@callback(
     Output("feedback-usr-massa", "children"),
-    Output("notificacoes", "children"),
-    Input("upload-cadastro-massa", "contents"),
+    Output("notificacoes", "children", allow_duplicate=True),
+    Input("btn-criar-usrs-batelada", "n_clicks"),
+    State("upload-cadastro-massa", "contents"),
     State("upload-cadastro-massa", "filename"),
+    State("empresa-usr-massa", "value"),
     prevent_initial_call=True,
 )
-def carregar_arquivo_xlsx(contents: str, nome: str):
-    if not contents:
+def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
+    if not n:
         raise PreventUpdate
-    ARQUIVO = nome if nome else "Nenhum arquivo escolhido"
+    if not contents:
+        ALERTA = dmc.Alert(
+            title="Atenção", children="Selecione um arquivo.", color="yellow"
+        )
+        NOTIFICACAO = no_update
+    elif not nome.endswith(".xlsx"):
+        ALERTA = dmc.Alert(
+            title="Atenção",
+            children='O arquivo precisa ter a extensão ".xlsx".',
+            color="red",
+        )
+        NOTIFICACAO = no_update
+    elif not empresa:
+        ALERTA = dmc.Alert(
+            title="Atenção", children="Selecione uma empresa.", color="red"
+        )
+        NOTIFICACAO = no_update
+    else:
+        try:
+            _, content_string = contents.split(",")
+            decoded = base64.b64decode(content_string)
+            novos_usuarios = NovosUsuariosBatelada.carregar_planilha(
+                io.BytesIO(decoded)
+            )
+            novos_usuarios.registrar_usuarios(empresa=ObjectId(empresa))
+        except ValidationError as e:
+            ALERTA = dmc.Alert(
+                title="Atenção", children=str(e.errors()[0]["ctx"]["error"])
+            )
+            NOTIFICACAO = no_update
+        else:
+            ALERTA = None
+            NOTIFICACAO = dmc.Notification(
+                id="notificacao-usr-massa-suc",
+                action="show",
+                title="Pronto!",
+                message=f"{len(novos_usuarios.usuarios)} usuários foram criados com sucesso.",
+                color="green",
+            )
 
-    content_type, content_string = contents.split(",")
-    decoded = base64.b64decode(content_string)
-    NovosUsuariosBatelada.carregar_planilha(io.BytesIO(decoded))
-
-    ALERTA = no_update
-    NOTIFICACAO = no_update
-
-    return ARQUIVO, ALERTA, NOTIFICACAO
+    return ALERTA, NOTIFICACAO

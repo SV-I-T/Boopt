@@ -147,7 +147,7 @@ class NovosUsuariosBatelada(BaseModel):
     usuarios: list[NovoUsuario] = Field(default_factory=list)
 
     def registrar_usuarios(self, empresa: ObjectId) -> None:
-        for i in len(self.usuarios):
+        for i in range(len(self.usuarios)):
             self.usuarios[i].empresa = empresa
 
         r = db("Boopt", "Usuários").insert_many(
@@ -155,7 +155,7 @@ class NovosUsuariosBatelada(BaseModel):
         )
         assert (
             r.acknowledged
-        ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
+        ), "Não conseguimos criar os usuários. Tente novamente mais tarde."
 
     @classmethod
     def gerar_modelo(cls, cargos_padres=list[str]) -> openpyxl.Workbook:
