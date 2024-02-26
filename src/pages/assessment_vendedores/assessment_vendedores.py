@@ -1,3 +1,4 @@
+import dash_mantine_components as dmc
 from dash import register_page
 from flask_login import current_user
 from utils.banco_dados import db
@@ -13,5 +14,4 @@ register_page(
 
 @checar_login
 def layout():
-    usr: Usuario = current_user
-    return None
+    return [dmc.Title("Bem-vindo ao Assessment de Vendedor")]

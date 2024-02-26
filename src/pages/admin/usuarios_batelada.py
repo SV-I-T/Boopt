@@ -138,6 +138,9 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
                 title="Atenção", children=str(e.errors()[0]["ctx"]["error"])
             )
             NOTIFICACAO = no_update
+        except Exception as e:
+            ALERTA = dmc.Alert(title="Atenção", children=str(e))
+            NOTIFICACAO = no_update
         else:
             ALERTA = None
             NOTIFICACAO = dmc.Notification(
