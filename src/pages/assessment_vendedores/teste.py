@@ -2,7 +2,6 @@ import re
 from random import choice, sample
 
 import dash_mantine_components as dmc
-import pendulum
 from bson import ObjectId
 from dash import (
     ClientsideFunction,
@@ -376,12 +375,10 @@ def salvar_resposta(n, frases, search):
     else:
         id = re.search("id\=([a-zA-Z0-9]*)\&?", search).group(1)
         cpf = re.search("cpf\=([0-9]{11})\&?", search).group(1)
-        dt = pendulum.now("America/Sao_Paulo")
         dados_resposta = {
             "notas": [
                 {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
             ],
-            "dt": dt,
             "cpf": cpf,
             "id_aplicacao": ObjectId(id),
         }
