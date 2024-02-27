@@ -4,7 +4,7 @@
     --input-bg: #fff;
 }
 
-* :not(.ag-root-wrapper *) {
+*:not(.ag-icon, .ag-checkbox-input-wrapper) {
     font-family: Montserrat, Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important
 }
 
@@ -34,8 +34,8 @@ body {
 }
 
 #page-container {
-    margin-top: 40px;
-    padding-top: 1rem;
+    margin-top: 40px !important;
+    padding-top: 1rem !important;
 }
 
 @media only screen and (max-width: 767px) {

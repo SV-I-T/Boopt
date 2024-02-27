@@ -1,3 +1,29 @@
 .ag-root-wrapper {
     border-radius: 10px;
 }
+
+.ag-theme-quartz .ag-cell:not(:last-child) {
+    border-right: 1px solid rgb(222, 226, 230);
+}
+
+.ag-theme-quartz .ag-header-cell-text {
+    font-weight: bold !important;
+}
+
+.ag-theme-quartz {
+    --ag-row-border-style: solid !important;
+    --ag-row-border-color: rgb(222, 226, 230) !important;
+    --ag-foreground-color: #000 !important;
+    --ag-odd-row-background-color: #fff !important;
+    --ag-background-color: rgb(248, 249, 250) !important;
+    --ag-header-background-color: #fff !important;
+    --ag-font-size: 14px !important;
+    --ag-header-foreground-color: rgb(73, 80, 87) !important;
+    --ag-header-column-separator-display: block !important;
+    --ag-header-column-separator-height: 100% !important;
+    --ag-header-column-separator-width: 1px !important;
+    --ag-header-column-separator-color: rgb(222, 226, 230) !important;
+    --ag-header-column-resize-handle-display: none !important;
+    --ag-grid-size: 6px !important;
+    --ag-active-color: var(--azul-sv) !important;
+}
