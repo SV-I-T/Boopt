@@ -6,5 +6,5 @@ load_dotenv()
 mongo = PyMongo()
 
 
-def db(colecao: str, tabela: str) -> Collection:
-    return mongo.cx[colecao][tabela]
+def db(database: str, colecao: str) -> Collection:
+    return mongo.cx[database][colecao]
