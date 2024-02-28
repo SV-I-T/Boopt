@@ -166,3 +166,4 @@ template_email.html
 .vscode/settings.json
 src/prod.env
 readme
+docker.md
