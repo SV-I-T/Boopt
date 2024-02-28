@@ -9,12 +9,15 @@ from dash import (
     callback,
     clientside_callback,
     html,
+    no_update,
     register_page,
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
+from pydantic import ValidationError
 from utils.banco_dados import db
+from utils.modelo_assessment import AssessmentVendedor
 from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
@@ -44,24 +47,29 @@ def layout_novo_assessment():
     return html.Div(
         style={"maxWidth": 300},
         children=[
-            dmc.Select(
-                id="empresa-novo-av",
-                label="Empresa",
-                icon=DashIconify(icon="fluent:building-24-filled", width=24),
-                name="empresa",
-                data=data_empresas,
-                required=True,
-                searchable=True,
-                nothingFound="Não encontrei nada",
-                value=None,
-            ),
-            dmc.ActionIcon(
-                id="usuarios-atualizar-btn-av",
-                children=DashIconify(
-                    icon="fluent:arrow-clockwise-20-regular", width=20
-                ),
-                color="theme.primaryColor",
-                variant="filled",
+            dmc.Group(
+                align="end",
+                children=[
+                    dmc.Select(
+                        id="empresa-novo-av",
+                        label="Empresa",
+                        icon=DashIconify(icon="fluent:building-24-filled", width=24),
+                        name="empresa",
+                        data=data_empresas,
+                        required=True,
+                        searchable=True,
+                        nothingFound="Não encontrei nada",
+                        value=None,
+                    ),
+                    dmc.ActionIcon(
+                        id="usuarios-atualizar-btn-av",
+                        children=DashIconify(
+                            icon="fluent:arrow-clockwise-20-regular", width=20
+                        ),
+                        color="theme.primaryColor",
+                        variant="filled",
+                    ),
+                ],
             ),
             dag.AgGrid(
                 id="usuarios-av",
@@ -80,22 +88,13 @@ def layout_novo_assessment():
                     {"field": "cargo"},
                 ],
                 getRowId="params.data._id",
-                selectedRows={"ids": ["10"]},
-                rowData=[
-                    {
-                        "_id": "10",
-                        "usuario": "Fulano",
-                        "cargo": "Vendedor",
-                    },
-                    {
-                        "_id": "2",
-                        "usuario": "Ciclano",
-                        "cargo": "Vendedor II",
-                    },
-                ],
+                selectedRows={"ids": []},
                 dashGridOptions={
                     "rowSelection": "multiple",
                     "suppressRowClickSelection": True,
+                    "overlayNoRowsTemplate": {
+                        "function": "return '<span>Selecione uma empresa</span>'"
+                    },
                 },
                 defaultColDef={
                     "resizable": False,
@@ -142,11 +141,37 @@ def carregar_usuarios_empresa(n: int, empresa: str):
 
 
 @callback(
-    Output("usuarios-av", "children"),
+    Output("notificacoes", "children"),
     Input("btn-criar-novo-av", "n_clicks"),
+    State("empresa-novo-av", "value"),
     State("usuarios-av", "selectedRows"),
     prevent_initial_call=True,
 )
-def ler_linhas_selecionadas(n, linhas: list[dict[str, str]]):
-    print(linhas)
-    raise PreventUpdate
+def ler_linhas_selecionadas(n, empresa: str, linhas: list[dict[str, str]]):
+    if not n:
+        raise PreventUpdate
+    participantes = [ObjectId(linha["_id"]) for linha in linhas]
+    try:
+        nova_aplicacao = AssessmentVendedor(
+            empresa=ObjectId(empresa), participantes=participantes
+        )
+        nova_aplicacao.registrar()
+    except ValidationError as e:
+        erro = e.errors()[0]["ctx"]["error"]
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-erro-criacao-av",
+            title="Erro",
+            message=str(erro),
+            action="show",
+            color="red",
+        )
+    else:
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-sucesso-criacao-av",
+            title="Pronto!",
+            message="O Assessment Vendedor foi criado com sucesso",
+            action="show",
+            color="green",
+        )
+
+    return NOTIFICACAO
