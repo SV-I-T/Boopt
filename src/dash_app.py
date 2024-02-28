@@ -53,7 +53,8 @@ def layout():
         withGlobalStyles=True,
         inherit=True,
         children=dmc.NotificationsProvider(
-            position="bottom-center",
+            position="top-right",
+            zIndex=10000,
             children=[
                 html.Div(id="notificacoes"),
                 dcc.Store(id="refresh"),
