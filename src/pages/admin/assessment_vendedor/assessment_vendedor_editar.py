@@ -13,15 +13,16 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import checar_login
+from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
     __name__, path="/admin/assessment-vendedor/edit", title="Editar Assessment Vendedor"
 )
 
 
-@checar_login
+@checar_login(admin=True, gestor=True)
 def layout(id: str = None):
     texto_titulo = [
         "Novo Assessment Vendedor",
@@ -35,11 +36,10 @@ def layout(id: str = None):
 
 
 def layout_novo_assessment():
+    usr_atual: Usuario = current_user
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in db("Boopt", "Empresas").find(
-            projection={"_id": 1, "nome": 1}, sort={"nome": 1}
-        )
+        for empresa in usr_atual.buscar_empresas()
     ]
     return html.Div(
         style={"maxWidth": 300},

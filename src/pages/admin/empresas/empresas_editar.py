@@ -6,6 +6,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.modelo_empresa import SEGMENTOS_PADROES, Empresa
+from utils.modelo_usuario import checar_login
 
 register_page(__name__, path="/admin/empresas/edit", title="Editar empresa")
 
@@ -35,6 +36,7 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
     )
 
 
+@checar_login(admin=True)
 def layout(id: str = None):
     if not id:
         texto_titulo = [

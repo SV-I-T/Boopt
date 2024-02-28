@@ -8,6 +8,7 @@ from flask_login import LoginManager, UserMixin, current_user
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
+from pymongo.cursor import Cursor
 from utils.banco_dados import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -153,6 +154,20 @@ class Usuario(BaseModel, UserMixin):
         assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
         return True
 
+    def buscar_empresas(self) -> Cursor | None:
+        if self.admin:
+            return db("Boopt", "Empresas").find(
+                projection={"_id": 1, "nome": 1}, sort={"nome": 1}
+            )
+        elif self.gestor:
+            return db("Boopt", "Empresas").find(
+                {"_id": self.empresa},
+                projection={"_id": 1, "nome": 1},
+                sort={"nome": 1},
+            )
+        else:
+            return None
+
 
 class NovosUsuariosBatelada(BaseModel):
     usuarios: list[NovoUsuario] = Field(default_factory=list)
@@ -276,11 +291,11 @@ def layout_nao_autorizado():
     ]
 
 
-def checar_login(_func=None, *, admin: bool = False, gestao: bool = False):
+def checar_login(_func=None, *, admin: bool = False, gestor: bool = False):
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated:
-                if admin and current_user.admin or not admin:
+                if (admin and current_user.admin) or (gestor and current_user.gestor):
                     return func(*args, **kwargs)
             return layout_nao_autorizado()
 

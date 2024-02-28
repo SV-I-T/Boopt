@@ -9,9 +9,11 @@ from dash import (
     html,
     register_page,
 )
+from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import CARGOS_PADROES, checar_login
+from utils.modelo_usuario import Usuario, checar_login
 
 register_page(__name__, "/admin/usuarios", name="Gerenciar usuários")
 
@@ -19,9 +21,17 @@ register_page(__name__, "/admin/usuarios", name="Gerenciar usuários")
 MAX_PAGINA = 20
 
 
-@checar_login
+@checar_login(admin=True, gestor=True)
 def layout():
-    n_usuarios = db("Boopt", "Usuários").count_documents({})
+    usr_atual: Usuario = current_user
+
+    if usr_atual.admin:
+        n_usuarios = db("Boopt", "Usuários").count_documents({})
+    else:
+        n_usuarios = db("Boopt", "Usuários").count_documents(
+            {"empresa": usr_atual.empresa}
+        )
+
     n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
         dmc.Title("Gerenciar usuários", order=1, weight=700),
@@ -87,37 +97,41 @@ def layout():
     State("usuario-filtro-input", "value"),
 )
 def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
+    usr_atual: Usuario = current_user
+
+    if not (usr_atual.gestor or usr_atual.admin):
+        raise PreventUpdate
+
     busca_regex = {"$regex": busca, "$options": "i"}
 
-    usuarios = db("Boopt", "Usuários").aggregate(
-        [
-            {"$sort": {"nome": 1}},
-            {
-                "$lookup": {
-                    "from": "Empresas",
-                    "localField": "empresa",
-                    "foreignField": "_id",
-                    "as": "empresa",
-                }
-            },
-            {"$set": {"empresa": {"$first": "$empresa.nome"}}},
-            {
-                "$match": {
-                    "$or": [
-                        {campo: busca_regex}
-                        for campo in ("nome", "sobrenome", "cargo", "empresa")
-                    ]
-                }
-            },
-            {"$skip": (pagina - 1) * MAX_PAGINA},
-            {"$limit": MAX_PAGINA},
-            {
-                "$project": {
-                    campo: 1 for campo in ("nome", "sobrenome", "cargo", "empresa")
-                }
-            },
-        ]
-    )
+    pipeline = [
+        {"$sort": {"nome": 1}},
+        {
+            "$lookup": {
+                "from": "Empresas",
+                "localField": "empresa",
+                "foreignField": "_id",
+                "as": "empresa",
+            }
+        },
+        {"$set": {"empresa": {"$first": "$empresa.nome"}}},
+        {
+            "$match": {
+                "$or": [
+                    {campo: busca_regex}
+                    for campo in ("nome", "sobrenome", "cargo", "empresa")
+                ]
+            }
+        },
+        {"$skip": (pagina - 1) * MAX_PAGINA},
+        {"$limit": MAX_PAGINA},
+        {"$project": {campo: 1 for campo in ("nome", "sobrenome", "cargo", "empresa")}},
+    ]
+
+    if not usr_atual.admin:
+        pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
+
+    usuarios = db("Boopt", "Usuários").aggregate(pipeline)
     return [
         *[
             html.Tr(

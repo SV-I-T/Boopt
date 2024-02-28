@@ -6,9 +6,10 @@ from bson import ObjectId
 from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_usuario import CARGOS_PADROES, NovoUsuario, Usuario
+from utils.modelo_usuario import CARGOS_PADROES, NovoUsuario, Usuario, checar_login
 
 register_page(__name__, path="/admin/usuarios/edit", title="Editar usuário")
 
@@ -24,12 +25,20 @@ def layout_edicao_usr(
     gestor: bool = False,
     recruta: bool = False,
 ):
+    usr_atual: Usuario = current_user
+
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in db("Boopt", "Empresas").find(
-            projection={"_id": 1, "nome": 1}, sort={"nome": 1}
-        )
+        for empresa in usr_atual.buscar_empresas()
     ]
+
+    if current_user.admin and nome is not None:
+        botao_excluir = dmc.Button(
+            id="btn-excluir-usr", children="Excluir", color="red", variant="outline"
+        )
+    else:
+        botao_excluir = None
+
     return html.Div(
         style={"maxWidth": 600},
         children=[
@@ -151,11 +160,13 @@ def layout_edicao_usr(
                 id="btn-criar-novo-usr" if nome is None else "btn-salvar-usr",
                 children="Criar" if nome is None else "Salvar",
             ),
+            botao_excluir,
             html.Div(id="feedback-novo-usr"),
         ],
     )
 
 
+@checar_login(admin=True, gestor=True)
 def layout(id: str = None):
     if not id:
         texto_titulo = "Novo usuário"
@@ -323,3 +334,30 @@ def criar_novo_usr(
         ALERTA = no_update
 
     return NOTIFICACAO, ALERTA
+
+
+@callback(
+    Output("btn-excluir-usr", "children"),
+    Output("url", "href"),
+    Input("btn-excluir-usr", "n_clicks"),
+    State("btn-excluir-usr", "children"),
+    State("url", "search"),
+    prevent_initial_call=True,
+)
+def abrir_modal_excluir_usr(n: int, botao: str, search: str):
+    if not n:
+        raise PreventUpdate
+
+    if botao == "Excluir":
+        BOTAO = "Confirmar exclusão"
+        HREF = no_update
+    else:
+        params = parse_qs(search[1:])
+        id = params["id"][0]
+
+        r = db("Boopt", "Usuários").delete_one({"_id": ObjectId(id)})
+
+        BOTAO = no_update
+        HREF = "/admin/usuarios"
+
+    return BOTAO, HREF
