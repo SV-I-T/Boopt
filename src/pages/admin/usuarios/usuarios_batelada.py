@@ -24,7 +24,7 @@ from utils.modelo_usuario import CARGOS_PADROES, NovosUsuariosBatelada, checar_l
 register_page(__name__, path="/admin/usuarios/batelada", title="Cadastro em Massa")
 
 
-@checar_login()
+@checar_login(admin=True, gestor=True)
 def layout():
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
