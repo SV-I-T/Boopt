@@ -1,5 +1,5 @@
 import re
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 import dash_mantine_components as dmc
 import openpyxl
@@ -31,7 +31,7 @@ class NovoUsuario(BaseModel):
     email: Optional[str] = None
     data: str
     cargo: str
-    empresa: Optional[ObjectId] = None
+    empresa: Union[None, str, ObjectId]
     admin: bool = False
     gestor: bool = False
     recruta: bool = False
@@ -40,7 +40,20 @@ class NovoUsuario(BaseModel):
         arbitrary_types_allowed = True
         str_strip_whitespace = True
 
-    @field_validator("nome", "sobrenome", "cpf", "data", "cargo", mode="before")
+    @field_validator("empresa", mode="before")
+    @classmethod
+    def validar_empresa(cls, v: Any) -> ObjectId | None:
+        assert bool(v), "O campo 'Empresa' é obrigatório"
+        if not v:
+            return None
+        elif isinstance(v, str):
+            return ObjectId(v)
+        else:
+            return None
+
+    @field_validator(
+        "nome", "sobrenome", "cpf", "data", "empresa", "cargo", mode="before"
+    )
     @classmethod
     def em_branco(cls, v: Any, info: ValidationInfo) -> Any:
         assert bool(v), f"O campo '{info.field_name.capitalize()}' é obrigatório."
@@ -49,7 +62,7 @@ class NovoUsuario(BaseModel):
     @field_validator("email")
     @classmethod
     def email_valido(cls, email: str) -> str | None:
-        if email == "":
+        if not email:
             return None
         assert re.compile(
             r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
@@ -59,6 +72,7 @@ class NovoUsuario(BaseModel):
     @field_validator("cpf")
     @classmethod
     def validar_cpf(cls, cpf: str) -> str:
+        cpf = cpf.replace(".", "").replace("-", "")
         assert len(cpf) == 11 and cpf.isdigit(), f"O CPF {cpf} é inválido."
         cpf_d = tuple(map(int, cpf))
         resto1 = sum(((10 - i) * n for i, n in enumerate(cpf_d[:9]))) % 11
