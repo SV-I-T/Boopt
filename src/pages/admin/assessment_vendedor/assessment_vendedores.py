@@ -1,6 +1,7 @@
 from math import ceil
 
 import dash_mantine_components as dmc
+from bson import ObjectId
 from dash import (
     ClientsideFunction,
     Input,
@@ -14,7 +15,9 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from utils.banco_dados import db
+from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
     __name__, "/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
@@ -32,8 +35,22 @@ def carregar_aplicacoes():
     return aplicacoes
 
 
+@checar_login(admin=True, gestor=True)
 def layout():
-    n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
+    usr_atual: Usuario = current_user
+
+    if usr_atual.admin:
+        n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
+    else:
+        n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(
+            {"empresa": usr_atual.empresa}
+        )
+
+    data_empresas = [
+        {"value": str(empresa["_id"]), "label": empresa["nome"]}
+        for empresa in usr_atual.buscar_empresas()
+    ]
+
     n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
     return [
         dmc.Title("Gerenciar Assessment Vendedor", order=1, weight=700),
@@ -48,6 +65,14 @@ def layout():
                         variant="gradient",
                     ),
                 ),
+                dmc.Select(
+                    id="empresa-assessment",
+                    data=data_empresas,
+                    searchable=True,
+                    nothingFound="Não encontrei nada",
+                    placeholder="Selecione uma empresa",
+                    w=250,
+                ),
             ]
         ),
         dmc.Table(
@@ -60,10 +85,9 @@ def layout():
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Empresa", style={"width": 200}),
-                            html.Th("Data de criação", style={"width": 200}),
-                            html.Th("Participantes", style={"width": 200}),
-                            html.Th("Respostas", style={"width": 200}),
+                            html.Th("Data de criação", style={"width": 250}),
+                            html.Th("Participantes", style={"width": 150}),
+                            html.Th("Respostas", style={"width": 150}),
                             html.Th("Ações", style={"width": 200}),
                         ]
                     )
@@ -75,35 +99,55 @@ def layout():
     ]
 
 
-# @callback(
-#     Output("tabela-empresas-body", "children"),
-#     Input("url", "pathname"),
-#     Input("tabela-empresas-nav", "page"),
-#     Input("empresa-filtro-btn", "n_clicks"),
-#     State("empresa-filtro-input", "value"),
-# )
-# def atualizar_tabela_empresas(_, pagina, n, busca):
-#     busca_regex = {"$regex": busca, "$options": "i"}
-#     empresas = db("Boopt", "Empresas").find(
-#         filter={"$or": [{campo: busca_regex} for campo in ("nome", "segmento")]},
-#         skip=(pagina - 1) * MAX_PAGINA,
-#         limit=MAX_PAGINA,
-#         sort={"nome": 1},
-#     )
-#     return [
-#         *[
-#             html.Tr(
-#                 [
-#                     html.Td(str(empresa["_id"])),
-#                     html.Td(empresa["nome"]),
-#                     html.Td(empresa["segmento"]),
-#                     html.Td(
-#                         dmc.Anchor(
-#                             "Editar", href=f'/admin/empresas/edit?id={empresa["_id"]}'
-#                         )
-#                     ),
-#                 ]
-#             )
-#             for empresa in empresas
-#         ],
-#     ]
+@callback(
+    Output("tabela-assessment-body", "children"),
+    Input("url", "pathname"),
+    Input("tabela-assessment-nav", "page"),
+    Input("empresa-assessment", "value"),
+)
+def atualizar_tabela_empresas(_, pagina: int, empresa: str):
+    assessments = db("AssessmentVendedores", "Aplicações").aggregate(
+        [
+            {"$match": {"empresa": ObjectId(empresa)}},
+            {"$sort": {"_id": -1}},
+            {"$skip": (pagina - 1) * MAX_PAGINA},
+            {"$limit": MAX_PAGINA},
+            {"$project": {"id_form": 0}},
+            {"$set": {"participantes": {"$size": "$participantes"}}},
+            {
+                "$lookup": {
+                    "from": "Respostas",
+                    "localField": "_id",
+                    "foreignField": "id_aplicacao",
+                    "as": "respostas",
+                }
+            },
+            {
+                "$set": {
+                    "respostas": {"$size": "$respostas"},
+                }
+            },
+        ]
+    )
+    return [
+        *[
+            html.Tr(
+                [
+                    html.Td(
+                        assessment["_id"]
+                        .generation_time.date()
+                        .strftime("%d de %B de %Y")
+                    ),
+                    html.Td(assessment["participantes"]),
+                    html.Td(assessment["respostas"]),
+                    html.Td(
+                        dmc.Anchor(
+                            "Editar",
+                            href=f'/admin/assessment-vendedor/edit?id={assessment["_id"]}',
+                        )
+                    ),
+                ]
+            )
+            for assessment in assessments
+        ],
+    ]
