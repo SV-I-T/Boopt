@@ -117,7 +117,6 @@ def layout():
                             fullWidth=True,
                             h=40,
                         ),
-                        html.Div(id="login-feedback"),
                     ],
                 ),
             ),
@@ -127,7 +126,7 @@ def layout():
 
 @callback(
     Output("url", "pathname", allow_duplicate=True),
-    Output("login-feedback", "children"),
+    Output("notificacoes", "children", allow_duplicate=True),
     Output("login-data", "data"),
     Input("login-btn", "n_clicks"),
     State("login-usr", "value"),
@@ -144,16 +143,18 @@ def logar(n, login, senha, lembrar):
         usr.validar_senha(senha)
     except AssertionError as e:
         URL = no_update
-        ALERTA = dmc.Alert(
-            "Verifique as suas credenciais e tente novamente.",
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-erro-login",
+            title="Atenção",
+            message=str(e),
             color="red",
-            title=str(e),
+            action="show",
         )
         LOGIN_DATA = no_update
     else:
         login_user(usr, remember=lembrar, force=True)
         URL = "/"
-        ALERTA = no_update
+        NOTIFICACAO = no_update
         LOGIN_DATA = 1
 
-    return URL, ALERTA, LOGIN_DATA
+    return URL, NOTIFICACAO, LOGIN_DATA

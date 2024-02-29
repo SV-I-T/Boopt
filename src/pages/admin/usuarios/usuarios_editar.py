@@ -70,7 +70,6 @@ def layout_edicao_usr(
                     dmc.TextInput(
                         id="cpf-novo-usr",
                         label="CPF",
-                        type="number",
                         required=True,
                         description="Somente números",
                         placeholder="12345678910",
@@ -144,7 +143,7 @@ def layout_edicao_usr(
                         required=True,
                         searchable=True,
                         nothingFound="Não encontrei nada",
-                        value=str(empresa),
+                        value=str(empresa) if empresa is not None else None,
                     ),
                     dmc.Switch(
                         id="gestor-novo-usr",
@@ -196,7 +195,6 @@ def layout(id: str = None):
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Output("feedback-novo-usr", "children"),
     Input("btn-salvar-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
@@ -248,10 +246,14 @@ def salvar_usr(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        ALERTA = dmc.Alert(str(erro), color="red", title="Atenção")
-        NOTIFICACAO = no_update
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-erro-edit-usr",
+            title="Atenção",
+            message=str(erro),
+            action="show",
+            color="red",
+        )
     else:
-        ALERTA = no_update
         NOTIFICACAO = dmc.Notification(
             id="notificacao-salvar-usr-suc",
             title="Pronto!",
@@ -264,12 +266,11 @@ def salvar_usr(
             action="show",
         )
 
-    return NOTIFICACAO, ALERTA
+    return NOTIFICACAO
 
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Output("feedback-novo-usr", "children", allow_duplicate=True),
     Input("btn-criar-novo-usr", "n_clicks"),
     State("nome-novo-usr", "value"),
     State("sobrenome-novo-usr", "value"),
@@ -304,7 +305,7 @@ def criar_novo_usr(
             cpf=cpf,
             data=data,
             email=email,
-            empresa=ObjectId(empresa),
+            empresa=empresa,
             cargo=cargo,
             gestor=gestor,
             recruta=recruta,
@@ -317,8 +318,13 @@ def criar_novo_usr(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        ALERTA = dmc.Alert(str(erro), color="red", title="Atenção")
-        NOTIFICACAO = no_update
+        NOTIFICACAO = NOTIFICACAO = dmc.Notification(
+            id="notificacao-erro-edit-usr",
+            title="Atenção",
+            message=str(erro),
+            action="show",
+            color="red",
+        )
     else:
         NOTIFICACAO = dmc.Notification(
             id="notificacao-novo-usr-suc",
@@ -331,9 +337,8 @@ def criar_novo_usr(
             color="green",
             action="show",
         )
-        ALERTA = no_update
 
-    return NOTIFICACAO, ALERTA
+    return NOTIFICACAO
 
 
 @callback(

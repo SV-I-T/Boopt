@@ -58,7 +58,6 @@ def layout(id: str = None):
 
 
 @callback(
-    Output("feedback-nova-empresa", "children", allow_duplicate=True),
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-criar-nova-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
@@ -77,10 +76,14 @@ def criar_empresa(n, nome: str, segmento: str):
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        ALERTA = dmc.Alert(str(erro), color="red", title="Atenção"), no_update
-        NOTIFICACAO = no_update
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-erro-criar-empresa",
+            title="Atenção",
+            message=str(erro),
+            color="red",
+            action="show",
+        )
     else:
-        ALERTA = no_update
         NOTIFICACAO = dmc.Notification(
             id="empresa-criada",
             color="green",
@@ -93,11 +96,10 @@ def criar_empresa(n, nome: str, segmento: str):
             ],
         )
 
-    return ALERTA, NOTIFICACAO
+    return NOTIFICACAO
 
 
 @callback(
-    Output("feedback-nova-empresa", "children", allow_duplicate=True),
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-salvar-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
@@ -119,12 +121,17 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        ALERTA = dmc.Alert(str(erro), color="red"), no_update
-        NOTIFICACAO = no_update
-    else:
-        ALERTA = no_update
         NOTIFICACAO = dmc.Notification(
-            id="empresa-salva",
+            id="notificacao-erro-criar-empresa",
+            title="Atenção",
+            message=str(erro),
+            color="red",
+            action="show",
+        )
+    else:
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-empresa-salva",
+            color="green",
             action="show",
             title="Pronto!",
             message=[
@@ -133,4 +140,4 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
                 dmc.Text(" foi editada com sucesso.", span=True),
             ],
         )
-    return ALERTA, NOTIFICACAO
+    return NOTIFICACAO
