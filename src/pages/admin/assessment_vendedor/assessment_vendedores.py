@@ -57,7 +57,7 @@ def layout():
         dmc.Group(
             children=[
                 dmc.Anchor(
-                    href="/admin/assessment-vendedor/edit",
+                    href="/admin/assessment-vendedor/novo",
                     children=dmc.Button(
                         id="btn-nova-aplicacao",
                         children="Nova aplicação",
@@ -88,7 +88,8 @@ def layout():
                             html.Th("Data de criação", style={"width": 250}),
                             html.Th("Participantes", style={"width": 150}),
                             html.Th("Respostas", style={"width": 150}),
-                            html.Th("Ações", style={"width": 200}),
+                            html.Th("Adesão", style={"width": 150}),
+                            html.Th("Nota média", style={"width": 150}),
                         ]
                     )
                 ),
@@ -140,12 +141,8 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                     ),
                     html.Td(assessment["participantes"]),
                     html.Td(assessment["respostas"]),
-                    html.Td(
-                        dmc.Anchor(
-                            "Editar",
-                            href=f'/admin/assessment-vendedor/edit?id={assessment["_id"]}',
-                        )
-                    ),
+                    html.Td(assessment["respostas"] / assessment["participantes"]),
+                    html.Td("50"),
                 ]
             )
             for assessment in assessments

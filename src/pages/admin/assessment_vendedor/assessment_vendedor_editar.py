@@ -21,12 +21,12 @@ from utils.modelo_assessment import AssessmentVendedor
 from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
-    __name__, path="/admin/assessment-vendedor/edit", title="Editar Assessment Vendedor"
+    __name__, path="/admin/assessment-vendedor/novo", title="Criar Assessment Vendedor"
 )
 
 
 @checar_login(admin=True, gestor=True)
-def layout(id: str = None):
+def layout():
     texto_titulo = [
         "Novo Assessment Vendedor",
     ]
@@ -111,7 +111,6 @@ def layout_novo_assessment():
                 className="ag-theme-quartz compact",
             ),
             dmc.Button(id="btn-criar-novo-av", children="Criar"),
-            html.Div(id="feedback-novo-av"),
         ],
     )
 
@@ -147,31 +146,48 @@ def carregar_usuarios_empresa(n: int, empresa: str):
     State("usuarios-av", "selectedRows"),
     prevent_initial_call=True,
 )
-def ler_linhas_selecionadas(n, empresa: str, linhas: list[dict[str, str]]):
+def criar_assessment(n, empresa: str, linhas: list[dict[str, str]]):
     if not n:
         raise PreventUpdate
-    participantes = [ObjectId(linha["_id"]) for linha in linhas]
-    try:
-        nova_aplicacao = AssessmentVendedor(
-            empresa=ObjectId(empresa), participantes=participantes
-        )
-        nova_aplicacao.registrar()
-    except ValidationError as e:
-        erro = e.errors()[0]["ctx"]["error"]
+    elif not empresa:
         NOTIFICACAO = dmc.Notification(
-            id="notificacao-erro-criacao-av",
-            title="Erro",
-            message=str(erro),
+            id="notificacao-sem-empresa",
+            title="Atenção",
+            message="Selecione uma empresa",
             action="show",
-            color="red",
+            color="orange",
+        )
+    elif not linhas:
+        NOTIFICACAO = dmc.Notification(
+            id="notificacao-sem-empresa",
+            title="Atenção",
+            message="Selecione pelo menos um usuário",
+            action="show",
+            color="orange",
         )
     else:
-        NOTIFICACAO = dmc.Notification(
-            id="notificacao-sucesso-criacao-av",
-            title="Pronto!",
-            message="O Assessment Vendedor foi criado com sucesso",
-            action="show",
-            color="green",
-        )
+        participantes = [ObjectId(linha["_id"]) for linha in linhas]
+        try:
+            nova_aplicacao = AssessmentVendedor(
+                empresa=ObjectId(empresa), participantes=participantes
+            )
+            nova_aplicacao.registrar()
+        except ValidationError as e:
+            erro = e.errors()[0]["ctx"]["error"]
+            NOTIFICACAO = dmc.Notification(
+                id="notificacao-erro-criacao-av",
+                title="Erro",
+                message=str(erro),
+                action="show",
+                color="red",
+            )
+        else:
+            NOTIFICACAO = dmc.Notification(
+                id="notificacao-sucesso-criacao-av",
+                title="Pronto!",
+                message="O Assessment Vendedor foi criado com sucesso",
+                action="show",
+                color="green",
+            )
 
     return NOTIFICACAO
