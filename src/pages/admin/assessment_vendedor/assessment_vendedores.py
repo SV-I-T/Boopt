@@ -90,10 +90,24 @@ def layout():
                             html.Th("Respostas", style={"width": 150}),
                             html.Th("Adesão", style={"width": 150}),
                             html.Th("Nota média", style={"width": 150}),
+                            html.Th("Acesso", style={"width": 150}),
                         ]
                     )
                 ),
-                html.Tbody(id="tabela-assessment-body"),
+                html.Tbody(
+                    id="tabela-assessment-body",
+                    children=[
+                        html.Tr(
+                            children=[
+                                html.Td(
+                                    "Selecione uma empresa primeiro",
+                                    colSpan=6,
+                                    style={"text-align": "center"},
+                                )
+                            ]
+                        )
+                    ],
+                ),
             ],
         ),
         dmc.Pagination(id="tabela-assessment-nav", total=n_paginas, page=1),
@@ -105,6 +119,7 @@ def layout():
     Input("url", "pathname"),
     Input("tabela-assessment-nav", "page"),
     Input("empresa-assessment", "value"),
+    prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(_, pagina: int, empresa: str):
     assessments = db("AssessmentVendedores", "Aplicações").aggregate(
@@ -143,6 +158,12 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                     html.Td(assessment["respostas"]),
                     html.Td(assessment["respostas"] / assessment["participantes"]),
                     html.Td("50"),
+                    html.Td(
+                        dmc.Anchor(
+                            children="Link de acesso",
+                            href=f'/assessment-vendedor/teste?id={str(assessment["_id"])}',
+                        )
+                    ),
                 ]
             )
             for assessment in assessments
