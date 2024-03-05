@@ -306,11 +306,21 @@ def layout_nao_autorizado():
 
 
 def checar_login(_func=None, *, admin: bool = False, gestor: bool = False):
+    """
+    A decorator function that checks if the user is authenticated and has the necessary role permissions before allowing access to the decorated function.
+    It takes in either a function or keyword arguments for admin and gestor roles, and returns a wrapper function that enforces the authentication and role permissions.
+    """
+
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated:
-                if (admin and current_user.admin) or (gestor and current_user.gestor):
+                if (
+                    (not admin and not gestor)
+                    or (admin and current_user.admin)
+                    or (gestor and current_user.gestor)
+                ):
                     return func(*args, **kwargs)
+
             return layout_nao_autorizado()
 
         return wrapper
