@@ -1,5 +1,6 @@
 import re
 from random import choice, sample
+from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 from bson import ObjectId
@@ -18,9 +19,9 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from utils.banco_dados import db
-
-from .funcoes.cpf import layout_cpf
+from utils.modelo_usuario import Usuario
 
 explicacao_teste = dcc.Markdown(
     """
@@ -39,86 +40,61 @@ explicacao_teste = dcc.Markdown(
 register_page(__name__, path="/assessment-vendedor/teste", title="Assessment Vendedor")
 
 
-def layout(id: str = None, cpf: str = None):
+def layout(id: str = None):
     if id is None or len(id) != 24:
         return dmc.Alert(
             "Este formulário não existe. Verifique o link", title="Erro", color="red"
         )
 
-    if cpf is None:
-        return layout_cpf
+    usr_atual: Usuario = current_user
 
-    elif len(id) != 0 and cpf is not None:
-        aplicacao = buscar_aplicacao(cpf, id)
+    aplicacao = db("AssessmentVendedores", "Aplicações").find_one(
+        {"participantes": usr_atual.id_, "_id": ObjectId(id)}
+    )
+    id_form: ObjectId = aplicacao["id_form"]
 
-        if aplicacao is None:
-            return dmc.Alert(
+    formulario_frases = db("AssessmentVendedores", "Formulários").find_one(
+        {"_id": id_form},
+        {
+            "_id": 0,
+            "competencias.frases.desc": 1,
+            "competencias.frases.id": 1,
+        },
+    )
+
+    frases = {
+        str(frase["id"]): {"frase": frase["desc"], "valor": None}
+        for competencia in formulario_frases["competencias"]
+        for frase in competencia["frases"]
+    }
+
+    ordem = sample(range(1, 63 + 1), 63)
+
+    return html.Div(
+        [
+            dcc.Store(id="store-status-start", data=False, storage_type="memory"),
+            dcc.Store(id="store-status-done", data=False, storage_type="memory"),
+            dcc.Store(id="store-frases", data=frases, storage_type="memory"),
+            dcc.Store(id="store-ordem-frases", data=ordem, storage_type="memory"),
+            dcc.Store(id="store-ordem-frase-atual", data=None, storage_type="memory"),
+            html.Div(id="container-frase"),
+            dmc.Grid(
                 [
-                    dmc.Text(
-                        f"O cpf '{cpf}' não foi registrado para essa aplicação ou ela não existe."
+                    dmc.Col(
+                        dmc.Button("Começar teste", id="btn-start"),
+                        span="auto",
                     ),
-                    dmc.Anchor("Voltar", href=f"/assessment-vendedor?id={id}"),
                 ],
-                title="Erro!",
-                color="red",
-            )
-
-        aplicacao = aplicacao[0]
-        id_form = aplicacao["id_form"]
-        nome = aplicacao["participantes"]["Nome"]
-        cliente = aplicacao["cliente"]
-
-        if "resposta" in aplicacao.keys():
-            # ADICIONAR O NOME/DATA DA APLICAÇÃO
-            return dmc.Alert(
-                f"O CPF {cpf} já respondeu esta aplicação.", color="yellow"
-            )
-
-        formulario_frases = db("AssessmentVendedores", "Formulários").find_one(
-            {"_id": id_form},
-            {
-                "_id": 0,
-                "competencias.frases.desc": 1,
-                "competencias.frases.id": 1,
-            },
-        )
-
-        frases = {
-            str(frase["id"]): {"frase": frase["desc"], "valor": None}
-            for competencia in formulario_frases["competencias"]
-            for frase in competencia["frases"]
-        }
-
-        ordem = sample(range(1, 63 + 1), 63)
-
-        return html.Div(
-            [
-                dcc.Store(id="store-status-start", data=False, storage_type="memory"),
-                dcc.Store(id="store-status-done", data=False, storage_type="memory"),
-                dcc.Store(id="store-frases", data=frases, storage_type="memory"),
-                dcc.Store(id="store-ordem-frases", data=ordem, storage_type="memory"),
-                dcc.Store(
-                    id="store-ordem-frase-atual", data=None, storage_type="memory"
-                ),
-                dmc.Text(f"{nome} - {cliente}", size="sm", color="grey"),
-                html.Div(id="container-frase"),
-                dmc.Grid(
-                    [
-                        dmc.Col(
-                            dmc.Button("Começar teste", id="btn-start"),
-                            span="auto",
-                        ),
-                    ],
-                    mt="1rem",
-                    id="group-btn",
-                    align="center",
-                    gutter="sm",
-                ),
-                # dmc.Button("Ultima", id="btn-last"),
-                html.Div(id="container-envio"),
-            ],
-            id="container-teste",
-        )
+                mt="1rem",
+                id="group-btn",
+                align="center",
+                gutter="sm",
+            ),
+            # dmc.Button("Ultima", id="btn-last"),
+            html.Div(id="container-envio"),
+        ],
+        id="container-teste",
+    )
 
 
 # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
@@ -316,48 +292,6 @@ def habilitar_envio(status_pronto):
         )
 
 
-def buscar_aplicacao(cpf, id):
-    return list(
-        db("AssessmentVendedores", "Aplicações").aggregate(
-            [
-                {"$unwind": "$participantes"},
-                {"$match": {"participantes.CPF": cpf, "_id": ObjectId(id)}},
-                {"$limit": 1},
-                {"$unwind": "$participantes"},
-                {
-                    "$lookup": {
-                        "from": "Respostas",
-                        "let": {"cpf": cpf, "id": "$_id"},
-                        "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            {"$eq": ["$cpf", "$$cpf"]},
-                                            {"$eq": ["$id_aplicacao", "$$id"]},
-                                        ]
-                                    }
-                                }
-                            }
-                        ],
-                        "as": "resposta",
-                    }
-                },
-                {"$unwind": {"path": "$resposta", "preserveNullAndEmptyArrays": True}},
-                {
-                    "$project": {
-                        "id_form": 1,
-                        "participantes": {"Nome": 1},
-                        "cliente": 1,
-                        "_id": 0,
-                        "resposta": {"_id": 1},
-                    }
-                },
-            ]
-        )
-    )
-
-
 @callback(
     Output("container-frase", "children", allow_duplicate=True),
     Output("group-btn", "children", allow_duplicate=True),
@@ -372,14 +306,15 @@ def salvar_resposta(n, frases, search):
         raise PreventUpdate
 
     else:
-        id = re.search(r"id=([a-zA-Z0-9]*)\&?", search).group(1)
-        cpf = re.search(r"cpf=([0-9]{11})\&?", search).group(1)
+        usr_atual: Usuario = current_user
+        params = parse_qs(search[1:])
+        id_aplicacao = params["id"][0]
         dados_resposta = {
             "notas": [
                 {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
             ],
-            "cpf": cpf,
-            "id_aplicacao": ObjectId(id),
+            "id_aplicacao": ObjectId(id_aplicacao),
+            "id_usuario": usr_atual.id_,
         }
         resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
         if resposta.inserted_id is not None:
@@ -391,7 +326,7 @@ def salvar_resposta(n, frases, search):
                             "Sua resposta foi enviada. Você pode conferir a avaliação da sua resposta ",
                             dmc.Anchor(
                                 "aqui",
-                                href=f"/assessment-vendedor/resultados?cpf={cpf}",
+                                href="/assessment-vendedor",
                             ),
                             ".",
                         ]
