@@ -118,5 +118,5 @@ def listar_paginas(_):
 def sair(n, login_data):
     if not n:
         raise PreventUpdate
-    logout_user()
+    current_user.sair()
     return html.Meta(httpEquiv="refresh", content="0.1"), login_data + 1

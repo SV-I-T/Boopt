@@ -4,12 +4,13 @@ from typing import Any, Literal, Optional, Union
 import dash_mantine_components as dmc
 import openpyxl
 from bson import ObjectId
-from flask_login import LoginManager, UserMixin, current_user
+from flask_login import LoginManager, UserMixin, current_user, logout_user
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
 from pymongo.cursor import Cursor
 from utils.banco_dados import db
+from utils.cache import cache_simple
 from werkzeug.security import check_password_hash, generate_password_hash
 
 CARGOS_PADROES = sorted(
@@ -182,6 +183,20 @@ class Usuario(BaseModel, UserMixin):
         else:
             return None
 
+    @classmethod
+    @cache_simple.memoize(timeout=600)
+    def buscar_login(cls, _id: str) -> dict | None:
+        print("Carregando usuário")
+        if _id == "None":
+            return None
+        return db("Boopt", "Usuários").find_one(
+            {"_id": ObjectId(_id)},
+        )
+
+    def sair(self) -> None:
+        logout_user()
+        cache_simple.delete_memoized(Usuario.buscar_login, Usuario)
+
 
 class NovosUsuariosBatelada(BaseModel):
     usuarios: list[NovoUsuario] = Field(default_factory=list)
@@ -275,15 +290,12 @@ class NovosUsuariosBatelada(BaseModel):
 
 login_manager = LoginManager()
 login_manager.login_view = "/login"
+login_manager.login_message = "Faça o login para acessar esta página."
 
 
 @login_manager.user_loader
 def carregar_usuario(_id):
-    if _id == "None":
-        return None
-    usr = db("Boopt", "Usuários").find_one(
-        {"_id": ObjectId(_id)},
-    )
+    usr = Usuario.buscar_login(_id)
     if not usr:
         return None
     return Usuario(**usr)

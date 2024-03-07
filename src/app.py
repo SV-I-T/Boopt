@@ -5,7 +5,7 @@ from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask
 from utils.banco_dados import mongo
-from utils.cache import cache
+from utils.cache import cache, cache_simple
 from utils.email import mail
 from utils.modelo_usuario import login_manager
 
@@ -34,6 +34,7 @@ app = Dash(
 
 mongo.init_app(server)
 cache.init_app(server)
+cache_simple.init_app(server)
 login_manager.init_app(server)
 mail.init_app(server)
 
