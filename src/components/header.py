@@ -50,18 +50,18 @@ def listar_paginas(_):
 
     if current_user.is_authenticated:
         opcoes = [
-            dmc.MenuItem("Alterar senha", href="/configuracoes/senha"),
+            dmc.MenuItem("Alterar senha", href="/app/configuracoes/senha"),
             dmc.MenuItem("Sair", id="logout-btn", color="red"),
         ]
 
         if current_user.admin:
-            opcoes.append(dmc.MenuItem("Painel de gestão", href="/admin"))
+            opcoes.append(dmc.MenuItem("Painel de gestão", href="/app/admin"))
 
         minha_area = dmc.Anchor(
             dmc.Button(
                 "Minha área", compact=True, variant="light", className="btn-header-left"
             ),
-            href="/dashboard",
+            href="/app/dashboard",
             refresh=True,
         )
 

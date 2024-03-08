@@ -1,15 +1,15 @@
 import dash_mantine_components as dmc
 from dash import register_page
-from flask_login import current_user
+from flask_login import current_user, login_required
 from utils.banco_dados import db
 from utils.modelo_assessment import AssessmentVendedor
 from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
     __name__,
-    path="/assessment-vendedor",
+    path="/app/assessment-vendedor",
     title="Assessment Vendedor",
-    redirect_from=["/dashboard"],
+    redirect_from=["/app/dashboard"],
 )
 
 
@@ -24,11 +24,11 @@ def layout():
             BOTAO_TESTE = dmc.Button("Sem teste disponível", disabled=True)
             BOTAO_RESULTADO = dmc.Anchor(
                 children=dmc.Button("Ver resultado"),
-                href=f"/assessment-vendedor/resultado/?id={aplicacao['resposta']}",
+                href=f"/app/assessment-vendedor/resultado/?id={aplicacao['resposta']}",
             )
         else:
             BOTAO_TESTE = dmc.Anchor(
-                href=f"/assessment-vendedor/teste/?id={aplicacao['_id']}",
+                href=f"/app/assessment-vendedor/teste/?id={aplicacao['_id']}",
                 children=dmc.Button("Começar o teste"),
             )
             BOTAO_RESULTADO = dmc.Button("Ver resultado", disabled=True)

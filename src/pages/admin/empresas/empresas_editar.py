@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from utils.modelo_empresa import SEGMENTOS_PADROES, Empresa
 from utils.modelo_usuario import checar_login
 
-register_page(__name__, path="/admin/empresas/edit", title="Editar empresa")
+register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
 
 
 def layout_nova_empresa(nome: str = None, segmento: str = None):

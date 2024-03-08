@@ -15,7 +15,7 @@ from dash_iconify import DashIconify
 from utils.banco_dados import db
 from utils.modelo_usuario import checar_login
 
-register_page(__name__, path="/admin/empresas", title="Gerenciar Empresas")
+register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 
 MAX_PAGINA = 20
 
@@ -101,7 +101,8 @@ def atualizar_tabela_empresas(_, pagina, n, busca):
                     html.Td(empresa["segmento"]),
                     html.Td(
                         dmc.Anchor(
-                            "Editar", href=f'/admin/empresas/edit?id={empresa["_id"]}'
+                            "Editar",
+                            href=f'/app/admin/empresas/edit?id={empresa["_id"]}',
                         )
                     ),
                 ]

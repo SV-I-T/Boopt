@@ -37,7 +37,9 @@ explicacao_teste = dcc.Markdown(
 """
 )
 
-register_page(__name__, path="/assessment-vendedor/teste", title="Assessment Vendedor")
+register_page(
+    __name__, path="/app/assessment-vendedor/teste", title="Assessment Vendedor"
+)
 
 
 def layout(id: str = None):
@@ -326,7 +328,7 @@ def salvar_resposta(n, frases, search):
                             "Sua resposta foi enviada. Você pode conferir a avaliação da sua resposta ",
                             dmc.Anchor(
                                 "aqui",
-                                href="/assessment-vendedor",
+                                href="/app/assessment-vendedor",
                             ),
                             ".",
                         ]

@@ -4,7 +4,7 @@ from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from utils.modelo_usuario import checar_login
 
-register_page(__name__, path="/configuracoes/senha")
+register_page(__name__, path="/app/configuracoes/senha")
 
 
 @checar_login

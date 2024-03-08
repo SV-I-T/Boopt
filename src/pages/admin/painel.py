@@ -2,17 +2,17 @@ import dash_mantine_components as dmc
 from dash import register_page
 from utils.modelo_usuario import checar_login
 
-register_page(__name__, path="/admin", title="Painel de gestão")
+register_page(__name__, path="/app/admin", title="Painel de gestão")
 
 
 @checar_login(admin=True)
 def layout():
     modulos: tuple[str] = (
-        {"label": "Usuários", "href": "/admin/usuarios"},
-        {"label": "Empresas", "href": "/admin/empresas"},
+        {"label": "Usuários", "href": "/app/admin/usuarios"},
+        {"label": "Empresas", "href": "/app/admin/empresas"},
         {
             "label": "Assessment Vendedores",
-            "href": "/admin/assessment-vendedor",
+            "href": "/app/admin/assessment-vendedor",
         },
     )
     return [

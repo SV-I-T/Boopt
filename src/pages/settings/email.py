@@ -17,7 +17,7 @@ from dash.exceptions import PreventUpdate
 from flask_mail import Message
 from utils.email import mail, template_email
 
-register_page(__name__, path="/configuracoes/email", title="Teste de email")
+# register_page(__name__, path="/app/configuracoes/email", title="Teste de email")
 
 
 def layout():

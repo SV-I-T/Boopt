@@ -15,7 +15,7 @@ from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Usuario, checar_login
 
-register_page(__name__, "/admin/usuarios", name="Gerenciar usuários")
+register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 
 
 MAX_PAGINA = 20
@@ -38,7 +38,7 @@ def layout():
         dmc.Group(
             children=[
                 dmc.Anchor(
-                    href="/admin/usuarios/edit",
+                    href="/app/admin/usuarios/edit",
                     children=dmc.Button(
                         id="btn-novo-usr",
                         children="Novo Usuário",
@@ -47,7 +47,7 @@ def layout():
                     ),
                 ),
                 dmc.Anchor(
-                    href="/admin/usuarios/batelada",
+                    href="/app/admin/usuarios/batelada",
                     children=dmc.Button(
                         id="btn-modal-usr-massa",
                         children="Cadastro em massa",
@@ -141,7 +141,8 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
                     html.Td(usuario["cargo"]),
                     html.Td(
                         dmc.Anchor(
-                            "Editar", href=f'/admin/usuarios/edit?id={usuario["_id"]}'
+                            "Editar",
+                            href=f'/app/admin/usuarios/edit?id={usuario["_id"]}',
                         )
                     ),
                 ]

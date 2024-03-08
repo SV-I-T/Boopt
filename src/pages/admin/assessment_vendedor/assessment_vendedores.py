@@ -20,7 +20,7 @@ from utils.banco_dados import db
 from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
-    __name__, "/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
+    __name__, "/app/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
 )
 
 MAX_PAGINA = 10
@@ -57,7 +57,7 @@ def layout():
         dmc.Group(
             children=[
                 dmc.Anchor(
-                    href="/admin/assessment-vendedor/novo",
+                    href="/app/admin/assessment-vendedor/novo",
                     children=dmc.Button(
                         id="btn-nova-aplicacao",
                         children="Nova aplicação",
@@ -161,7 +161,7 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                     html.Td(
                         dmc.Anchor(
                             children="Link de acesso",
-                            href=f'/assessment-vendedor/teste?id={str(assessment["_id"])}',
+                            href=f'/app/assessment-vendedor/teste?id={str(assessment["_id"])}',
                         )
                     ),
                 ]

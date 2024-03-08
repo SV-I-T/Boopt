@@ -21,7 +21,9 @@ from utils.modelo_assessment import AssessmentVendedor
 from utils.modelo_usuario import Usuario, checar_login
 
 register_page(
-    __name__, path="/admin/assessment-vendedor/novo", title="Criar Assessment Vendedor"
+    __name__,
+    path="/app/admin/assessment-vendedor/novo",
+    title="Criar Assessment Vendedor",
 )
 
 

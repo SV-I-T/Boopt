@@ -16,7 +16,7 @@ from .funcoes.graficos import (
 
 register_page(
     __name__,
-    path="/assessment-vendedor/resultado",
+    path="/app/assessment-vendedor/resultado",
     title="Resultados - Assessment Vendedor",
 )
 
