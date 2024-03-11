@@ -6,6 +6,7 @@ from dash import (
     Output,
     State,
     callback,
+    dcc,
     get_asset_url,
     html,
     no_update,
@@ -13,13 +14,14 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask import request
 from flask_login import current_user, login_user
 from utils.modelo_usuario import Usuario
 
-register_page(__name__, path="/login", title="Entrar")
+register_page(__name__, path_template="/login/<next>", title="Entrar")
 
 
-def layout():
+def layout(next: str = None):
     if current_user.is_authenticated:
         return [
             dmc.Title(children="Você já está logado!", order=1),
@@ -31,6 +33,7 @@ def layout():
         ]
     return dmc.Group(
         [
+            dcc.Store(id="next-url", data=next),
             html.Div(
                 id="login-side-rect",
                 children=html.Img(
@@ -132,9 +135,10 @@ def layout():
     State("login-usr", "value"),
     State("login-senha", "value"),
     State("login-check-lembrar", "checked"),
+    State("next-url", "data"),
     prevent_initial_call=True,
 )
-def logar(n, login, senha, lembrar):
+def logar(n, login, senha, lembrar, next_url):
     if not n:
         raise PreventUpdate
     identificador = "email" if "@" in login else "cpf"
@@ -153,7 +157,7 @@ def logar(n, login, senha, lembrar):
         LOGIN_DATA = no_update
     else:
         login_user(usr, remember=lembrar, force=True)
-        URL = "/"
+        URL = f"{next_url}" if next_url else "/"
         NOTIFICACAO = no_update
         LOGIN_DATA = 1
 

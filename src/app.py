@@ -3,7 +3,8 @@ import locale
 from dash import Dash
 from dash_app import layout
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, redirect, request
+from flask_login import current_user
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
@@ -21,6 +22,7 @@ app = Dash(
     suppress_callback_exceptions=True,
     prevent_initial_callbacks=True,
     use_pages=True,
+    title="Boopt - Sucesso em Vendas",
     update_title="Carregando...",
     external_scripts=[
         "https://cdn.plot.ly/plotly-locale-pt-br-latest.js",
@@ -40,6 +42,20 @@ mail.init_app(server)
 
 app.layout = layout
 app.enable_dev_tools(debug=None)
+
+
+@server.before_request
+def printar_referer():
+    if "/app/" not in request.url:
+        return
+    if request.referrer and "/app/" not in request.referrer:
+        return
+    if current_user and current_user.is_authenticated:
+        return
+    if not request.path.startswith("/login/"):
+        return redirect(f"/login/{request.path}")
+    else:
+        return
 
 
 if __name__ == "__main__":
