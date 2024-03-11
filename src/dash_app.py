@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from components.header import layout_header
+from components.navbar import layout_navbar
 from dash import (
     ClientsideFunction,
     Input,
@@ -39,7 +39,7 @@ TEMA_PADRAO = {
     },
     "primaryColor": "SVAzul",
     "colorScheme": "light",
-    "defaultRadius": "xl",
+    "defaultRadius": "lg",
     "defaultGradient": {"from": "SVAzul", "to": "BooptLaranja"},
 }
 
@@ -61,7 +61,7 @@ def layout():
                 dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh=True),
-                layout_header(),
+                layout_navbar(),
                 html.Div(
                     id="page-container",
                     children=page_container,
