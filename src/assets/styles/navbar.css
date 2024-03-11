@@ -1,0 +1,45 @@
+#navbar {
+    position: fixed;
+    background-color: var(--azul-sv);
+    background-image:
+        url("../imgs/boopt/icone_laranja.svg"),
+        linear-gradient(0deg, var(--laranja-boopt) 0%, rgba(217, 217, 217, 0) 75%);
+    background-repeat: no-repeat, no-repeat;
+    background-position:
+        bottom -500px center,
+        top;
+    background-size: auto 900px, 100%;
+    padding-top: 124px;
+    padding-left: 75px;
+    width: 627px;
+}
+
+#navbar *:not(.mantine-Menu-dropdown *) {
+    color: #fff;
+}
+
+#navbar::after {
+    content: "";
+    top: 0px;
+    left: calc(626px - 50px);
+    bottom: 0px;
+    width: 52px;
+    background-color: var(--cinza-bg);
+    position: absolute;
+    border-radius: 50px 0px 0px 50px;
+    box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2);
+}
+
+#page-container {
+    padding-top: 124px;
+    margin-left: 627px;
+    padding-left: 10px;
+}
+
+#navbar a img {
+    bottom: 50px;
+    position: absolute;
+    translate: -50%;
+    left: calc(50% - 50px);
+    height: 100px;
+}

@@ -3,6 +3,7 @@
     --laranja-boopt: #FF7730;
     --preto-sv: #171C24;
     --input-bg: #fff;
+    --cinza-bg: #f3f3f3;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
@@ -15,7 +16,7 @@ html {
 
 body {
     min-height: calc(100vh - 40px) !important;
-    background-color: #f3f3f3 !important;
+    background-color: var(--cinza-bg) !important;
     background-image: url("../imgs/boopt/icone_branco.svg");
     background-repeat: no-repeat;
     background-position: bottom -150px right -150px;
@@ -34,10 +35,6 @@ body {
     margin: 0;
 }
 
-#page-container {
-    margin-top: 40px !important;
-    padding-top: 1rem !important;
-}
 
 @media only screen and (max-width: 767px) {
     .mantine-Container-root {
