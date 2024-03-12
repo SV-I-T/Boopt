@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boopt</title>
+
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/iconify.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/input.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/botoes.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/promo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}" />
+
+    <script>
+        function showPassword() {
+            var input = document.getElementById("password");
+            var eye = document.getElementById("password-eye");
+            if (input.type === "password") {
+                input.type = "text";
+                eye.className = "fluent--eye-24-filled";
+            } else {
+                input.type = "password";
+                eye.className = "fluent--eye-off-24-filled";
+            }
+        }
+    </script>
+</head>
+
+<body class="index-body">
+    <div class="content">
+
+        <div class="promo-sidebar">
+        </div>
+        <div class="login-container">
+            <div class="login-form">
+                <h1>LOGIN</h1>
+                <form action="/login" method="POST">
+                    <div class="user-input">
+                        <label for="user-input">CPF ou E-mail</label>
+                        <input type="text" class="input" id="user-input" name="user">
+                    </div>
+
+                    <div class="password-input">
+                        <label for="password">Senha</label>
+                        <div class="password-field">
+                            <input type="password" id="password" class="input" name="password">
+                            <span id="password-eye" class="fluent--eye-off-24-filled" onclick="showPassword()"></span>
+                        </div>
+                    </div>
+
+                    <div class="login-options">
+                        <div class="remember-container">
+                            <input class="input" type="checkbox" name="remember" id="remember">
+                            <label for="remember">Lembrar de mim</label>
+                        </div>
+                        <div class="forgot-password">
+                            <a href="#">Esqueceu sua senha?</a>
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-gradiente" type="submit" id="login-btn">Enviar</button>
+                </form>
+
+            </div>
+        </div>
+
+
+    </div>
+</body>
+
+</html>
