@@ -1,3 +1,52 @@
 button {
     border-radius: 30px !important;
 }
+
+.btn {
+    border-radius: 30px;
+    text-align: center;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    line-height: 34px;
+    font-weight: 400;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.btn-gradiente {
+    background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
+    color: #fff;
+    border: none;
+}
+
+.btn-azul {
+    background-color: var(--azul-sv);
+    color: #fff;
+    border: none;
+}
+
+.btn-laranja {
+    background-color: var(--laranja-boopt);
+    color: #fff;
+    border: none;
+}
+
+.btn-cinza {
+    background-color: #999999;
+    color: #fff;
+    border: none;
+}
+
+.btn-preto {
+    background-color: var(--preto-sv);
+    color: #fff;
+    border: none;
+}
+
+.btn-borda-gradiente {
+    background:
+        linear-gradient(white, white) padding-box,
+        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
+    border-radius: 50em;
+    border: 2px solid transparent;
+}

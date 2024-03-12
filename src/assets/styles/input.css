@@ -1,0 +1,37 @@
+input.input {
+    border-radius: 30px !important;
+
+    line-height: 34px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: #fff;
+    border: 1px solid rgb(206, 212, 218);
+    transition: border-color 100ms ease 0s, background-color 100ms ease 0s;
+}
+
+input[type="text"].input,
+input[type="password"].input {
+    min-height: 36px;
+}
+
+input[type="checkbox"].input {
+    width: 20px;
+    height: 20px;
+    clip-path: circle(50% at 50% 50%);
+    appearance: none;
+    border-radius: 16px;
+    padding: 0px;
+}
+
+input[type="checkbox"].input:checked {
+    appearance: auto;
+    background-color: var(--azul-sv);
+    border-color: var(--azul-sv);
+    color: white;
+}
+
+
+input.input:focus {
+    border-color: var(--azul-sv);
+    outline: none;
+}

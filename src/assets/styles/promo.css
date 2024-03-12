@@ -1,0 +1,34 @@
+.promo-sidebar {
+    width: 40%;
+    background:
+        url("../imgs/boopt/horizontal_branco.svg"),
+        url("../imgs/boopt/promo_frase.svg"),
+        linear-gradient(200deg, var(--azul-sv) 50%, var(--laranja-boopt));
+    background-repeat:
+        no-repeat,
+        no-repeat,
+        no-repeat;
+    background-position:
+        bottom 80px center,
+        center center,
+        center;
+    background-size:
+        auto 90px,
+        500px auto,
+        auto;
+    border-radius: 0 80px 80px 0;
+    box-shadow: 10px 0px 17px 0px rgba(0, 0, 0, 0.2);
+    /* height: calc(100vh - 80px); */
+    bottom: 0;
+    top: 0;
+    position: relative;
+}
+
+.promo-sidebar img {
+    position: absolute;
+    bottom: 0;
+    height: 90px;
+    left: 50%;
+    transform: translateX(-60%);
+    margin-bottom: 1rem;
+}

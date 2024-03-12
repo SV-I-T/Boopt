@@ -4,6 +4,7 @@
     --preto-sv: #171C24;
     --input-bg: #fff;
     --cinza-bg: #f3f3f3;
+    -webkit-font-smoothing: antialiased;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
@@ -17,6 +18,11 @@ html {
 body {
     min-height: calc(100vh - 40px) !important;
     background-color: var(--cinza-bg) !important;
+
+}
+
+body.index-body {
+    margin: 0px;
     background-image: url("../imgs/boopt/icone_branco.svg");
     background-repeat: no-repeat;
     background-position: bottom -150px right -150px;

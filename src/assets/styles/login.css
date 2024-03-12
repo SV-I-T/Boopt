@@ -1,17 +1,78 @@
-#login-side-rect {
-    width: 500px;
-    background-image: linear-gradient(200deg, var(--azul-sv) 50%, var(--laranja-boopt));
-    border-radius: 0 80px 80px 0;
-    box-shadow: 10px 0px 17px 0px rgba(0, 0, 0, 0.2);
-    height: calc(100vh - 80px);
+.content {
+    display: flex;
+    flex-direction: row;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    flex: 1;
+    width: 100%;
+    text-align: center;
+}
+
+.login-container {
+    flex-grow: 1;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    width: 400px;
+}
+
+.user-input,
+.password-input {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+
+}
+
+.user-input input,
+.password-input input {
+    font-size: 20px;
+    font-weight: 500;
+    width: 100%;
+}
+
+.user-input label,
+.password-input label {
+    font-size: 26px;
+    font-weight: 300;
+}
+
+.login-options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+}
+
+.password-field {
+    width: 100%;
+}
+
+#password-eye {
+    float: right;
+    right: -10px;
+    top: -30px;
     position: relative;
 }
 
-#login-side-rect img {
-    position: absolute;
-    bottom: 0;
-    height: 90px;
-    left: 50%;
-    transform: translateX(-60%);
-    margin-bottom: 1rem;
+.remember-container {
+    display: flex;
+    align-items: center;
+}
+
+.forgot-password a {
+    text-decoration: none;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
 }
