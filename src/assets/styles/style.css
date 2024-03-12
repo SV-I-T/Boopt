@@ -4,7 +4,10 @@
     --preto-sv: #171C24;
     --input-bg: #fff;
     --cinza-bg: #f3f3f3;
-    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    -webkit-font-smoothing: antialiased !important;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {

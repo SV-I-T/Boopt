@@ -23,13 +23,19 @@
     width: 400px;
 }
 
+.login-form h1 {
+    font-size: 40px;
+    font-weight: 500;
+    text-align: start;
+}
+
 .user-input,
 .password-input {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-
+    margin-top: 1rem;
 }
 
 .user-input input,
@@ -75,4 +81,48 @@
 
 .forgot-password a:hover {
     text-decoration: underline;
+}
+
+.primeiro-acesso {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: start;
+}
+
+.primeiro-acesso p:first-child {
+    color: var(--azul-sv);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    margin-top: 1rem;
+}
+
+.primeiro-acesso p:last-child {
+    color: #5c5c5c;
+    font-size: 15px;
+    font-weight: 300;
+    margin: 0;
+}
+
+div#login-feedback {
+    background-color: #FFE9DE;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: start;
+    font-size: 15px;
+    font-weight: 300;
+    margin-top: 1rem;
+    border: 1px solid var(--laranja-boopt);
+}
+
+div#login-feedback p {
+    margin: 0;
+}
+
+div#login-feedback h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--laranja-boopt);
+    margin: 0;
 }
