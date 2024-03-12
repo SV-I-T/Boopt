@@ -18,26 +18,55 @@ def layout():
     usr_atual: Usuario = current_user
 
     aplicacao = AssessmentVendedor.buscar_ultimo(usr_atual.id_)
+    resposta = aplicacao.get("resposta", None)
 
-    if aplicacao is not None:
-        if "resposta" in aplicacao:
-            BOTAO_TESTE = dmc.Button("Sem teste disponível", disabled=True)
-            BOTAO_RESULTADO = dmc.Anchor(
-                children=dmc.Button("Ver resultado"),
-                href=f"/app/assessment-vendedor/resultado/?id={aplicacao['resposta']}",
-            )
-        else:
-            BOTAO_TESTE = dmc.Anchor(
-                href=f"/app/assessment-vendedor/teste/?id={aplicacao['_id']}",
-                children=dmc.Button("Começar o teste"),
-            )
-            BOTAO_RESULTADO = dmc.Button("Ver resultado", disabled=True)
-    else:
-        BOTAO_TESTE = dmc.Button("Sem teste disponível", disabled=True)
-        BOTAO_RESULTADO = dmc.Button("Ver resultado", disabled=True)
-
-    return [
-        dmc.Title("Bem-vindo ao Assessment de Vendedor", order=1, weight=700),
-        BOTAO_TESTE,
-        BOTAO_RESULTADO,
-    ]
+    return dmc.Stack(
+        align="center",
+        justify="center",
+        px="1rem",
+        children=[
+            dmc.Text(
+                "Bem-vindo ao Assessment de Vendedor",
+                size=64,
+                weight=600,
+                align="center",
+                mb="1rem",
+            ),
+            dmc.Text(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ligula arcu, auctor vel tellus vitae, aliquam dignissim quam.",
+                size=40,
+                weight=500,
+                align="center",
+                mb="4rem",
+            ),
+            dmc.Anchor(
+                dmc.Button(
+                    children=dmc.Text(
+                        "Começar o teste"
+                        if aplicacao and not resposta
+                        else "Sem teste disponível",
+                        size=20,
+                        weight=400,
+                    ),
+                    disabled=not (aplicacao and not resposta),
+                    w=300,
+                    h=50,
+                    color="BooptLaranja",
+                ),
+                href=f"/app/assessment-vendedor/teste/?id={aplicacao['_id']}"
+                if aplicacao and not resposta
+                else None,
+            ),
+            dmc.Anchor(
+                dmc.Button(
+                    children=dmc.Text("Ver resultado", size=20, weight=400),
+                    disabled=not resposta,
+                    w=300,
+                    h=50,
+                ),
+                href=f"/app/assessment-vendedor/resultado/?id={resposta}"
+                if resposta
+                else None,
+            ),
+        ],
+    )
