@@ -6,27 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boopt</title>
 
+    <!-- FAVICON -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- FOLHAS DE ESTILO -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/iconify.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/input.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/botoes.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/promo.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}" />
-
-    <script>
+    <!-- FONTE MONTESERRAT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <!-- MOSTRAR/ESCONDER SENHA -->
+    <script defer>
         function showPassword() {
-            var input = document.getElementById("password");
-            var eye = document.getElementById("password-eye");
-            if (input.type === "password") {
-                input.type = "text";
-                eye.className = "fluent--eye-24-filled";
-            } else {
-                input.type = "password";
-                eye.className = "fluent--eye-off-24-filled";
-            }
-        }
+            let input = document.getElementById("password");
+            let eye = document.getElementById("password-eye");
+            input.type = input.type === "password" ? "text" : "password";
+            eye.className = input.type === "password" ? "fluent--eye-24-filled" : "fluent--eye-off-24-filled";
+        };
     </script>
+    <!-- HTMX -->
+    <script src="{{ url_for('static', filename='scripts/htmx.min.js') }}"></script>
+
 </head>
 
 <body class="index-body">
@@ -37,17 +42,18 @@
         <div class="login-container">
             <div class="login-form">
                 <h1>LOGIN</h1>
-                <form action="/login" method="POST">
+                <form onsubmit="javascript:void(0);" hx-post="/login" hx-target="#login-feedback-container"
+                    hx-swap="innerHTML">
                     <div class="user-input">
-                        <label for="user-input">CPF ou E-mail</label>
+                        <label for="user-input">CPF OU E-MAIL</label>
                         <input type="text" class="input" id="user-input" name="user">
                     </div>
 
                     <div class="password-input">
-                        <label for="password">Senha</label>
+                        <label for="password">SENHA</label>
                         <div class="password-field">
                             <input type="password" id="password" class="input" name="password">
-                            <span id="password-eye" class="fluent--eye-off-24-filled" onclick="showPassword()"></span>
+                            <span id="password-eye" class="fluent--eye-24-filled" onclick="showPassword()"></span>
                         </div>
                     </div>
 
@@ -64,6 +70,15 @@
 
                     <button class="btn btn-gradiente" type="submit" id="login-btn">Enviar</button>
                 </form>
+
+                <div id="login-feedback-container">
+
+                </div>
+                <div class="primeiro-acesso">
+                    <p>Primeiro acesso?</p>
+                    <p>Por padrão, sua senha é a sua data de nascimento no formato DDMMAAAA (exemplo: 22032024). Não se
+                        esqueça de trocar uma mais segura depois.</p>
+                </div>
 
             </div>
         </div>
