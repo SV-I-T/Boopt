@@ -18,7 +18,7 @@ from flask import request
 from flask_login import current_user, login_user
 from utils.modelo_usuario import Usuario
 
-register_page(__name__, path_template="/login/<next>", title="Entrar")
+# register_page(__name__, path_template="/login/<next>", title="Entrar")
 
 
 def layout(next: str = None):

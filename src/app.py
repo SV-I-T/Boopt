@@ -3,18 +3,57 @@ import locale
 from dash import Dash
 from dash_app import layout
 from dotenv import load_dotenv
-from flask import Flask, redirect, request
+from flask import Flask, redirect, render_template, request
 from flask_login import current_user
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
-from utils.modelo_usuario import login_manager
+from utils.modelo_usuario import Usuario, login_manager
 
 locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
 
-server = Flask(__name__)
+server = Flask(__name__, static_folder="assets")
 server.config.from_prefixed_env()
+
+
+@server.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
+
+
+@server.route("/login", methods=["GET"])
+def login_get():
+    if current_user and current_user.is_authenticated:
+        return redirect("/app/dashboard")
+    return render_template("login.html")
+
+
+@server.route("/login", methods=["POST"])
+def login_post():
+    usr = request.form["user"]
+    senha = request.form["password"]
+    lembrar = {"off": False, "on": True}.get(request.form.get("remember", "off"))
+
+    identificador = "email" if "@" in usr else "cpf"
+    try:
+        usr = Usuario.buscar(identificador=identificador, valor=usr)
+        usr.validar_senha(senha)
+    except AssertionError as e:
+        mensagem = str(e)
+        return mensagem
+    else:
+        usr.logar(lembrar)
+        next = request.args.get("next", None)
+        return redirect("/app/dashboard" if next is None else next)
+
+
+@server.route("/logout", methods=["POST", "GET"])
+def logout_post():
+    if current_user and current_user.is_authenticated:
+        current_user.sair()
+    return redirect("/")
+
 
 app = Dash(
     __name__,
@@ -45,15 +84,15 @@ app.enable_dev_tools(debug=None)
 
 
 @server.before_request
-def printar_referer():
+def checar_auth():
     if "/app/" not in request.url:
         return
     if request.referrer and "/app/" not in request.referrer:
         return
     if current_user and current_user.is_authenticated:
         return
-    if not request.path.startswith("/login/"):
-        return redirect(f"/login/{request.path}")
+    if not request.query_string:
+        return redirect(f"/login?next={request.path}")
     else:
         return
 

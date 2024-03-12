@@ -4,7 +4,7 @@ from typing import Any, Literal, Optional, Union
 import dash_mantine_components as dmc
 import openpyxl
 from bson import ObjectId
-from flask_login import LoginManager, UserMixin, current_user, logout_user
+from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
@@ -123,6 +123,9 @@ class Usuario(BaseModel, UserMixin):
     @property
     def id(self) -> str:
         return str(self.id_)
+
+    def logar(self, lembrar: bool = False) -> None:
+        login_user(self, remember=lembrar, force=True)
 
     @classmethod
     def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):

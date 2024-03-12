@@ -94,7 +94,11 @@ def listar_paginas(_):
                                         if usr.admin
                                         else None,
                                         dmc.MenuItem(
-                                            "Sair", id="logout-btn", color="red"
+                                            "Sair",
+                                            color="red",
+                                            id="logout-btn",
+                                            refresh=True,
+                                            href="/logout",
                                         ),
                                     ]
                                 ),
@@ -113,17 +117,3 @@ def listar_paginas(_):
                 dmc.Button("Entrar", href="/login/app/dashboard", refresh=True),
             ]
         )
-
-
-@callback(
-    Output("logout-timer", "children", allow_duplicate=True),
-    Output("login-data", "data", allow_duplicate=True),
-    Input("logout-btn", "n_clicks"),
-    State("login-data", "data"),
-    prevent_initial_call=True,
-)
-def sair(n, login_data):
-    if not n:
-        raise PreventUpdate
-    current_user.sair()
-    return html.Meta(httpEquiv="refresh", content="0.1"), login_data + 1
