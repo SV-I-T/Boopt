@@ -60,7 +60,7 @@ def layout():
                 dcc.Store(id="refresh"),
                 dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
-                dcc.Location(id="url", refresh=True),
+                dcc.Location(id="url", refresh="callback-nav"),
                 layout_navbar(),
                 html.Div(
                     id="page-container",
