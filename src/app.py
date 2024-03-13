@@ -3,7 +3,7 @@ import locale
 from dash import Dash
 from dash_app import layout
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request
+from flask import Flask, Response, redirect, render_template, request, url_for
 from flask_login import current_user
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
@@ -26,26 +26,32 @@ def index():
 def login_get():
     if current_user and current_user.is_authenticated:
         return redirect("/app/dashboard")
-    return render_template("login.html")
+    return render_template(
+        "login.html",
+        post_url=request.full_path,
+    )
 
 
 @server.route("/login", methods=["POST"])
 def login_post():
     usr = request.form["user"]
     senha = request.form["password"]
-    lembrar = {"off": False, "on": True}.get(request.form.get("remember", "off"))
+    lembrar = bool(request.form.get("remember"))
 
-    identificador = "email" if "@" in usr else "cpf"
     try:
+        identificador = "email" if "@" in usr else "cpf"
         usr = Usuario.buscar(identificador=identificador, valor=usr)
         usr.validar_senha(senha)
     except AssertionError as e:
-        mensagem = str(e)
-        return mensagem
+        return render_template("erro_login.html", mensagem=str(e))
     else:
         usr.logar(lembrar)
         next = request.args.get("next", None)
-        return redirect("/app/dashboard" if next is None else next)
+        next_url = "/app/dashboard" if next is None else next
+        response = Response(
+            "", status=302, headers={"HX-Redirect": next_url, "HX-Refresh": True}
+        )
+        return response
 
 
 @server.route("/logout", methods=["POST", "GET"])
@@ -53,6 +59,17 @@ def logout_post():
     if current_user and current_user.is_authenticated:
         current_user.sair()
     return redirect("/")
+
+
+@server.before_request
+def checar_acesso():
+    if not request.path.startswith("/app/") or (
+        request.referrer and not request.referrer.startswith("/app/")
+    ):
+        return
+    if current_user and current_user.is_authenticated:
+        return
+    return redirect(url_for("login_get", next=request.path))
 
 
 app = Dash(
@@ -81,21 +98,6 @@ mail.init_app(server)
 
 app.layout = layout
 app.enable_dev_tools(debug=None)
-
-
-@server.before_request
-def checar_auth():
-    if "/app/" not in request.url:
-        return
-    if request.referrer and "/app/" not in request.referrer:
-        return
-    if current_user and current_user.is_authenticated:
-        return
-    if not request.query_string:
-        return redirect(f"/login?next={request.path}")
-    else:
-        return
-
 
 if __name__ == "__main__":
     server.run(load_dotenv=True, port=8080, host="127.0.0.1")

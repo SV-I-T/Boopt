@@ -26,7 +26,7 @@
             let input = document.getElementById("password");
             let eye = document.getElementById("password-eye");
             input.type = input.type === "password" ? "text" : "password";
-            eye.className = input.type === "password" ? "fluent--eye-24-filled" : "fluent--eye-off-24-filled";
+            eye.className = input.type === "password" ? "fluent--eye-24-filled input-icon" : "fluent--eye-off-24-filled input-icon";
         };
     </script>
     <!-- HTMX -->
@@ -42,18 +42,22 @@
         <div class="login-container">
             <div class="login-form">
                 <h1>LOGIN</h1>
-                <form onsubmit="javascript:void(0);" hx-post="/login" hx-target="#login-feedback-container"
+                <form onsubmit="javascript:void(0);" hx-post="{{ post_url }}" hx-target="#login-feedback-container"
                     hx-swap="innerHTML">
                     <div class="user-input">
                         <label for="user-input">CPF OU E-MAIL</label>
-                        <input type="text" class="input" id="user-input" name="user">
+                        <div class="user-field">
+                            <input type="text" class="input" id="user-input" name="user">
+                            <i class="input-icon fluent--person-24-filled"></i>
+                        </div>
                     </div>
 
                     <div class="password-input">
                         <label for="password">SENHA</label>
                         <div class="password-field">
                             <input type="password" id="password" class="input" name="password">
-                            <span id="password-eye" class="fluent--eye-24-filled" onclick="showPassword()"></span>
+                            <i id="password-eye" class="fluent--eye-24-filled input-icon" onclick="showPassword()"></i>
+                            <i class="input-icon fluent--lock-closed-24-filled"></i>
                         </div>
                     </div>
 
