@@ -45,7 +45,7 @@ def layout_navbar():
     Output("menu-usr", "children"),
     Input("login-data", "data"),
 )
-def listar_paginas(_):
+def menu_usuario(_):
     usr: Usuario = current_user
 
     if usr.is_authenticated:
@@ -66,8 +66,7 @@ def listar_paginas(_):
                             ),
                             weight=600,
                             size=25,
-                            refresh=True,
-                            href="/app/dashboard",
+                            href="/app/assessment-vendedor",
                             underline=False,
                             variant="text",
                         ),
@@ -114,6 +113,8 @@ def listar_paginas(_):
         return dmc.Group(
             [
                 dmc.Text("Você não está logado!"),
-                dmc.Button("Entrar", href="/login/app/dashboard", refresh=True),
+                dmc.Anchor(
+                    dmc.Button("Entrar"), href="/login/app/dashboard", refresh=True
+                ),
             ]
         )

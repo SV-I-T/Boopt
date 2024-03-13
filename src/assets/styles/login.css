@@ -44,6 +44,7 @@
     font-weight: 500;
     width: 100%;
     padding-left: 36px;
+    box-sizing: border-box;
 }
 
 
@@ -68,7 +69,7 @@
 }
 
 #password-eye {
-    right: -18px;
+    right: 20px;
 }
 
 .fluent--lock-closed-24-filled,
@@ -83,6 +84,7 @@
 
 .forgot-password a {
     text-decoration: none;
+    right: -18px;
 }
 
 .forgot-password a:hover {

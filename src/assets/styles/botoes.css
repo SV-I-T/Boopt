@@ -11,6 +11,16 @@ button {
     font-weight: 400;
     font-size: 20px;
     cursor: pointer;
+    background-size: 100%;
+    transition: background-size 300ms ease 0s;
+}
+
+.btn:hover {
+    background-size: 200%;
+}
+
+.btn:active {
+    transform: translateY(1px);
 }
 
 .btn-gradiente {
