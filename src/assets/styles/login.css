@@ -43,7 +43,9 @@
     font-size: 20px;
     font-weight: 500;
     width: 100%;
+    padding-left: 36px;
 }
+
 
 .user-input label,
 .password-input label {
@@ -55,19 +57,23 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-top: -1rem;
+    margin-top: 0.5rem;
     margin-bottom: 2rem;
 }
 
-.password-field {
+.password-field,
+.user-field {
     width: 100%;
+    position: relative;
 }
 
 #password-eye {
-    float: right;
-    right: -10px;
-    top: -30px;
-    position: relative;
+    right: -18px;
+}
+
+.fluent--lock-closed-24-filled,
+.fluent--person-24-filled {
+    left: 0
 }
 
 .remember-container {

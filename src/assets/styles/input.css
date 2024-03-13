@@ -24,10 +24,10 @@ input[type="checkbox"].input {
 }
 
 input[type="checkbox"].input:checked {
-    appearance: auto;
     background-color: var(--azul-sv);
     border-color: var(--azul-sv);
     color: white;
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23FFF' d='M9.765 3.205a.75.75 0 0 1 .03 1.06l-4.25 4.5a.75.75 0 0 1-1.075.015L2.22 6.53a.75.75 0 0 1 1.06-1.06l1.705 1.704l3.72-3.939a.75.75 0 0 1 1.06-.03'/%3E%3C/svg%3E");
 }
 
 
