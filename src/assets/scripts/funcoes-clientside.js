@@ -28,13 +28,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 return '/admin/empresas/edit'
             }
         },
-        iniciar_teste: function (n) {
-            if (!n) {
-                throw window.dash_clientside.PreventUpdate;
-            } else {
-                return [true, 0];
-            }
-        },
         alterar_frase: function (n_next, n_back, ordem_atual) {
             const triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
             switch (triggered[0]) {
@@ -67,7 +60,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return [
                 frase_atual["frase"], frase_atual["valor"],
                 disable_next, disable_back,
-                progresso, textoProgresso
+                progresso
             ];
         },
         nota_clicada: function (nota, ordem_atual, ordem, frases) {

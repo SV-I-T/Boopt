@@ -1,0 +1,15 @@
+.mantine-Progress-root#progress-bar {
+    height: 28px;
+    background-color: #d9d9d9;
+    border-radius: 32px;
+}
+
+.mantine-Progress-root#progress-bar .mantine-Progress-bar {
+    /* background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt)); */
+    height: 34px !important;
+    box-shadow: 7px 0px 12px -1px #99999966;
+}
+
+.mantine-Group-root[role="radiogroup"] {
+    padding-top: 0px;
+}
