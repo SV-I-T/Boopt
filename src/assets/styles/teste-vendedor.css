@@ -10,6 +10,70 @@
     box-shadow: 7px 0px 12px -1px #99999966;
 }
 
-.mantine-Group-root[role="radiogroup"] {
-    padding-top: 0px;
+#btn-notas-frase {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+#btn-notas-frase label input {
+    appearance: none;
+    background-color: #fff;
+    border-radius: 40px !important;
+    border-width: 2px;
+    border-style: solid;
+    transition: background-color 100ms ease-in 0s;
+}
+
+#btn-notas-frase label input::after {
+    content: "";
+    display: block;
+    background-color: #fff;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    border-radius: 40px !important;
+    position: relative;
+    transform: translateY(-50%) translateX(-50%);
+    left: 50%;
+    top: 50%;
+    transition: width 100ms ease-in 0s, height 100ms ease-in 0s;
+}
+
+#btn-notas-frase label input:checked::after {
+    width: calc(100% - 25px);
+    height: calc(100% - 25px);
+}
+
+#btn-notas-frase label:nth-child(1) input,
+#btn-notas-frase label:nth-child(5) input {
+    width: 70px;
+    height: 70px;
+}
+
+#btn-notas-frase label:nth-child(2) input,
+#btn-notas-frase label:nth-child(4) input {
+    width: 50px;
+    height: 50px;
+}
+
+#btn-notas-frase label:nth-child(3) input {
+    width: 40px;
+    height: 40px;
+}
+
+#btn-notas-frase label:nth-child(1) input,
+#btn-notas-frase label:nth-child(2) input {
+    border-color: var(--laranja-boopt);
+    background-color: var(--laranja-boopt);
+}
+
+#btn-notas-frase label:nth-child(4) input,
+#btn-notas-frase label:nth-child(5) input {
+    border-color: var(--azul-sv);
+    background-color: var(--azul-sv);
+}
+
+#btn-notas-frase label:nth-child(3) input {
+    border-color: #5c5c5c;
+    background-color: #5c5c5c;
 }

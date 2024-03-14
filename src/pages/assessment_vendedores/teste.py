@@ -91,9 +91,10 @@ def layout(id: str = None, secao: str = "instrucoes"):
         frase_atual = frases[str(ordem[0])]
 
         return [
-            dcc.Store(id="store-frases", data=frases, storage_type="session"),
-            dcc.Store(id="store-ordem-frases", data=ordem, storage_type="session"),
-            dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="session"),
+            dcc.Store(id="store-frases", data=frases, storage_type="local"),
+            dcc.Store(id="store-status-done", data=False, storage_type="local"),
+            dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
+            dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
             dmc.Progress(id="progress-bar"),
             dmc.Container(
                 h=400,
@@ -109,27 +110,19 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 ),
             ),
             dmc.Group(
-                align="justify",
+                align="center",
                 position="center",
                 children=[
                     dmc.Text(
                         "Não me identifico", color="BooptLaranja", size=22, weight=700
                     ),
-                    dmc.RadioGroup(
-                        [
-                            dmc.Radio(
-                                value=str(n),
-                                color="gray"
-                                if n == 3
-                                else "BooptLaranja"
-                                if n < 3
-                                else "SVAzul",
-                                size="md" if n == 3 else "lg" if n in (2, 4) else "xl",
-                            )
-                            for n in range(1, 6)
-                        ],
-                        value=frase_atual["valor"],
+                    dcc.RadioItems(
                         id="btn-notas-frase",
+                        options=[
+                            {"value": i, "label": ""} for i in ["1", "2", "3", "4", "5"]
+                        ],
+                        inline=True,
+                        value=None,
                     ),
                     dmc.Text(
                         "Me identifico muito", color="SVAzul", size=22, weight=700
@@ -137,13 +130,12 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 ],
             ),
             dmc.Group(
-                mt="5rem",
+                my="5rem",
                 position="center",
                 children=[
                     dmc.Button(
                         "Anterior",
                         leftIcon=DashIconify(icon="bxs:left-arrow"),
-                        n_clicks=0,
                         id="btn-back",
                         disabled=True,
                         color="dark",
@@ -151,36 +143,41 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     dmc.Button(
                         "Próximo",
                         rightIcon=DashIconify(icon="bxs:right-arrow"),
-                        n_clicks=0,
                         color="dark",
                         id="btn-next",
                     ),
-                    # dmc.Col(
-                    #     dmc.Button("Auto-preencher", id="btn-last", variant="subtle"),
-                    #     span="content",
-                    #     p=0,
-                    # ),
+                    dmc.Button("Auto-preencher", id="btn-last"),
                 ],
             ),
             html.Div(id="container-envio"),
         ]
+    elif secao == "enviado":
+        return [
+            dmc.Title("Obrigado!"),
+            dmc.Text(
+                [
+                    "Você pode conferir seu resultado agora mesmo clicando ",
+                    dmc.Anchor("aqui", href="/app/assessment-vendedor", underline=True),
+                ]
+            ),
+        ]
 
 
-# # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
-# @callback(
-#     Output("store-ordem-frase-atual", "data", allow_duplicate=True),
-#     Output("store-frases", "data", allow_duplicate=True),
-#     Input("btn-last", "n_clicks"),
-#     State("store-frases", "data"),
-#     prevent_initial_call=True,
-# )
-# def preencher_auto(n, frases):
-#     if not n:
-#         raise PreventUpdate
-#     else:
-#         for k in frases:
-#             frases[k]["valor"] = choice([1, 2, 3, 4, 5])
-#         return 62, frases
+# CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
+@callback(
+    Output("store-frases", "data", allow_duplicate=True),
+    Output("store-ordem-frase-atual", "data", allow_duplicate=True),
+    Input("btn-last", "n_clicks"),
+    State("store-frases", "data"),
+    prevent_initial_call=True,
+)
+def preencher_auto(n, frases):
+    if not n:
+        raise PreventUpdate
+    else:
+        for k in frases:
+            frases[k]["valor"] = choice([1, 2, 3, 4, 5])
+        return frases, 62
 
 
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
@@ -238,58 +235,67 @@ def habilitar_envio(status_pronto):
         raise PreventUpdate
     else:
         return dmc.Alert(
-            [
-                dmc.Text("Você pode revisar suas respostas ou enviá-las agora mesmo."),
-                dmc.Button("Enviar", color="green", id="btn-enviar", mt="0.5rem"),
-            ],
-            title="Tudo pronto!",
-            color="green",
-            mt="0.5rem",
+            bg="#D9D9D9",
+            px="2rem",
+            children=dmc.Group(
+                position="apart",
+                children=[
+                    html.Div(
+                        [
+                            dmc.Text(
+                                "Tudo pronto!", size=26, weight=700, color="SVAzul"
+                            ),
+                            dmc.Text(
+                                "Você pode revisar suas respostas ou enviá-las agora mesmo.",
+                                size=26,
+                                weight=400,
+                            ),
+                        ]
+                    ),
+                    dmc.Button(
+                        id="btn-enviar",
+                        children=dmc.Text("Enviar", size=20, weight=400),
+                        variant="gradient",
+                        w=220,
+                        h=50,
+                        mx=10,
+                    ),
+                ],
+            ),
         )
 
 
-# @callback(
-#     Output("container-frase", "children", allow_duplicate=True),
-#     Output("group-btn", "children", allow_duplicate=True),
-#     Output("container-envio", "children", allow_duplicate=True),
-#     Input("btn-enviar", "n_clicks"),
-#     State("store-frases", "data"),
-#     State("url", "search"),
-#     prevent_initial_call=True,
-# )
-# def salvar_resposta(n, frases, search):
-#     if not n or callback_context.triggered_id != "btn-enviar":
-#         raise PreventUpdate
+@callback(
+    Output("url", "search", allow_duplicate=True),
+    Output("notificacoes", "children", allow_duplicate=True),
+    Input("btn-enviar", "n_clicks"),
+    State("store-frases", "data"),
+    State("url", "search"),
+    prevent_initial_call=True,
+)
+def salvar_resposta(n, frases, search):
+    if not n or callback_context.triggered_id != "btn-enviar":
+        raise PreventUpdate
 
-#     else:
-#         usr_atual: Usuario = current_user
-#         params = parse_qs(search[1:])
-#         id_aplicacao = params["id"][0]
-#         dados_resposta = {
-#             "notas": [
-#                 {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
-#             ],
-#             "id_aplicacao": ObjectId(id_aplicacao),
-#             "id_usuario": usr_atual.id_,
-#         }
-#         resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
-#         if resposta.inserted_id is not None:
-#             return (
-#                 [
-#                     dmc.Title("Obrigado!"),
-#                     dmc.Text(
-#                         [
-#                             "Sua resposta foi enviada. Você pode conferir a avaliação da sua resposta ",
-#                             dmc.Anchor(
-#                                 "aqui",
-#                                 href="/app/assessment-vendedor",
-#                             ),
-#                             ".",
-#                         ]
-#                     ),
-#                 ],
-#                 None,
-#                 None,
-#             )
-#         else:
-#             raise PreventUpdate
+    else:
+        usr_atual: Usuario = current_user
+        params = parse_qs(search[1:])
+        id_aplicacao = params["id"][0]
+        dados_resposta = {
+            "notas": [
+                {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
+            ],
+            "id_aplicacao": ObjectId(id_aplicacao),
+            "id_usuario": usr_atual.id_,
+        }
+        resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
+        if resposta.inserted_id:
+            return f"?id={id_aplicacao}&secao=enviado", no_update
+        else:
+            return no_update, dmc.Notification(
+                id="erro-envio-teste",
+                color="red",
+                title="Atenção",
+                message="Erro ao salvar resposta. Tente novamente",
+                action="show",
+            )
