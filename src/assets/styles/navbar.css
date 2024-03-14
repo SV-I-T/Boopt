@@ -31,10 +31,11 @@
 }
 
 #page-container {
-    padding-top: 124px;
     margin-left: 627px;
+    padding-top: 124px;
     padding-left: 10px;
-    padding-right: 4rem
+    padding-right: 4rem;
+    padding-bottom: 4rem;
 }
 
 #navbar a img {

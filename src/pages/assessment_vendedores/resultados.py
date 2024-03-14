@@ -146,7 +146,7 @@ def layout(id: str = None):
     )
 
 
-# @cache.memoize(timeout=6000)
+@cache.memoize(timeout=6000)
 def dfs_resultado(id_resposta: str):
     resposta = AssessmentVendedor.resultado(ObjectId(id_resposta))
 
