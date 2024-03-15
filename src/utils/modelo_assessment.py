@@ -70,58 +70,40 @@ class AssessmentVendedor(BaseModel):
             return None
 
     @classmethod
-    def buscar_ultimo(cls, id_usr: ObjectId) -> dict | None:
+    def testes_disponiveis(cls, id_usr: ObjectId) -> dict | None:
         r = db("AssessmentVendedores", "Aplicações").aggregate(
             [
-                {"$unwind": "$participantes"},
                 {"$match": {"participantes": id_usr}},
-                # Buscar somente a última aplicação para o usuário
+                # # Buscar somente a última aplicação para o usuário
                 {"$sort": {"_id": -1}},
                 {"$limit": 1},
                 {
                     "$lookup": {
                         "from": "Respostas",
-                        "let": {
-                            "id_aplicacao": "$_id",
-                            "participantes": "$participantes",
-                        },
+                        "let": {"id_aplicacao": "$_id"},
                         "pipeline": [
                             {
                                 "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            {"$eq": ["$id_usuario", "$$participantes"]},
-                                            {
-                                                "$eq": [
-                                                    "$id_aplicacao",
-                                                    "$$id_aplicacao",
-                                                ]
-                                            },
-                                        ]
-                                    }
+                                    "$expr": {"$eq": ["$id_usuario", id_usr]},
                                 }
                             },
-                            # Buscar somenta a última resposta
-                            {"$sort": {"_id": -1}},
-                            {"$limit": 1},
                             {
                                 "$project": {
-                                    "id_aplicacao": 0,
-                                    "id_usuario": 0,
-                                    "notas": 0,
+                                    "id_aplicacao": 1,
                                 }
                             },
                         ],
-                        "as": "resposta",
+                        "as": "respostas",
                     }
                 },
-                {"$set": {"resposta": {"$first": "$resposta._id"}}},
                 {
                     "$project": {
-                        "_id": 1,
-                        "id_form": 0,
-                        "empresa": 0,
-                        "participantes": 0,
+                        "_id": 0,
+                        "ultima_aplicacao": {
+                            "id": "$_id",
+                            "resposta": {"$in": ["$_id", "$respostas.id_aplicacao"]},
+                        },
+                        "ultima_resposta_id": {"$max": "$respostas._id"},
                     }
                 },
             ]

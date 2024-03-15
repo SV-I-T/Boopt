@@ -17,8 +17,9 @@ register_page(
 def layout():
     usr_atual: Usuario = current_user
 
-    aplicacao = AssessmentVendedor.buscar_ultimo(usr_atual.id_)
-    resposta = aplicacao.get("resposta", None)
+    r = AssessmentVendedor.testes_disponiveis(usr_atual.id_)
+    ultima_aplicacao = r.get("ultima_aplicacao", None)
+    ultima_resposta_id = r.get("ultima_resposta_id", None)
 
     return dmc.Stack(
         align="center",
@@ -43,29 +44,31 @@ def layout():
                 dmc.Button(
                     children=dmc.Text(
                         "Começar o teste"
-                        if aplicacao and not resposta
+                        if ultima_aplicacao and not ultima_aplicacao.get("resposta")
                         else "Sem teste disponível",
                         size=20,
                         weight=400,
                     ),
-                    disabled=not (aplicacao and not resposta),
+                    disabled=not (
+                        ultima_aplicacao and not ultima_aplicacao.get("resposta")
+                    ),
                     w=300,
                     h=50,
                     color="BooptLaranja",
                 ),
-                href=f"/app/assessment-vendedor/teste/?id={aplicacao['_id']}"
-                if aplicacao and not resposta
+                href=f"/app/assessment-vendedor/teste/?id={ultima_aplicacao['id']}"
+                if ultima_aplicacao and not ultima_aplicacao.get("resposta")
                 else None,
             ),
             dmc.Anchor(
                 dmc.Button(
                     children=dmc.Text("Ver resultado", size=20, weight=400),
-                    disabled=not resposta,
+                    disabled=not ultima_resposta_id,
                     w=300,
                     h=50,
                 ),
-                href=f"/app/assessment-vendedor/resultado/?id={resposta}"
-                if resposta
+                href=f"/app/assessment-vendedor/resultado/?id={ultima_resposta_id}"
+                if ultima_resposta_id
                 else None,
             ),
         ],
