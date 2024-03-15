@@ -112,3 +112,10 @@ class AssessmentVendedor(BaseModel):
             return r.next()
         else:
             return None
+
+    @classmethod
+    def buscar_respostas(cls, id_usr: ObjectId) -> list[ObjectId]:
+        r = db("AssessmentVendedores", "Respostas").find(
+            {"id_usuario": id_usr}, {"_id": 1}
+        )
+        return [i["_id"] for i in r]

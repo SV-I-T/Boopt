@@ -67,7 +67,7 @@ def layout():
                     w=300,
                     h=50,
                 ),
-                href=f"/app/assessment-vendedor/resultado/?id={ultima_resposta_id}"
+                href=f"/app/assessment-vendedor/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"
                 if ultima_resposta_id
                 else None,
             ),
