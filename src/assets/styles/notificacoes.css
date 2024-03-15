@@ -1,6 +1,7 @@
 .mantine-Notification-root {
     background-color: var(--preto-sv);
     border-radius: 10px;
+    border: none;
 }
 
 .mantine-Notification-title {

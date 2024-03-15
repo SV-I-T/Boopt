@@ -1,9 +1,7 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, get_asset_url, html, page_registry
-from dash.exceptions import PreventUpdate
+from dash import Input, Output, callback, get_asset_url, html, page_registry
 from dash_iconify import DashIconify
 from flask_login import current_user
-from utils.banco_dados import db
 from utils.modelo_usuario import Usuario
 
 
@@ -29,12 +27,9 @@ def layout_navbar():
                     ),
                 ],
             ),
-            dmc.Anchor(
-                href="/",
-                children=html.Img(
-                    src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
-                    height=30,
-                ),
+            html.Img(
+                src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
+                height=30,
             ),
         ],
         id="navbar",
