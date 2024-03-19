@@ -53,10 +53,20 @@ button {
     border: none;
 }
 
+
 .btn-borda-gradiente {
     background:
-        linear-gradient(white, white) padding-box,
+        linear-gradient(90deg, #fff 0%, #fff 100%) padding-box,
         linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
-    border-radius: 50em;
     border: 2px solid transparent;
+    color: #000;
+    transition: all 100ms ease-out 0s;
+    width: 100%;
+}
+
+.btn-borda-gradiente:hover {
+    background:
+        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
+    background-color: white;
+    color: #fff;
 }

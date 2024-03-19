@@ -31,7 +31,9 @@ def layout():
                                 href=modulo["href"],
                                 underline=False,
                                 children=dmc.Button(
-                                    "Acessar", fullWidth=True, variant="light"
+                                    "Acessar",
+                                    fullWidth=True,
+                                    className="btn-borda-gradiente",
                                 ),
                             ),
                         ],
