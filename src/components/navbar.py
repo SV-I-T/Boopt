@@ -12,21 +12,6 @@ def layout_navbar():
                 id="titulo-navbar", children="Boopt", size=40, weight=800, mb="2rem"
             ),
             html.Div(id="menu-usr"),
-            dmc.Menu(
-                [
-                    dmc.MenuTarget(dmc.Button("Páginas", compact=True)),
-                    dmc.MenuDropdown(
-                        [
-                            dmc.MenuItem(
-                                f'{page["title"]} [~{page["path"]}]',
-                                href=page["path"],
-                                target="_self",
-                            )
-                            for page in page_registry.values()
-                        ]
-                    ),
-                ],
-            ),
             html.Img(
                 src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
                 height=30,
