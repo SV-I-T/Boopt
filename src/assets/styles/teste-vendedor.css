@@ -33,15 +33,14 @@
     height: calc(100% - 2px);
     border-radius: 40px !important;
     position: relative;
-    transform: translateY(-50%) translateX(-50%);
+    transform: translateY(-50%) translateX(-50%) scale(1);
     left: 50%;
     top: 50%;
-    transition: width 100ms ease-in 0s, height 100ms ease-in 0s;
+    transition: transform 100ms ease-in 0s;
 }
 
 #btn-notas-frase label input:checked::after {
-    width: calc(100% - 25px);
-    height: calc(100% - 25px);
+    transform: translateY(-50%) translateX(-50%) scale(0.5);
 }
 
 #btn-notas-frase label:nth-child(1) input,
