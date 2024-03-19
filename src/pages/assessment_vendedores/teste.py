@@ -95,7 +95,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
             dcc.Store(id="store-status-done", data=False, storage_type="local"),
             dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
             dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
-            dmc.Progress(id="progress-bar"),
+            html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
             dmc.Container(
                 h=400,
                 children=dmc.Text(
@@ -199,7 +199,7 @@ clientside_callback(
     Output("btn-notas-frase", "value"),
     Output("btn-next", "disabled"),
     Output("btn-back", "disabled"),
-    Output("progress-bar", "value"),
+    # Output("progress-bar", "width"),
     Input("store-ordem-frase-atual", "data"),
     State("store-frases", "data"),
     State("store-ordem-frases", "data"),

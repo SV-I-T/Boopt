@@ -47,10 +47,10 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                     disable_back = false;
                     break;
             }
+            document.querySelector('.progress-bar').lastChild.style.width = progresso + "%";
             return [
                 frase_atual["frase"], frase_atual["valor"],
                 disable_next, disable_back,
-                progresso
             ];
         },
         nota_clicada: async function (nota, ordem_atual, ordem, frases) {
