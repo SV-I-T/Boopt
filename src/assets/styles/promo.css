@@ -1,5 +1,7 @@
 .promo-sidebar {
-    width: 40%;
+    width: 50%;
+    min-width: 550px;
+    max-width: 750px;
     background:
         url("../imgs/boopt/horizontal_branco.svg"),
         url("../imgs/boopt/promo_frase.svg"),
@@ -9,12 +11,12 @@
         no-repeat,
         no-repeat;
     background-position:
-        bottom 80px center,
+        bottom 40px center,
         center center,
         center;
     background-size:
-        auto 90px,
-        500px auto,
+        160px auto,
+        400px auto,
         auto;
     border-radius: 0 80px 80px 0;
     box-shadow: 10px 0px 17px 0px rgba(0, 0, 0, 0.2);
@@ -24,11 +26,14 @@
     position: relative;
 }
 
-.promo-sidebar img {
-    position: absolute;
-    bottom: 0;
-    height: 90px;
-    left: 50%;
-    transform: translateX(-60%);
-    margin-bottom: 1rem;
+@media only screen and (max-width: 1000px) {
+    .promo-sidebar {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    .promo-sidebar {
+        display: block;
+    }
 }
