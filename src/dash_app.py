@@ -61,10 +61,13 @@ def layout():
                 dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh="callback-nav"),
-                layout_navbar(),
                 html.Div(
                     id="page-container",
-                    children=page_container,
+                    children=[
+                        html.Div(id="hamburger-btn"),
+                        layout_navbar(),
+                        page_container,
+                    ],
                 ),
             ],
         ),
