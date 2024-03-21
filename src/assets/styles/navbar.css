@@ -6,42 +6,56 @@
         linear-gradient(0deg, var(--laranja-boopt) 0%, rgba(217, 217, 217, 0) 75%);
     background-repeat: no-repeat, no-repeat;
     background-position:
-        bottom -500px center,
+        bottom -250px center,
         top;
-    background-size: auto 900px, 100%;
-    padding-top: 124px;
-    padding-left: 75px;
-    width: 627px;
+    background-size: auto 500px, 100%;
+    padding: 5rem 50px 1rem 1rem;
+    z-index: -1;
 }
 
-#navbar *:not(.mantine-Menu-dropdown *) {
+#navbar *:not(.mantine-Menu-dropdown *, .mantine-NavLink-root, .mantine-NavLink-root *) {
     color: #fff;
 }
 
-#navbar::after {
-    content: "";
-    top: 0px;
-    left: calc(626px - 50px);
-    bottom: 0px;
-    width: 52px;
-    background-color: var(--cinza-bg);
-    position: absolute;
-    border-radius: 50px 0px 0px 50px;
-    box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2);
-}
-
-#page-container {
-    margin-left: 627px;
-    padding-top: 124px;
-    padding-left: 10px;
-    padding-right: 4rem;
-    padding-bottom: 4rem;
-}
-
 #navbar img {
-    bottom: 50px;
+    bottom: 1rem;
     position: absolute;
-    translate: -50%;
-    left: calc(50% - 50px);
-    height: 100px;
+    transform: translateX(-50%);
+    left: calc(50% - 25px);
+    height: 50px;
+}
+
+.mantine-Menu-itemLabel>div {
+    font-size: 14px;
+}
+
+.mantine-NavLink-root:not([data-active=true]) * {
+    color: #fff;
+}
+
+.mantine-NavLink-root:not([data-active=true]):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media only screen and (max-width: 1200px) {
+    #navbar {
+        width: 0px;
+        display: none;
+        border-radius: 0 50px 50px 0;
+    }
+
+    #hamburger-btn {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        background-color: red;
+        z-index: 10000;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #navbar {
+        width: var(--navbar-width);
+        display: block;
+    }
 }

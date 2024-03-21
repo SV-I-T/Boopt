@@ -4,10 +4,13 @@
     --preto-sv: #171C24;
     --input-bg: #fff;
     --cinza-bg: #f3f3f3;
+    --max-size: 1200px;
+    --navbar-width: 450px;
 }
 
 * {
     -webkit-font-smoothing: antialiased !important;
+    font-size: 18px;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
