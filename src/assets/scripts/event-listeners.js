@@ -18,3 +18,19 @@ window.addEventListener('keyup', function (e) {
 clicar_botao = function (id) {
     this.document.getElementById(id).click();
 };
+
+const observeUrlChange = () => {
+    let oldPath = document.location.pathname;
+    const body = document.querySelector("body");
+    const observer = new MutationObserver(mutations => {
+        if (oldPath !== document.location.pathname) {
+            oldPath = document.location.pathname;
+            document.querySelectorAll('.mantine-NavLink-root').forEach(el => {
+                (el.getAttribute('href') === document.location.pathname) ? el.setAttribute('data-active', true) : el.removeAttribute('data-active');
+            });
+        }
+    });
+    observer.observe(body, { childList: true, subtree: true });
+};
+
+window.onload = observeUrlChange;
