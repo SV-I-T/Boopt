@@ -138,25 +138,26 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     ],
                 ),
                 dmc.Group(
-                    my="5rem",
+                    mt="5rem",
+                    mb="1rem",
                     position="center",
                     children=[
                         dmc.Button(
                             "Anterior",
-                            leftIcon=DashIconify(icon="bxs:left-arrow"),
+                            leftIcon=DashIconify(icon="bxs:left-arrow", width=18),
                             id="btn-back",
                             disabled=True,
                             color="dark",
                         ),
                         dmc.Button(
                             "Próximo",
-                            rightIcon=DashIconify(icon="bxs:right-arrow"),
+                            rightIcon=DashIconify(icon="bxs:right-arrow", width=18),
                             color="dark",
                             id="btn-next",
                         ),
-                        dmc.Button("Auto-preencher", id="btn-last"),
                     ],
                 ),
+                dmc.Button("Auto-preencher", id="btn-last", compact=True, size="xs"),
                 html.Div(id="container-envio"),
             ],
         )
