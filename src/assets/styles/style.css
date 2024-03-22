@@ -17,18 +17,16 @@
     font-family: Montserrat, Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important
 }
 
-html {
-    min-height: 100vh;
-}
 
-body {
-    min-height: calc(100vh - 40px) !important;
-    background-color: var(--cinza-bg) !important;
-
+body:not(.index-body) {
+    display: flex;
+    flex-direction: column;
 }
 
 body.index-body {
+    height: 100vh;
     margin: 0px;
+    background-color: var(--cinza-bg);
     background-image: url("../imgs/boopt/icone_branco.svg");
     background-repeat: no-repeat;
     background-position: bottom -150px right -150px;

@@ -6,7 +6,7 @@ from utils.modelo_usuario import Usuario
 
 
 def layout_navbar():
-    return dmc.Navbar(
+    return html.Nav(
         children=[
             dmc.Title(id="titulo-navbar", children="Boopt", weight=800, mb="2rem"),
             html.Div(id="menu-usr"),
