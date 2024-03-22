@@ -9,7 +9,7 @@
         bottom -250px center,
         top;
     background-size: auto 500px, 100%;
-    padding: 5rem 50px 1rem 1rem;
+    padding: 5rem 70px 1rem 1rem;
     z-index: -1;
 }
 
@@ -25,16 +25,31 @@
     height: 50px;
 }
 
-.mantine-Menu-itemLabel>div {
+#navbar .mantine-Menu-itemLabel>div {
     font-size: 14px;
 }
 
-.mantine-NavLink-root:not([data-active=true]) * {
-    color: #fff;
+#navbar .mantine-NavLink-root {
+    border-radius: 0 30px 30px 0;
+    margin-left: -1rem;
+    padding-left: 1rem;
+    margin-top: 0.25rem;
 }
 
-.mantine-NavLink-root:not([data-active=true]):hover {
+#navbar .mantine-NavLink-root:not([data-active=true]) * {
+    color: #cecece;
+}
+
+#navbar .mantine-NavLink-root[data-active=true] {
+    background-color: #f3f3f3;
+}
+
+#navbar .mantine-NavLink-root:not([data-active=true]):hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+#navbar .mantine-NavLink-label {
+    font-weight: 700;
 }
 
 @media only screen and (max-width: 1200px) {

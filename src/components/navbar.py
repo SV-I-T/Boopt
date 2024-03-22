@@ -36,55 +36,39 @@ def menu_usuario(_):
                             f"{usr.nome} {usr.sobrenome}".upper(),
                             weight=600,
                         ),
-                        dmc.Menu(
-                            [
-                                dmc.MenuTarget(
-                                    dmc.ActionIcon(
-                                        DashIconify(
-                                            icon="fluent:chevron-down-32-filled",
-                                            width=18,
-                                        ),
-                                        variant="transparent",
-                                    )
-                                ),
-                                dmc.MenuDropdown(
-                                    [
-                                        dmc.MenuItem(
-                                            "Alterar senha",
-                                            href="/app/configuracoes/senha",
-                                        ),
-                                        dmc.MenuItem(
-                                            "Painel de gestão", href="/app/admin"
-                                        )
-                                        if usr.admin
-                                        else None,
-                                        dmc.MenuItem(
-                                            "Sair",
-                                            color="red",
-                                            id="logout-btn",
-                                            refresh=True,
-                                            href="/logout",
-                                        ),
-                                    ]
-                                ),
-                            ],
-                        ),
                     ]
                 ),
                 dmc.Text(f"{usr.cargo}", weight=400),
                 html.Div(
                     children=[
                         dmc.NavLink(
-                            label=dmc.Text("Início", size=16, weight=700),
+                            label="Início",
                             href="/app/assessment-vendedor",
                             icon=DashIconify(icon="fluent:home-20-filled", width=18),
                             active=True,
                         ),
                         dmc.NavLink(
-                            label=dmc.Text("Configurações", size=16, weight=700),
+                            label="Configurações",
                             href="/app/configuracoes",
                             icon=DashIconify(
                                 icon="fluent:settings-20-filled", width=18
+                            ),
+                        ),
+                        dmc.NavLink(
+                            label="Painel de Gestão",
+                            href="/app/admin",
+                            # icon=DashIconify(
+                            #     icon="fluent:settings-18-filled", width=18
+                            # ),
+                        )
+                        if usr.gestor or usr.admin
+                        else None,
+                        dmc.NavLink(
+                            label="Sair",
+                            href="/logout",
+                            refresh=True,
+                            icon=DashIconify(
+                                icon="fluent:arrow-exit-20-filled", width=18
                             ),
                         ),
                     ]
