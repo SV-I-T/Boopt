@@ -40,13 +40,9 @@ def layout():
                 children=[
                     dmc.Anchor(
                         dmc.Button(
-                            children=dmc.Text(
-                                "Começar o teste"
-                                if ultima_aplicacao
-                                and not ultima_aplicacao.get("resposta")
-                                else "Sem teste disponível",
-                                weight=400,
-                            ),
+                            children="Começar o teste"
+                            if ultima_aplicacao and not ultima_aplicacao.get("resposta")
+                            else "Sem teste disponível",
                             disabled=not (
                                 ultima_aplicacao
                                 and not ultima_aplicacao.get("resposta")
@@ -59,7 +55,7 @@ def layout():
                     ),
                     dmc.Anchor(
                         dmc.Button(
-                            children=dmc.Text("Ver resultado", weight=400),
+                            children="Ver resultado",
                             disabled=not ultima_resposta_id,
                         ),
                         href=f"/app/assessment-vendedor/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"

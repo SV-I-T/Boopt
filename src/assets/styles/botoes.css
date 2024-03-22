@@ -70,3 +70,7 @@ button {
     background-color: white;
     color: #fff;
 }
+
+.mantine-Button-label {
+    font-weight: 400;
+}
