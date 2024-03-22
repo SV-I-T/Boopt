@@ -1,6 +1,7 @@
 .progress-bar {
     position: relative;
     height: 34px;
+    width: 100%;
 }
 
 .progress-bar div:last-child {

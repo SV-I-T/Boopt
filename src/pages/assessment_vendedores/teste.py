@@ -60,10 +60,8 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 dmc.Anchor(
                     href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
                     children=dmc.Button(
-                        dmc.Text("Começar teste", size=20, weight=400),
+                        "Começar teste",
                         color="BooptLaranja",
-                        w=300,
-                        h=50,
                     ),
                 ),
             ],
@@ -93,67 +91,75 @@ def layout(id: str = None, secao: str = "instrucoes"):
 
         frase_atual = frases[str(ordem[0])]
 
-        return [
-            dcc.Store(id="store-frases", data=frases, storage_type="local"),
-            dcc.Store(id="store-status-done", data=False, storage_type="local"),
-            dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
-            dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
-            html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
-            dmc.Container(
-                h=400,
-                children=dmc.Text(
-                    id="text-frase",
-                    children=frase_atual["frase"],
-                    weight=500,
-                    size=36,
-                    align="center",
-                    display="flex",
-                    h="100%",
-                    style={"align-items": "center"},
+        return html.Div(
+            className="center-container",
+            children=[
+                dcc.Store(id="store-frases", data=frases, storage_type="local"),
+                dcc.Store(id="store-status-done", data=False, storage_type="local"),
+                dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
+                dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
+                html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
+                dmc.Container(
+                    h=400,
+                    children=dmc.Text(
+                        id="text-frase",
+                        children=frase_atual["frase"],
+                        weight=500,
+                        size=18,
+                        align="center",
+                        display="flex",
+                        h="100%",
+                        style={"align-items": "center"},
+                    ),
                 ),
-            ),
-            dmc.Group(
-                align="center",
-                position="center",
-                children=[
-                    dmc.Text(
-                        "Não me identifico", color="BooptLaranja", size=22, weight=700
-                    ),
-                    dcc.RadioItems(
-                        id="btn-notas-frase",
-                        options=[
-                            {"value": i, "label": ""} for i in ["1", "2", "3", "4", "5"]
-                        ],
-                        inline=True,
-                        value=None,
-                    ),
-                    dmc.Text(
-                        "Me identifico muito", color="SVAzul", size=22, weight=700
-                    ),
-                ],
-            ),
-            dmc.Group(
-                my="5rem",
-                position="center",
-                children=[
-                    dmc.Button(
-                        "Anterior",
-                        leftIcon=DashIconify(icon="bxs:left-arrow"),
-                        id="btn-back",
-                        disabled=True,
-                        color="dark",
-                    ),
-                    dmc.Button(
-                        "Próximo",
-                        rightIcon=DashIconify(icon="bxs:right-arrow"),
-                        color="dark",
-                        id="btn-next",
-                    ),
-                    dmc.Button("Auto-preencher", id="btn-last"),
-                ],
-            ),
-            html.Div(id="container-envio"),
-        ]
+                dmc.Group(
+                    align="center",
+                    position="center",
+                    children=[
+                        dmc.Text(
+                            "Não me identifico",
+                            color="BooptLaranja",
+                            size=16,
+                            weight=700,
+                        ),
+                        dcc.RadioItems(
+                            id="nota-av",
+                            className="radio-notas-frase",
+                            options=[
+                                {"value": i, "label": ""}
+                                for i in ["1", "2", "3", "4", "5"]
+                            ],
+                            inline=True,
+                            value=None,
+                        ),
+                        dmc.Text(
+                            "Me identifico muito", color="SVAzul", size=16, weight=700
+                        ),
+                    ],
+                ),
+                dmc.Group(
+                    my="5rem",
+                    position="center",
+                    children=[
+                        dmc.Button(
+                            "Anterior",
+                            leftIcon=DashIconify(icon="bxs:left-arrow"),
+                            id="btn-back",
+                            disabled=True,
+                            color="dark",
+                        ),
+                        dmc.Button(
+                            "Próximo",
+                            rightIcon=DashIconify(icon="bxs:right-arrow"),
+                            color="dark",
+                            id="btn-next",
+                        ),
+                        dmc.Button("Auto-preencher", id="btn-last"),
+                    ],
+                ),
+                html.Div(id="container-envio"),
+            ],
+        )
     elif secao == "enviado":
         return [
             dmc.Title("Obrigado!"),
@@ -199,10 +205,9 @@ clientside_callback(
         namespace="clientside", function_name="atualizar_componentes_frase"
     ),
     Output("text-frase", "children"),
-    Output("btn-notas-frase", "value"),
+    Output("nota-av", "value"),
     Output("btn-next", "disabled"),
     Output("btn-back", "disabled"),
-    # Output("progress-bar", "width"),
     Input("store-ordem-frase-atual", "data"),
     State("store-frases", "data"),
     State("store-ordem-frases", "data"),
@@ -212,7 +217,7 @@ clientside_callback(
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="nota_clicada"),
     Output("store-frases", "data"),
-    Input("btn-notas-frase", "value"),
+    Input("nota-av", "value"),
     State("store-ordem-frase-atual", "data"),
     State("store-ordem-frases", "data"),
     State("store-frases", "data"),
@@ -239,29 +244,23 @@ def habilitar_envio(status_pronto):
     else:
         return dmc.Alert(
             bg="#D9D9D9",
-            px="2rem",
+            px="1rem",
             children=dmc.Group(
                 position="apart",
                 children=[
                     html.Div(
                         [
-                            dmc.Text(
-                                "Tudo pronto!", size=26, weight=700, color="SVAzul"
-                            ),
+                            dmc.Text("Tudo pronto!", weight=700, color="SVAzul"),
                             dmc.Text(
                                 "Você pode revisar suas respostas ou enviá-las agora mesmo.",
-                                size=26,
                                 weight=400,
                             ),
                         ]
                     ),
                     dmc.Button(
                         id="btn-enviar",
-                        children=dmc.Text("Enviar", size=20, weight=400),
+                        children="Enviar",
                         variant="gradient",
-                        w=220,
-                        h=50,
-                        mx=10,
                     ),
                 ],
             ),

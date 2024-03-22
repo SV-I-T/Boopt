@@ -1,22 +1,10 @@
-.mantine-Progress-root#progress-bar {
-    height: 28px;
-    background-color: #d9d9d9;
-    border-radius: 32px;
-}
-
-.mantine-Progress-root#progress-bar .mantine-Progress-bar {
-    /* background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt)); */
-    height: 34px !important;
-    box-shadow: 7px 0px 12px -1px #99999966;
-}
-
-#btn-notas-frase {
+.radio-notas-frase {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
-#btn-notas-frase label input {
+.radio-notas-frase label input {
     appearance: none;
     background-color: #fff;
     border-radius: 40px !important;
@@ -25,12 +13,12 @@
     transition: background-color 100ms ease-in 0s;
 }
 
-#btn-notas-frase label input::after {
+.radio-notas-frase label input::after {
     content: "";
     display: block;
     background-color: #fff;
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
+    width: calc(100% - 1px);
+    height: calc(100% - 1px);
     border-radius: 40px !important;
     position: relative;
     transform: translateY(-50%) translateX(-50%) scale(1);
@@ -39,40 +27,40 @@
     transition: transform 100ms ease-in 0s;
 }
 
-#btn-notas-frase label input:checked::after {
+.radio-notas-frase label input:checked::after {
     transform: translateY(-50%) translateX(-50%) scale(0.5);
 }
 
-#btn-notas-frase label:nth-child(1) input,
-#btn-notas-frase label:nth-child(5) input {
-    width: 70px;
-    height: 70px;
-}
-
-#btn-notas-frase label:nth-child(2) input,
-#btn-notas-frase label:nth-child(4) input {
+.radio-notas-frase label:nth-child(1) input,
+.radio-notas-frase label:nth-child(5) input {
     width: 50px;
     height: 50px;
 }
 
-#btn-notas-frase label:nth-child(3) input {
-    width: 40px;
-    height: 40px;
+.radio-notas-frase label:nth-child(2) input,
+.radio-notas-frase label:nth-child(4) input {
+    width: 30px;
+    height: 30px;
 }
 
-#btn-notas-frase label:nth-child(1) input,
-#btn-notas-frase label:nth-child(2) input {
+.radio-notas-frase label:nth-child(3) input {
+    width: 20px;
+    height: 20px;
+}
+
+.radio-notas-frase label:nth-child(1) input,
+.radio-notas-frase label:nth-child(2) input {
     border-color: var(--laranja-boopt);
     background-color: var(--laranja-boopt);
 }
 
-#btn-notas-frase label:nth-child(4) input,
-#btn-notas-frase label:nth-child(5) input {
+.radio-notas-frase label:nth-child(4) input,
+.radio-notas-frase label:nth-child(5) input {
     border-color: var(--azul-sv);
     background-color: var(--azul-sv);
 }
 
-#btn-notas-frase label:nth-child(3) input {
+.radio-notas-frase label:nth-child(3) input {
     border-color: #5c5c5c;
     background-color: #5c5c5c;
 }
