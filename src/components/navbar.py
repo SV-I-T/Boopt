@@ -57,9 +57,9 @@ def menu_usuario(_):
                         dmc.NavLink(
                             label="Painel de Gestão",
                             href="/app/admin",
-                            # icon=DashIconify(
-                            #     icon="fluent:settings-18-filled", width=18
-                            # ),
+                            icon=DashIconify(
+                                icon="fluent:panel-left-text-20-filled", width=18
+                            ),
                         )
                         if usr.gestor or usr.admin
                         else None,
