@@ -4,8 +4,6 @@
 
 #_pages_content {
     padding-top: 2rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
     padding-bottom: 2rem;
     height: 100vh;
     position: relative;
@@ -16,6 +14,11 @@
     #page-container {
         padding-left: 0px;
         left: 0px;
+    }
+
+    #_pages_content {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 }
 
@@ -37,5 +40,10 @@
         background-color: var(--cinza-bg);
         border-radius: 50px 0 0 50px;
         box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2);
+    }
+
+    #_pages_content {
+        padding-left: 3rem;
+        padding-right: 3rem;
     }
 }
