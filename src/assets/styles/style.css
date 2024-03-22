@@ -48,6 +48,17 @@ body.index-body {
 }
 
 
+.center-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 1500px;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+
 @media only screen and (max-width: 767px) {
     .mantine-Container-root {
         padding: 0 !important;

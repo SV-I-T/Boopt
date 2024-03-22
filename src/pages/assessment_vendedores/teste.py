@@ -50,21 +50,24 @@ def layout(id: str = None, secao: str = "instrucoes"):
     usr: Usuario = current_user
 
     if secao == "instrucoes":
-        return [
-            dcc.Markdown(
-                EXPLICACAO_MD.format(vendedor=usr.nome),
-                style={"font-weight": 400, "font-size": 30},
-            ),
-            dmc.Anchor(
-                href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
-                children=dmc.Button(
-                    dmc.Text("Começar teste", size=20, weight=400),
-                    color="BooptLaranja",
-                    w=300,
-                    h=50,
+        return html.Div(
+            className="center-container",
+            children=[
+                dcc.Markdown(
+                    EXPLICACAO_MD.format(vendedor=usr.nome),
+                    style={"font-weight": 400, "font-size": 30},
                 ),
-            ),
-        ]
+                dmc.Anchor(
+                    href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
+                    children=dmc.Button(
+                        dmc.Text("Começar teste", size=20, weight=400),
+                        color="BooptLaranja",
+                        w=300,
+                        h=50,
+                    ),
+                ),
+            ],
+        )
 
     elif secao == "frases":
         aplicacao = db("AssessmentVendedores", "Aplicações").find_one(

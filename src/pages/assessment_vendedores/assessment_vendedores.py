@@ -1,7 +1,6 @@
 import dash_mantine_components as dmc
-from dash import register_page
-from flask_login import current_user, login_required
-from utils.banco_dados import db
+from dash import html, register_page
+from flask_login import current_user
 from utils.modelo_assessment import AssessmentVendedor
 from utils.modelo_usuario import Usuario, checar_login
 
@@ -21,11 +20,8 @@ def layout():
     ultima_aplicacao = r.get("ultima_aplicacao", None)
     ultima_resposta_id = r.get("ultima_resposta_id", None)
 
-    return dmc.Stack(
-        align="center",
-        justify="center",
-        px="1rem",
-        h="100%",
+    return html.Div(
+        className="center-container",
         children=[
             dmc.Text(
                 "Bem-vindo ao Assessment de Vendedor",
