@@ -28,11 +28,14 @@ def layout():
         dmc.Title("Gerenciamento de empresas", order=1, weight=700),
         dmc.Group(
             children=[
-                dmc.Button(
-                    id="btn-nova-empresa",
-                    children="Nova empresa",
-                    leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
-                    variant="gradient",
+                dmc.Anchor(
+                    href="/app/admin/empresas/edit",
+                    children=dmc.Button(
+                        id="btn-nova-empresa",
+                        children="Nova empresa",
+                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        variant="gradient",
+                    ),
                 ),
                 dmc.TextInput(
                     id="empresa-filtro-input", placeholder="Pesquisar", w=200
@@ -67,14 +70,6 @@ def layout():
         ),
         dmc.Pagination(id="tabela-empresas-nav", total=n_paginas, page=1),
     ]
-
-
-clientside_callback(
-    ClientsideFunction("clientside", "redirect_empresas_edit"),
-    Output("url", "pathname", allow_duplicate=True),
-    Input("btn-nova-empresa", "n_clicks"),
-    prevent_initial_call=True,
-)
 
 
 @callback(
