@@ -26,7 +26,7 @@ const observeUrlChange = () => {
         if (oldPath !== document.location.pathname) {
             oldPath = document.location.pathname;
             document.querySelectorAll('.mantine-NavLink-root').forEach(el => {
-                (el.getAttribute('href') === document.location.pathname) ? el.setAttribute('data-active', true) : el.removeAttribute('data-active');
+                (document.location.pathname.startsWith(el.getAttribute('href'))) ? el.setAttribute('data-active', true) : el.removeAttribute('data-active');
             });
         }
     });
