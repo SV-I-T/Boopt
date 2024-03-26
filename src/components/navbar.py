@@ -29,12 +29,10 @@ def menu_usuario(_):
     if usr.is_authenticated:
         return html.Div(
             children=[
-                dmc.Anchor(
-                    href="/app/perfil",
+                dmc.Text(
                     className="nome-usr-navbar",
                     children=f"{usr.nome}",
                     weight=600,
-                    underline=False,
                 ),
                 dmc.Text(className="cargo-usr-navbar", children=usr.cargo, weight=400),
                 html.Div(

@@ -24,20 +24,8 @@
 
 #navbar .nome-usr-navbar {
     text-transform: uppercase;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 30px;
-    width: fit-content;
-    padding: 2px 7px 0 7px;
-    text-align: center;
-    align-self: center;
-    transition: background-color 100ms ease 0s;
-}
-
-#navbar .nome-usr-navbar:hover {
-    background-color: rgba(255, 255, 255, 0.5);
 
 }
-
 
 #navbar *:not(.mantine-Menu-dropdown *, .mantine-NavLink-root, .mantine-NavLink-root *) {
     color: #fff;
