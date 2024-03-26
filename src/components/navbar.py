@@ -48,11 +48,9 @@ def menu_usuario(_):
                             active=True,
                         ),
                         dmc.NavLink(
-                            label="Configurações",
-                            href="/app/configuracoes",
-                            icon=DashIconify(
-                                icon="fluent:settings-20-filled", width=18
-                            ),
+                            label="Meu perfil",
+                            href="/app/perfil",
+                            icon=DashIconify(icon="fluent:person-20-filled", width=18),
                         ),
                         dmc.NavLink(
                             label="Painel de Gestão",
