@@ -1,0 +1,7 @@
+.not-found img {
+    width: 100%;
+}
+
+.not-found>* {
+    margin-bottom: 3rem;
+}
