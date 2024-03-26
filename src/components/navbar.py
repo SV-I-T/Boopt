@@ -8,7 +8,13 @@ from utils.modelo_usuario import Usuario
 def layout_navbar():
     return html.Nav(
         children=[
-            dmc.Title(id="titulo-navbar", children="Boopt", weight=800, mb="2rem"),
+            dmc.Text(
+                id="titulo-navbar",
+                children="Assessment de Vendedores",
+                weight=800,
+                mb="2rem",
+                size=20,
+            ),
             html.Div(id="menu-usr"),
             html.Img(
                 src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
