@@ -61,6 +61,20 @@
     font-weight: 700;
 }
 
+
+#navbar::before {
+    content: "";
+    display: block;
+    position: absolute;
+    right: 0;
+    width: 50px;
+    top: 0;
+    bottom: 0;
+    background-color: var(--cinza-bg);
+    border-radius: 50px 0 0 50px;
+    box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2);
+}
+
 @media only screen and (max-width: 1200px) {
     #navbar {
         width: 0px;
@@ -79,7 +93,7 @@
 
 @media only screen and (min-width: 1200px) {
     #navbar {
-        width: calc(var(--navbar-width) + 50px);
+        width: var(--navbar-width);
         display: block;
     }
 }
