@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 from dash import register_page
+from dash_iconify import DashIconify
 from utils.modelo_usuario import checar_login
 
 register_page(__name__, path="/app/admin", title="Painel de gestão")
@@ -8,11 +9,20 @@ register_page(__name__, path="/app/admin", title="Painel de gestão")
 @checar_login(admin=True)
 def layout():
     modulos: tuple[str] = (
-        {"label": "Usuários", "href": "/app/admin/usuarios"},
-        {"label": "Empresas", "href": "/app/admin/empresas"},
+        {
+            "label": "Usuários",
+            "href": "/app/admin/usuarios",
+            "icon": "fluent:person-24-filled",
+        },
+        {
+            "label": "Empresas",
+            "href": "/app/admin/empresas",
+            "icon": "fluent:building-shop-24-filled",
+        },
         {
             "label": "Assessment Vendedores",
             "href": "/app/admin/assessment-vendedor",
+            "icon": "fluent:checkbox-person-24-filled",
         },
     )
     return [
@@ -20,19 +30,25 @@ def layout():
         dmc.Grid(
             children=[
                 dmc.Col(
-                    span="content",
+                    xs=6,
+                    md=4,
                     children=dmc.Card(
                         shadow="sm",
                         withBorder=True,
                         className="card-painel-gestao",
                         children=[
-                            dmc.Text(modulo["label"], weight=500),
+                            dmc.Group(
+                                children=[
+                                    DashIconify(icon=modulo["icon"], width=24),
+                                    dmc.Text(modulo["label"], weight=500),
+                                ],
+                                align="center",
+                            ),
                             dmc.Anchor(
                                 href=modulo["href"],
                                 underline=False,
                                 children=dmc.Button(
                                     "Acessar",
-                                    fullWidth=True,
                                     className="btn-borda-gradiente",
                                 ),
                             ),

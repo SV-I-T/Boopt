@@ -33,18 +33,6 @@ body.index-body {
     background-size: 500px;
 }
 
-.card-painel-gestao {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 300px;
-    height: 150px;
-}
-
-.mantine-Grid-root {
-    margin: 0;
-}
-
 
 @media only screen and (max-width: 767px) {
     .mantine-Container-root {

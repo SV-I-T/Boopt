@@ -1,0 +1,11 @@
+.card-painel-gestao {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* width: 250px; */
+    height: 150px;
+}
+
+.mantine-Grid-root {
+    margin: 0;
+}
