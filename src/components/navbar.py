@@ -55,6 +55,7 @@ def menu_usuario(_, path):
                 "label": "Sair",
                 "href": "/logout",
                 "icon": "fluent:arrow-exit-20-filled",
+                "refresh": True,
             },
         ]
         return html.Div(
@@ -76,6 +77,7 @@ def menu_usuario(_, path):
                             href=link["href"],
                             icon=DashIconify(icon=link["icon"], width=18),
                             active=path.startswith(link["href"]),
+                            refresh=link.get("refresh", False),
                         )
                         for link in links
                         if ("gestor" not in link)
