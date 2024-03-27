@@ -58,7 +58,6 @@ def layout():
             children=[
                 html.Div(id="notificacoes"),
                 dcc.Store(id="refresh"),
-                dcc.Store(id="login-data", data=0),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh="callback-nav"),
                 html.Div(

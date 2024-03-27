@@ -15,7 +15,7 @@ def layout_navbar():
                 mb="2rem",
                 size=20,
             ),
-            html.Div(id="menu-usr"),
+            menu_usuario(),
             html.Img(
                 src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
                 height=30,
@@ -25,11 +25,7 @@ def layout_navbar():
     )
 
 
-@callback(
-    Output("menu-usr", "children"),
-    Input("login-data", "data"),
-)
-def menu_usuario(_):
+def menu_usuario():
     usr: Usuario = current_user
 
     if usr.is_authenticated:
@@ -37,11 +33,15 @@ def menu_usuario(_):
             children=[
                 dmc.Text(
                     className="nome-usr-navbar",
-                    children=f"{usr.nome}",
-                    weight=600,
+                    children=usr.nome,
                 ),
-                dmc.Text(className="cargo-usr-navbar", children=usr.cargo, weight=400),
+                dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
+                dmc.Text(
+                    className="empresa-usr-navbar",
+                    children=usr.empresa_nome,
+                ),
                 html.Div(
+                    className="links-nav",
                     children=[
                         dmc.NavLink(
                             label="Início",
@@ -71,7 +71,7 @@ def menu_usuario(_):
                                 icon="fluent:arrow-exit-20-filled", width=18
                             ),
                         ),
-                    ]
+                    ],
                 ),
             ]
         )
