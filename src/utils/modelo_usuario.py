@@ -25,6 +25,113 @@ CARGOS_PADROES = sorted(
 )
 
 
+class Usuario(BaseModel, UserMixin):
+    id_: ObjectId = Field(alias="_id")
+    nome: str
+    sobrenome: str
+    data: str
+    senha_hash: str
+    cpf: str
+    email: str
+    cargo: str
+    empresa: ObjectId
+    empresa_nome: Optional[
+        str
+    ] = None  # Não faz parte do esquema no DB, é calculado no model_post_init
+    admin: bool = False
+    gestor: bool = False
+    recruta: bool = False
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @computed_field
+    @property
+    def id(self) -> str:
+        return str(self.id_)
+
+    def model_post_init(self, _) -> None:
+        self.empresa_nome = db("Boopt", "Empresas").find_one(
+            {"_id": self.empresa}, {"nome": 1, "_id": 0}
+        )["nome"]
+
+    def logar(self, lembrar: bool = False) -> None:
+        login_user(self, remember=lembrar, force=True)
+
+    def sair(self) -> None:
+        logout_user()
+        cache_simple.delete_memoized(Usuario.buscar_login, Usuario)
+
+    @classmethod
+    def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):
+        if identificador == "_id":
+            valor = ObjectId(valor)
+        usr = db("Boopt", "Usuários").find_one({identificador: valor})
+        assert usr, "Este usuário não foi encontrado."
+
+        return cls(**usr)
+
+    @classmethod
+    @cache_simple.memoize(timeout=600)
+    def buscar_login(cls, _id: str) -> dict | None:
+        print("Carregando usuário")
+        if _id == "None":
+            return None
+        return db("Boopt", "Usuários").find_one(
+            {"_id": ObjectId(_id)},
+        )
+
+    def validar_senha(self, senha: str) -> None:
+        assert check_password_hash(
+            self.senha_hash, senha
+        ), "A senha digitada está incorreta."
+
+    def atualizar(self, novos_dados: dict[str, str]) -> None:
+        r = db("Boopt", "Usuários").update_one(
+            {"_id": self.id_},
+            {"$set": {campo: valor for campo, valor in novos_dados.items()}},
+        )
+
+        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
+
+    def alterar_senha(
+        self, senha_atual: str, senha_nova: str, senha_nova_check: str
+    ) -> bool:
+        senha_hash = db("Boopt", "Usuários").find_one(
+            {"_id": self.id_}, {"_id": 0, "senha_hash": 1}
+        )["senha_hash"]
+        assert check_password_hash(
+            senha_hash, senha_atual
+        ), "A senha atual não está correta."
+
+        assert not check_password_hash(
+            senha_hash, senha_nova
+        ), "A senha nova não pode ser igual à senha atual."
+
+        assert senha_nova == senha_nova_check, "As senhas novas não combinam."
+
+        r = db("Boopt", "Usuários").update_one(
+            {"_id": self.id_},
+            {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
+        )
+        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
+        return True
+
+    def buscar_empresas(self) -> Cursor | None:
+        if self.admin:
+            return db("Boopt", "Empresas").find(
+                projection={"_id": 1, "nome": 1}, sort={"nome": 1}
+            )
+        elif self.gestor:
+            return db("Boopt", "Empresas").find(
+                {"_id": self.empresa},
+                projection={"_id": 1, "nome": 1},
+                sort={"nome": 1},
+            )
+        else:
+            return None
+
+
 class NovoUsuario(BaseModel):
     nome: str
     sobrenome: str
@@ -100,105 +207,6 @@ class NovoUsuario(BaseModel):
         assert (
             r.acknowledged
         ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
-
-
-class Usuario(BaseModel, UserMixin):
-    id_: ObjectId = Field(alias="_id")
-    nome: str
-    sobrenome: str
-    data: str
-    senha_hash: str
-    cpf: str
-    email: str
-    cargo: str
-    empresa: ObjectId
-    admin: bool = False
-    gestor: bool = False
-    recruta: bool = False
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @computed_field
-    @property
-    def id(self) -> str:
-        return str(self.id_)
-
-    def logar(self, lembrar: bool = False) -> None:
-        login_user(self, remember=lembrar, force=True)
-
-    @classmethod
-    def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):
-        if identificador == "_id":
-            valor = ObjectId(valor)
-        usr = db("Boopt", "Usuários").find_one({identificador: valor})
-        assert usr, "Este usuário não foi encontrado."
-
-        return cls(**usr)
-
-    def validar_senha(self, senha: str) -> None:
-        assert check_password_hash(
-            self.senha_hash, senha
-        ), "A senha digitada está incorreta."
-
-    def atualizar(self, novos_dados: dict[str, str]) -> None:
-        r = db("Boopt", "Usuários").update_one(
-            {"_id": self.id_},
-            {"$set": {campo: valor for campo, valor in novos_dados.items()}},
-        )
-
-        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
-
-    def alterar_senha(
-        self, senha_atual: str, senha_nova: str, senha_nova_check: str
-    ) -> bool:
-        senha_hash = db("Boopt", "Usuários").find_one(
-            {"_id": self.id_}, {"_id": 0, "senha_hash": 1}
-        )["senha_hash"]
-        assert check_password_hash(
-            senha_hash, senha_atual
-        ), "A senha atual não está correta."
-
-        assert not check_password_hash(
-            senha_hash, senha_nova
-        ), "A senha nova não pode ser igual à senha atual."
-
-        assert senha_nova == senha_nova_check, "As senhas novas não combinam."
-
-        r = db("Boopt", "Usuários").update_one(
-            {"_id": self.id_},
-            {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
-        )
-        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
-        return True
-
-    def buscar_empresas(self) -> Cursor | None:
-        if self.admin:
-            return db("Boopt", "Empresas").find(
-                projection={"_id": 1, "nome": 1}, sort={"nome": 1}
-            )
-        elif self.gestor:
-            return db("Boopt", "Empresas").find(
-                {"_id": self.empresa},
-                projection={"_id": 1, "nome": 1},
-                sort={"nome": 1},
-            )
-        else:
-            return None
-
-    @classmethod
-    @cache_simple.memoize(timeout=600)
-    def buscar_login(cls, _id: str) -> dict | None:
-        print("Carregando usuário")
-        if _id == "None":
-            return None
-        return db("Boopt", "Usuários").find_one(
-            {"_id": ObjectId(_id)},
-        )
-
-    def sair(self) -> None:
-        logout_user()
-        cache_simple.delete_memoized(Usuario.buscar_login, Usuario)
 
 
 class NovosUsuariosBatelada(BaseModel):
