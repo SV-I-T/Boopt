@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, get_asset_url, html
+from dash import Input, Output, State, callback, get_asset_url, html
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.modelo_usuario import Usuario
@@ -15,7 +15,7 @@ def layout_navbar():
                 mb="2rem",
                 size=20,
             ),
-            menu_usuario(),
+            html.Div(id="menu-usr"),
             html.Img(
                 src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
                 height=30,
@@ -25,10 +25,38 @@ def layout_navbar():
     )
 
 
-def menu_usuario():
+@callback(
+    Output("menu-usr", "children"),
+    Input("navbar", "title"),
+    State("url", "pathname"),
+)
+def menu_usuario(_, path):
     usr: Usuario = current_user
 
     if usr.is_authenticated:
+        links = [
+            {
+                "label": "Início",
+                "href": "/app/assessment-vendedor",
+                "icon": "fluent:home-20-filled",
+            },
+            {
+                "label": "Meu perfil",
+                "href": "/app/perfil",
+                "icon": "fluent:person-20-filled",
+            },
+            {
+                "label": "Painel de Gestão",
+                "href": "/app/admin",
+                "icon": "fluent:panel-left-text-20-filled",
+                "gestor": True,
+            },
+            {
+                "label": "Sair",
+                "href": "/logout",
+                "icon": "fluent:arrow-exit-20-filled",
+            },
+        ]
         return html.Div(
             children=[
                 dmc.Text(
@@ -44,33 +72,14 @@ def menu_usuario():
                     className="links-nav",
                     children=[
                         dmc.NavLink(
-                            label="Início",
-                            href="/app/assessment-vendedor",
-                            icon=DashIconify(icon="fluent:home-20-filled", width=18),
-                            active=True,
-                        ),
-                        dmc.NavLink(
-                            label="Meu perfil",
-                            href="/app/perfil",
-                            icon=DashIconify(icon="fluent:person-20-filled", width=18),
-                        ),
-                        dmc.NavLink(
-                            label="Painel de Gestão",
-                            href="/app/admin",
-                            icon=DashIconify(
-                                icon="fluent:panel-left-text-20-filled", width=18
-                            ),
+                            label=link["label"],
+                            href=link["href"],
+                            icon=DashIconify(icon=link["icon"], width=18),
+                            active=path.startswith(link["href"]),
                         )
-                        if usr.gestor or usr.admin
-                        else None,
-                        dmc.NavLink(
-                            label="Sair",
-                            href="/logout",
-                            refresh=True,
-                            icon=DashIconify(
-                                icon="fluent:arrow-exit-20-filled", width=18
-                            ),
-                        ),
+                        for link in links
+                        if ("gestor" not in link)
+                        or (link["gestor"] and (usr.gestor or usr.admin))
                     ],
                 ),
             ]
