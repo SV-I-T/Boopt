@@ -34,7 +34,7 @@ def layout():
 
     n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
-        dmc.Title("Gerenciar usuários", order=1, weight=700),
+        dmc.Title("Gerenciar usuários", className="titulo-pagina"),
         dmc.Group(
             children=[
                 dmc.Anchor(

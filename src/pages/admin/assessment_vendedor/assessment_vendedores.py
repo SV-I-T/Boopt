@@ -53,7 +53,7 @@ def layout():
 
     n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
     return [
-        dmc.Title("Gerenciar Assessment Vendedor", order=1, weight=700),
+        dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
         dmc.Group(
             children=[
                 dmc.Anchor(

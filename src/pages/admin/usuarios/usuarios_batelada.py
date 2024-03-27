@@ -33,7 +33,7 @@ def layout():
         )
     ]
     return [
-        dmc.Title("Cadastro em massa", order=1, weight=700),
+        dmc.Title("Cadastro em massa", className="titulo-pagina"),
         dmc.Select(
             id="empresa-usr-massa",
             label="Empresa de cadastro",

@@ -35,7 +35,7 @@ def layout():
     layout_edicao = layout_novo_assessment()
 
     return [
-        dmc.Title(texto_titulo, order=1, weight=700),
+        dmc.Title(texto_titulo, className="titulo-pagina"),
         layout_edicao,
     ]
 

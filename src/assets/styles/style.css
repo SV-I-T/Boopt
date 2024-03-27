@@ -33,6 +33,10 @@ body.index-body {
     background-size: 500px;
 }
 
+.titulo-pagina {
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
 
 @media only screen and (max-width: 767px) {
     .mantine-Container-root {

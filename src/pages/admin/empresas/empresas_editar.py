@@ -52,7 +52,7 @@ def layout(id: str = None):
         layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
 
     return [
-        dmc.Title(texto_titulo, order=1, weight=700),
+        dmc.Title(texto_titulo, className="titulo-pagina"),
         layout_edicao,
     ]
 

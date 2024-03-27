@@ -25,7 +25,7 @@ def layout():
     n_empresas = db("Boopt", "Empresas").count_documents({})
     n_paginas = ceil(n_empresas / MAX_PAGINA)
     return [
-        dmc.Title("Gerenciamento de empresas", order=1, weight=700),
+        dmc.Title("Gerenciamento de empresas", className="titulo-pagina"),
         dmc.Group(
             children=[
                 dmc.Anchor(
