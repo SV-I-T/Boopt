@@ -24,7 +24,17 @@
 
 #navbar .nome-usr-navbar {
     text-transform: uppercase;
+    font-weight: 600;
+}
 
+#navbar .cargo-usr-navbar,
+#navbar .empresa-usr-navbar {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+#navbar .links-nav {
+    margin-top: 2rem;
 }
 
 #navbar *:not(.mantine-Menu-dropdown *, .mantine-NavLink-root, .mantine-NavLink-root *) {
