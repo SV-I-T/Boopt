@@ -10,7 +10,7 @@
 
 * {
     -webkit-font-smoothing: antialiased !important;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {

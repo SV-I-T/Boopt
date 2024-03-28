@@ -25,6 +25,7 @@
 #navbar .nome-usr-navbar {
     text-transform: uppercase;
     font-weight: 600;
+    font-size: 18px;
 }
 
 #navbar .cargo-usr-navbar,
@@ -74,6 +75,7 @@
 
 #navbar .mantine-NavLink-label {
     font-weight: 700;
+    /* font-size: 16px; */
 }
 
 

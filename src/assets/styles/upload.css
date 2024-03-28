@@ -20,15 +20,10 @@
 } */
 
 .container-upload>div:first-child #usr-massa-arquivo {
-    font-size: 16px;
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 30px;
     padding: 0 10px 0 10px;
     width: fit-content;
-}
-
-button#usr-massa-download-template * {
-    font-size: 16px;
 }
 
 button#usr-massa-download-template {
