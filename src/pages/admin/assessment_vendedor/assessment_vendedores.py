@@ -2,18 +2,7 @@ from math import ceil
 
 import dash_mantine_components as dmc
 from bson import ObjectId
-from dash import (
-    ClientsideFunction,
-    Input,
-    Output,
-    State,
-    callback,
-    clientside_callback,
-    dcc,
-    html,
-    register_page,
-)
-from dash.exceptions import PreventUpdate
+from dash import Input, Output, callback, html, register_page
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
@@ -55,8 +44,22 @@ def layout():
     return [
         dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
         dmc.Group(
+            mb="1rem",
             children=[
+                dmc.Select(
+                    id="empresa-assessment",
+                    icon=DashIconify(icon="fluent:building-24-filled", width=24),
+                    name="empresa",
+                    data=data_empresas,
+                    required=True,
+                    searchable=True,
+                    nothingFound="Não encontrei nada",
+                    placeholder="Selecione uma empresa",
+                    w=250,
+                    mr="auto",
+                ),
                 dmc.Anchor(
+                    id="a-nova-aplicacao",
                     href="/app/admin/assessment-vendedor/novo",
                     children=dmc.Button(
                         id="btn-nova-aplicacao",
@@ -65,22 +68,14 @@ def layout():
                         variant="gradient",
                     ),
                 ),
-                dmc.Select(
-                    id="empresa-assessment",
-                    data=data_empresas,
-                    searchable=True,
-                    nothingFound="Não encontrei nada",
-                    placeholder="Selecione uma empresa",
-                    w=250,
-                ),
-            ]
+            ],
         ),
         dmc.Table(
             striped=True,
             highlightOnHover=True,
             withBorder=True,
             withColumnBorders=True,
-            style={"width": "auto"},
+            style={"width": "100%"},
             children=[
                 html.Thead(
                     html.Tr(
@@ -89,8 +84,6 @@ def layout():
                             html.Th("Participantes", style={"width": 150}),
                             html.Th("Respostas", style={"width": 150}),
                             html.Th("Adesão", style={"width": 150}),
-                            html.Th("Nota média", style={"width": 150}),
-                            html.Th("Acesso", style={"width": 150}),
                         ]
                     )
                 ),
@@ -110,12 +103,15 @@ def layout():
                 ),
             ],
         ),
-        dmc.Pagination(id="tabela-assessment-nav", total=n_paginas, page=1),
+        dmc.Pagination(
+            id="tabela-assessment-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+        ),
     ]
 
 
 @callback(
     Output("tabela-assessment-body", "children"),
+    Output("a-nova-aplicacao", "href"),
     Input("url", "pathname"),
     Input("tabela-assessment-nav", "page"),
     Input("empresa-assessment", "value"),
@@ -150,22 +146,20 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
             html.Tr(
                 [
                     html.Td(
-                        assessment["_id"]
-                        .generation_time.date()
-                        .strftime("%d de %B de %Y")
+                        dmc.Anchor(
+                            children=assessment["_id"]
+                            .generation_time.date()
+                            .strftime("%d de %B de %Y"),
+                            href=f'/app/assessment-vendedor/teste?id={str(assessment["_id"])}',
+                        )
                     ),
                     html.Td(assessment["participantes"]),
                     html.Td(assessment["respostas"]),
-                    html.Td(assessment["respostas"] / assessment["participantes"]),
-                    html.Td("50"),
                     html.Td(
-                        dmc.Anchor(
-                            children="Link de acesso",
-                            href=f'/app/assessment-vendedor/teste?id={str(assessment["_id"])}',
-                        )
+                        f'{(assessment["respostas"] / assessment["participantes"]):.0%}'
                     ),
                 ]
             )
             for assessment in assessments
         ],
-    ]
+    ], f"/app/admin/assessment-vendedor/novo?empresa={empresa}"

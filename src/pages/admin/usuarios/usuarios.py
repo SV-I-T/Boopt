@@ -18,7 +18,7 @@ from utils.modelo_usuario import Usuario, checar_login
 register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 
 
-MAX_PAGINA = 20
+MAX_PAGINA = 15
 
 
 @checar_login(admin=True, gestor=True)
@@ -36,7 +36,21 @@ def layout():
     return [
         dmc.Title("Gerenciar usuários", className="titulo-pagina"),
         dmc.Group(
+            mb="1rem",
+            spacing="sm",
             children=[
+                dmc.TextInput(
+                    id="usuario-filtro-input",
+                    placeholder="Pesquisar por nome, empresa, cargo...",
+                    w=300,
+                ),
+                dmc.ActionIcon(
+                    id="usuario-filtro-btn",
+                    children=DashIconify(icon="fluent:search-20-filled", width=24),
+                    color="theme.primaryColor",
+                    variant="subtle",
+                    mr="auto",
+                ),
                 dmc.Anchor(
                     href="/app/admin/usuarios/edit",
                     children=dmc.Button(
@@ -47,45 +61,39 @@ def layout():
                     ),
                 ),
                 dmc.Anchor(
-                    href="/app/admin/usuarios/batelada",
+                    href="/app/admin/usuarios/cadastro-massa",
                     children=dmc.Button(
                         id="btn-modal-usr-massa",
                         children="Cadastro em massa",
                         variant="light",
                     ),
                 ),
-                dmc.TextInput(
-                    id="usuario-filtro-input", placeholder="Pesquisar", w=200
-                ),
-                dmc.ActionIcon(
-                    id="usuario-filtro-btn",
-                    children=DashIconify(icon="fluent:search-20-filled", width=20),
-                    color="theme.primaryColor",
-                    variant="filled",
-                ),
-            ]
+            ],
         ),
         dmc.Table(
             striped=True,
             withColumnBorders=True,
             withBorder=True,
             highlightOnHover=True,
-            style={"width": "auto"},
+            style={"width": "100%"},
             children=[
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Usuário", style={"width": 350}),
-                            html.Th("Empresa", style={"width": 200}),
+                            html.Th("Nome completo", style={"width": 350}),
+                            html.Th("Empresa", style={"width": 150}),
                             html.Th("Cargo", style={"width": 200}),
-                            html.Th("Ações", style={"width": 200}),
+                            html.Th("Gestor", style={"width": 100}),
+                            html.Th("Candidato", style={"width": 100}),
                         ]
                     )
                 ),
                 html.Tbody(id="tabela-usuarios-body"),
             ],
         ),
-        dmc.Pagination(id="tabela-usuarios-nav", total=n_paginas, page=1),
+        dmc.Pagination(
+            id="tabela-usuarios-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+        ),
     ]
 
 
@@ -125,7 +133,20 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
         },
         {"$skip": (pagina - 1) * MAX_PAGINA},
         {"$limit": MAX_PAGINA},
-        {"$project": {campo: 1 for campo in ("nome", "sobrenome", "cargo", "empresa")}},
+        {
+            "$project": {
+                campo: 1
+                for campo in (
+                    "nome",
+                    "sobrenome",
+                    "cargo",
+                    "empresa",
+                    "gestor",
+                    "recruta",
+                    "admin",
+                )
+            }
+        },
     ]
 
     if not usr_atual.admin:
@@ -136,15 +157,25 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
         *[
             html.Tr(
                 [
-                    html.Td(f'{usuario["nome"]} {usuario["sobrenome"]}'),
+                    html.Td(
+                        [
+                            dmc.Anchor(
+                                href=f"/app/admin/usuarios/edit?id={usuario['_id']}",
+                                children=f'{usuario["nome"]} {usuario["sobrenome"]}',
+                            ),
+                            DashIconify(
+                                icon="fluent:shield-person-20-filled",
+                                width=20,
+                                color="#c6c6c6",
+                            )
+                            if usuario["admin"]
+                            else None,
+                        ]
+                    ),
                     html.Td(usuario.get("empresa", None)),
                     html.Td(usuario["cargo"]),
-                    html.Td(
-                        dmc.Anchor(
-                            "Editar",
-                            href=f'/app/admin/usuarios/edit?id={usuario["_id"]}',
-                        )
-                    ),
+                    html.Td(usuario["gestor"] and "Sim" or "Não"),
+                    html.Td(usuario["recruta"] and "Sim" or "Não"),
                 ]
             )
             for usuario in usuarios

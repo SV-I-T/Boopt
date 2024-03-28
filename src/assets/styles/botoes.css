@@ -9,7 +9,7 @@ button {
     padding-right: 3rem;
     line-height: 34px;
     font-weight: 400;
-    font-size: 20px;
+    font-size: 16px;
     cursor: pointer;
     background-size: 100%;
     transition: background-size 300ms ease 0s;

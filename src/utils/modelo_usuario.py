@@ -272,17 +272,22 @@ class NovosUsuariosBatelada(BaseModel):
     @classmethod
     def carregar_planilha(cls, planilha):
         wb = openpyxl.load_workbook(planilha)
-        assert "Cadastro" in wb.sheetnames, "A planilha 'Cadastro' não foi encontrada."
+        assert (
+            "Cadastro" in wb.sheetnames
+        ), "A planilha 'Cadastro' não foi encontrada. Certifique-se que o arquivo segue o modelo fornecido."
         ws = wb["Cadastro"]
         linhas = [[cell.value for cell in row] for row in ws.rows]
-        assert [
-            "Primeiro Nome",
-            "Sobrenome",
-            "CPF",
-            "Data de Nascimento",
-            "Email",
-            "Cargo/Função",
-        ] == linhas[0], "O cabeçalho da tabela não segue o modelo fornecido."
+        assert (
+            [
+                "Primeiro Nome",
+                "Sobrenome",
+                "CPF",
+                "Data de Nascimento",
+                "Email",
+                "Cargo/Função",
+            ]
+            == linhas[0]
+        ), "O arquivo não está no modelo esperado. Certifique-se de não modificar o cabeçalho do modelo fornecido."
 
         usuarios = [
             {

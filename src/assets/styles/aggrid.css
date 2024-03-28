@@ -2,12 +2,20 @@
     border-radius: 10px;
 }
 
+.ag-theme-quartz * {
+    font-size: 14px;
+}
+
 .ag-theme-quartz .ag-cell:not(:last-child) {
     border-right: 1px solid rgb(222, 226, 230);
 }
 
 .ag-theme-quartz .ag-header-cell-text {
     font-weight: bold !important;
+}
+
+#usuarios-av {
+    width: 500px !important;
 }
 
 .ag-theme-quartz {

@@ -1,17 +1,7 @@
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
 from bson import ObjectId
-from dash import (
-    ClientsideFunction,
-    Input,
-    Output,
-    State,
-    callback,
-    clientside_callback,
-    html,
-    no_update,
-    register_page,
-)
+from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
@@ -28,11 +18,11 @@ register_page(
 
 
 @checar_login(admin=True, gestor=True)
-def layout():
+def layout(empresa: str = None):
     texto_titulo = [
         "Novo Assessment Vendedor",
     ]
-    layout_edicao = layout_novo_assessment()
+    layout_edicao = layout_novo_assessment(empresa)
 
     return [
         dmc.Title(texto_titulo, className="titulo-pagina"),
@@ -40,36 +30,29 @@ def layout():
     ]
 
 
-def layout_novo_assessment():
+def layout_novo_assessment(empresa: str = None):
     usr_atual: Usuario = current_user
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
         for empresa in usr_atual.buscar_empresas()
     ]
     return html.Div(
-        style={"maxWidth": 300},
+        className="editar-assessment",
         children=[
             dmc.Group(
-                align="end",
+                mb="1rem",
                 children=[
                     dmc.Select(
                         id="empresa-novo-av",
-                        label="Empresa",
                         icon=DashIconify(icon="fluent:building-24-filled", width=24),
                         name="empresa",
                         data=data_empresas,
                         required=True,
                         searchable=True,
                         nothingFound="Não encontrei nada",
-                        value=None,
-                    ),
-                    dmc.ActionIcon(
-                        id="usuarios-atualizar-btn-av",
-                        children=DashIconify(
-                            icon="fluent:arrow-clockwise-20-regular", width=20
-                        ),
-                        color="theme.primaryColor",
-                        variant="filled",
+                        placeholder="Selecione uma empresa",
+                        w=250,
+                        value=empresa,
                     ),
                 ],
             ),
@@ -94,8 +77,11 @@ def layout_novo_assessment():
                 dashGridOptions={
                     "rowSelection": "multiple",
                     "suppressRowClickSelection": True,
+                    "overlayLoadingTemplate": {
+                        "function": "'<span>Selecione uma empresa primeiro</span>'"
+                    },
                     "overlayNoRowsTemplate": {
-                        "function": "return '<span>Selecione uma empresa</span>'"
+                        "function": "'<span>Não há registros</span>'"
                     },
                 },
                 defaultColDef={
@@ -109,22 +95,19 @@ def layout_novo_assessment():
                     "suppressMovable": True,
                     "flex": 1,
                 },
-                style={"width": 500},
                 className="ag-theme-quartz compact",
             ),
-            dmc.Button(id="btn-criar-novo-av", children="Criar"),
+            dmc.Button(id="btn-criar-novo-av", children="Criar", mt="1rem"),
         ],
     )
 
 
 @callback(
     Output("usuarios-av", "rowData"),
-    Input("usuarios-atualizar-btn-av", "n_clicks"),
-    State("empresa-novo-av", "value"),
-    prevent_initial_call=True,
+    Input("empresa-novo-av", "value"),
 )
-def carregar_usuarios_empresa(n: int, empresa: str):
-    if not n:
+def carregar_usuarios_empresa(empresa: str):
+    if not empresa:
         raise PreventUpdate
 
     usuarios = list(

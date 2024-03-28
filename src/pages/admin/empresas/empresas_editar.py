@@ -1,19 +1,23 @@
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, html, no_update, register_page
+from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
-from utils.modelo_empresa import SEGMENTOS_PADROES, Empresa
+from utils.banco_dados import db
+from utils.modelo_empresa import Empresa
 from utils.modelo_usuario import checar_login
 
 register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
 
 
 def layout_nova_empresa(nome: str = None, segmento: str = None):
+    segmentos = db("Boopt", "Empresas").distinct(
+        "segmento", {"segmento": {"$ne": None}}
+    )
     return html.Div(
-        style={"maxWidth": 300},
+        className="editar-empresa",
         children=[
             dmc.TextInput(
                 id="nome-nova-empresa", label="Nome", required=True, value=nome
@@ -21,17 +25,17 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
             dmc.Select(
                 id="segmento-nova-empresa",
                 label="Segmento",
-                data=SEGMENTOS_PADROES,
+                description="Escolha um dos segmentos existentes ou digite um novo.",
+                data=segmentos,
                 creatable=True,
                 searchable=True,
                 clearable=True,
                 value=segmento,
             ),
             dmc.Button(
-                id="btn-criar-nova-empresa" if nome is None else "btn-salvar-empresa",
+                id="btn-criar-empresa" if nome is None else "btn-salvar-empresa",
                 children="Criar" if nome is None else "Salvar",
             ),
-            html.Div(id="feedback-nova-empresa"),
         ],
     )
 
@@ -59,7 +63,7 @@ def layout(id: str = None):
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Input("btn-criar-nova-empresa", "n_clicks"),
+    Input("btn-criar-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
     State("segmento-nova-empresa", "value"),
     prevent_initial_call=True,

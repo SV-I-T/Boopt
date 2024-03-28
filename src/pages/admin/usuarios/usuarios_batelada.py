@@ -21,7 +21,9 @@ from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_usuario import CARGOS_PADROES, NovosUsuariosBatelada, checar_login
 
-register_page(__name__, path="/app/admin/usuarios/batelada", title="Cadastro em Massa")
+register_page(
+    __name__, path="/app/admin/usuarios/cadastro-massa", title="Cadastro em Massa"
+)
 
 
 @checar_login(admin=True, gestor=True)
@@ -40,29 +42,37 @@ def layout():
             icon=DashIconify(icon="fluent:building-24-filled", width=24),
             name="empresa",
             data=data_empresas,
+            placeholder="Selecione uma empresa",
             required=True,
             searchable=True,
             nothingFound="Não encontrei nada",
             w=300,
         ),
-        dcc.Upload(
-            id="upload-cadastro-massa",
-            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            children=dmc.Button(
-                id="usr-massa-upload",
-                children="Escolha o arquivo (.xlsx)",
-                leftIcon=DashIconify(icon="fluent:arrow-upload-16-filled", width=24),
-            ),
-        ),
-        dmc.Text(id="usr-massa-arquivo", children="Nenhum arquivo escolhido"),
         dmc.Button(
             id="usr-massa-download-template",
-            children="Baixar modelo (.xlsx)",
+            children="Baixar modelo",
             variant="subtle",
             compact=True,
             leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
         ),
-        dmc.Button("Criar usuários", id="btn-criar-usrs-batelada"),
+        dcc.Upload(
+            id="upload-cadastro-massa",
+            className="container-upload",
+            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            children=[
+                html.Div(
+                    [
+                        dmc.Text(
+                            "Clique aqui para selecionar ou arraste o arquivo (.xlsx)"
+                        ),
+                        dmc.Text(
+                            id="usr-massa-arquivo", children="Nenhum arquivo escolhido"
+                        ),
+                    ]
+                ),
+            ],
+        ),
+        dmc.Button("Enviar", id="btn-criar-usrs-batelada"),
         html.Div(id="feedback-usr-massa"),
     ]
 
@@ -91,12 +101,14 @@ clientside_callback(
     ClientsideFunction("clientside", "bind_valor"),
     Output("usr-massa-arquivo", "children"),
     Input("upload-cadastro-massa", "filename"),
+    prevent_initial_call=True,
 )
 
 
 @callback(
     Output("feedback-usr-massa", "children"),
     Output("notificacoes", "children", allow_duplicate=True),
+    Output("url", "pathname", allow_duplicate=True),
     Input("btn-criar-usrs-batelada", "n_clicks"),
     State("upload-cadastro-massa", "contents"),
     State("upload-cadastro-massa", "filename"),
@@ -106,23 +118,25 @@ clientside_callback(
 def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
     if not n:
         raise PreventUpdate
-    if not contents:
-        ALERTA = dmc.Alert(
-            title="Atenção", children="Selecione um arquivo.", color="yellow"
-        )
-        NOTIFICACAO = no_update
-    elif not nome.endswith(".xlsx"):
+    if not empresa:
         ALERTA = dmc.Alert(
             title="Atenção",
-            children='O arquivo precisa ter a extensão ".xlsx".',
-            color="red",
+            children="Selecione uma empresa para cadastrar os usuários.",
         )
         NOTIFICACAO = no_update
-    elif not empresa:
+        URL = no_update
+    elif not contents:
         ALERTA = dmc.Alert(
-            title="Atenção", children="Selecione uma empresa.", color="red"
+            title="Atenção", children="Selecione um arquivo com os dados dos usuários."
         )
         NOTIFICACAO = no_update
+        URL = no_update
+    elif not nome.endswith(".xlsx"):
+        ALERTA = dmc.Alert(
+            title="Atenção", children='O arquivo precisa ter a extensão ".xlsx".'
+        )
+        NOTIFICACAO = no_update
+        URL = no_update
     else:
         try:
             _, content_string = contents.split(",")
@@ -136,9 +150,11 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
                 title="Atenção", children=str(e.errors()[0]["ctx"]["error"])
             )
             NOTIFICACAO = no_update
+            URL = no_update
         except Exception as e:
             ALERTA = dmc.Alert(title="Atenção", children=str(e))
             NOTIFICACAO = no_update
+            URL = no_update
         else:
             ALERTA = None
             NOTIFICACAO = dmc.Notification(
@@ -148,5 +164,6 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
                 message=f"{len(novos_usuarios.usuarios)} usuários foram criados com sucesso.",
                 color="green",
             )
+            URL = "/app/admin/usuarios"
 
-    return ALERTA, NOTIFICACAO
+    return ALERTA, NOTIFICACAO, URL

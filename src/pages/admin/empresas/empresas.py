@@ -17,7 +17,7 @@ from utils.modelo_usuario import checar_login
 
 register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 
-MAX_PAGINA = 20
+MAX_PAGINA = 15
 
 
 @checar_login(admin=True)
@@ -27,7 +27,21 @@ def layout():
     return [
         dmc.Title("Gerenciamento de empresas", className="titulo-pagina"),
         dmc.Group(
+            mb="1rem",
+            spacing="sm",
             children=[
+                dmc.TextInput(
+                    id="empresa-filtro-input",
+                    placeholder="Pesquisar por nome, segmento...",
+                    w=300,
+                ),
+                dmc.ActionIcon(
+                    id="empresa-filtro-btn",
+                    children=DashIconify(icon="fluent:search-20-filled", width=24),
+                    color="theme.primaryColor",
+                    variant="subtle",
+                    mr="auto",
+                ),
                 dmc.Anchor(
                     href="/app/admin/empresas/edit",
                     children=dmc.Button(
@@ -37,38 +51,30 @@ def layout():
                         variant="gradient",
                     ),
                 ),
-                dmc.TextInput(
-                    id="empresa-filtro-input", placeholder="Pesquisar", w=200
-                ),
-                dmc.ActionIcon(
-                    id="empresa-filtro-btn",
-                    children=DashIconify(icon="fluent:search-20-filled", width=20),
-                    color="theme.primaryColor",
-                    variant="filled",
-                ),
-            ]
+            ],
         ),
         dmc.Table(
             striped=True,
             highlightOnHover=True,
             withBorder=True,
             withColumnBorders=True,
-            style={"width": "auto"},
+            style={"width": "100%"},
             children=[
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("ID", style={"width": 200}),
                             html.Th("Nome", style={"width": 200}),
                             html.Th("Segmento", style={"width": 200}),
-                            html.Th("Ações", style={"width": 200}),
+                            html.Th("Usuários", style={"width": 100}),
                         ]
                     )
                 ),
                 html.Tbody(id="tabela-empresas-body"),
             ],
         ),
-        dmc.Pagination(id="tabela-empresas-nav", total=n_paginas, page=1),
+        dmc.Pagination(
+            id="tabela-empresas-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+        ),
     ]
 
 
@@ -81,25 +87,39 @@ def layout():
 )
 def atualizar_tabela_empresas(_, pagina, n, busca):
     busca_regex = {"$regex": busca, "$options": "i"}
-    empresas = db("Boopt", "Empresas").find(
-        filter={"$or": [{campo: busca_regex} for campo in ("nome", "segmento")]},
-        skip=(pagina - 1) * MAX_PAGINA,
-        limit=MAX_PAGINA,
-        sort={"nome": 1},
+    empresas = db("Boopt", "Empresas").aggregate(
+        [
+            {
+                "$match": {
+                    "$or": [{campo: busca_regex} for campo in ("nome", "segmento")]
+                }
+            },
+            {"$skip": (pagina - 1) * MAX_PAGINA},
+            {"$limit": MAX_PAGINA},
+            {"$sort": {"nome": 1}},
+            {
+                "$lookup": {
+                    "from": "Usuários",
+                    "foreignField": "empresa",
+                    "localField": "_id",
+                    "as": "usuarios",
+                }
+            },
+            {"$set": {"usuarios": {"$size": "$usuarios"}}},
+        ]
     )
     return [
         *[
             html.Tr(
                 [
-                    html.Td(str(empresa["_id"])),
-                    html.Td(empresa["nome"]),
-                    html.Td(empresa["segmento"]),
                     html.Td(
                         dmc.Anchor(
-                            "Editar",
+                            empresa["nome"],
                             href=f'/app/admin/empresas/edit?id={empresa["_id"]}',
                         )
                     ),
+                    html.Td(empresa["segmento"]),
+                    html.Td(empresa["usuarios"]),
                 ]
             )
             for empresa in empresas

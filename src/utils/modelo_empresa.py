@@ -4,8 +4,6 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
 from utils.banco_dados import db
 
-SEGMENTOS_PADROES = sorted(["Farmácia", "Eletromóveis", "Automóveis", "Imóveis"])
-
 
 class Empresa(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)

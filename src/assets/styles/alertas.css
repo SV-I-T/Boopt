@@ -1,0 +1,8 @@
+.mantine-Alert-root {
+    background-color: #FFE9DE;
+    border: 1px solid var(--laranja-boopt);
+}
+
+.mantine-Alert-label {
+    color: var(--laranja-boopt);
+}
