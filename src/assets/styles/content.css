@@ -28,7 +28,7 @@ div:has(>#_pages_content) {
     width: 100%;
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 1000px) {
     #page-container {
         padding-left: 0px;
         left: 0px;
@@ -40,7 +40,7 @@ div:has(>#_pages_content) {
     }
 }
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 1000px) {
     #page-container {
         margin-left: calc(var(--navbar-width));
         z-index: 1;
