@@ -33,9 +33,15 @@ body.index-body {
     background-size: 500px;
 }
 
-.titulo-pagina {
+h1.titulo-pagina {
     font-weight: 600;
     margin-bottom: 2rem;
+}
+
+h1.secao-pagina {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
 @media only screen and (max-width: 767px) {
