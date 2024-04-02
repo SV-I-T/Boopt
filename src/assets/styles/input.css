@@ -37,3 +37,8 @@ input.input:focus {
     border-color: var(--azul-sv);
     outline: none;
 }
+
+input[disabled] {
+    background-color: #dadada !important;
+    color: #0f0f0f !important;
+}
