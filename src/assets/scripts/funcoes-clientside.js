@@ -14,18 +14,17 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             location.reload();
             throw window.dash_clientside.PreventUpdate;
         },
-        alterar_frase: async function (n_next, n_back, ordem_atual) {
+        alterar_frase: async function (n_next, n_back, ordem_atual, frases, ordem) {
             const triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
             switch (triggered[0]) {
                 case "btn-next.n_clicks":
-                    if (n_next) { return ordem_atual + 1; } else { throw window.dash_clientside.PreventUpdate; }
+                    if (n_next) { ordem_atual++; };
+                    break
                 case "btn-back.n_clicks":
-                    if (n_back) { return ordem_atual - 1; } else { throw window.dash_clientside.PreventUpdate; }
-                default:
-                    throw window.dash_clientside.PreventUpdate;
-            }
-        },
-        atualizar_componentes_frase: async function (ordem_atual, frases, ordem) {
+                    if (n_back) { ordem_atual--; };
+                    break
+            };
+
             let frase_atual = frases[String(ordem[ordem_atual])];
             let totalFrases = ordem.length;
             let progresso = 100 * (ordem_atual + 1) / totalFrases;
@@ -48,10 +47,14 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                     break;
             }
             document.querySelector('.progress-bar').lastChild.style.width = progresso + "%";
+
             return [
-                frase_atual["frase"], frase_atual["valor"],
-                disable_next, disable_back,
-            ];
+                ordem_atual,
+                frase_atual["frase"],
+                frase_atual["valor"],
+                disable_next,
+                disable_back
+            ]
         },
         nota_clicada: async function (nota, ordem_atual, ordem, frases) {
             frases[String(ordem[ordem_atual])]['valor'] = nota;
