@@ -1,10 +1,24 @@
+.play-videos-av {
+    background-image: linear-gradient(45deg, var(--azul-sv) 20%, var(--laranja-boopt) 80%);
+    border-radius: 50px;
+    padding: 20px;
+    height: 80px;
+    width: 80px;
+}
+
 #text-frase {
     font-weight: 500;
-    font-size: 20px;
+    font-size: 26px;
+    font-size-adjust: 0.5;
     display: flex;
     text-align: center;
     align-items: center;
-    height: 100%;
+    height: 400px;
+}
+
+.teste-assessment .label-teste {
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .radio-notas-frase {
@@ -16,8 +30,8 @@
 .radio-notas-frase label input {
     appearance: none;
     background-color: #fff;
-    border-radius: 40px !important;
-    border-width: 2px;
+    border-radius: 50px !important;
+    border-width: 1px;
     border-style: solid;
     transition: background-color 100ms ease-in 0s;
 }
@@ -25,33 +39,38 @@
 .radio-notas-frase label input::after {
     content: "";
     display: block;
-    background-color: #fff;
-    width: calc(100% - 1px);
-    height: calc(100% - 1px);
-    border-radius: 40px !important;
-    position: relative;
-    transform: translateY(-50%) translateX(-50%) scale(1);
+    background-image: radial-gradient(#fff, #ddd);
+    width: 100%;
+    height: 100%;
+    border-radius: 50px !important;
+    transform: scale(0.9);
     left: 50%;
     top: 50%;
-    transition: transform 100ms ease-in 0s;
+    transition: transform 100ms ease-in 10s;
 }
 
 .radio-notas-frase label input:checked::after {
-    transform: translateY(-50%) translateX(-50%) scale(0.5);
+    transform: scale(0.5);
 }
 
+
+.radio-notas-frase label:nth-child(1),
+.radio-notas-frase label:nth-child(5),
 .radio-notas-frase label:nth-child(1) input,
 .radio-notas-frase label:nth-child(5) input {
     width: 50px;
     height: 50px;
 }
 
+.radio-notas-frase label:nth-child(2),
+.radio-notas-frase label:nth-child(4),
 .radio-notas-frase label:nth-child(2) input,
 .radio-notas-frase label:nth-child(4) input {
     width: 30px;
     height: 30px;
 }
 
+.radio-notas-frase label:nth-child(3),
 .radio-notas-frase label:nth-child(3) input {
     width: 20px;
     height: 20px;

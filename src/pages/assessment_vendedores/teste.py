@@ -50,22 +50,19 @@ def layout(id: str = None, secao: str = "instrucoes"):
     usr: Usuario = current_user
 
     if secao == "instrucoes":
-        return html.Div(
-            className="center-container",
-            children=[
-                dcc.Markdown(
-                    EXPLICACAO_MD.format(vendedor=usr.nome),
-                    style={"font-weight": 400, "font-size": 30},
+        return [
+            dcc.Markdown(
+                EXPLICACAO_MD.format(vendedor=usr.nome),
+                style={"font-weight": 400, "font-size": 30},
+            ),
+            dmc.Anchor(
+                href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
+                children=dmc.Button(
+                    "Começar teste",
+                    color="SVAzul",
                 ),
-                dmc.Anchor(
-                    href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
-                    children=dmc.Button(
-                        "Começar teste",
-                        color="BooptLaranja",
-                    ),
-                ),
-            ],
-        )
+            ),
+        ]
 
     elif secao == "frases":
         aplicacao = db("AssessmentVendedores", "Aplicações").find_one(
@@ -92,35 +89,26 @@ def layout(id: str = None, secao: str = "instrucoes"):
         frase_atual = frases[str(ordem[0])]
 
         return html.Div(
-            className="center-container",
+            className="center-container teste-assessment",
             children=[
                 dcc.Store(id="store-frases", data=frases, storage_type="local"),
                 dcc.Store(id="store-status-done", data=False, storage_type="local"),
                 dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
                 dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
                 html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
-                dmc.Container(
-                    h=400,
-                    children=dmc.Text(
-                        id="text-frase",
-                        children=frase_atual["frase"],
-                        weight=500,
-                        size=18,
-                        align="center",
-                        display="flex",
-                        h="100%",
-                        style={"align-items": "center"},
-                    ),
+                dmc.Text(
+                    id="text-frase",
+                    children=frase_atual["frase"],
                 ),
                 dmc.Group(
                     align="center",
                     position="center",
+                    mb="1rem",
                     children=[
                         dmc.Text(
                             "Não me identifico",
                             color="BooptLaranja",
-                            size=16,
-                            weight=700,
+                            className="label-teste",
                         ),
                         dcc.RadioItems(
                             id="nota-av",
@@ -133,31 +121,41 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             value=None,
                         ),
                         dmc.Text(
-                            "Me identifico muito", color="SVAzul", size=16, weight=700
+                            "Me identifico muito",
+                            color="SVAzul",
+                            className="label-teste",
                         ),
                     ],
                 ),
                 dmc.Group(
-                    mt="5rem",
                     mb="1rem",
                     position="center",
                     children=[
                         dmc.Button(
                             "Anterior",
-                            leftIcon=DashIconify(icon="bxs:left-arrow", width=18),
+                            leftIcon=DashIconify(
+                                icon="fluent:chevron-left-20-filled", width=18
+                            ),
                             id="btn-back",
                             disabled=True,
                             color="dark",
                         ),
                         dmc.Button(
                             "Próximo",
-                            rightIcon=DashIconify(icon="bxs:right-arrow", width=18),
+                            rightIcon=DashIconify(
+                                icon="fluent:chevron-right-20-filled", width=18
+                            ),
                             color="dark",
                             id="btn-next",
                         ),
+                        dmc.ActionIcon(
+                            DashIconify(
+                                icon="fluent:arrow-shuffle-16-filled", width=16
+                            ),
+                            id="btn-last",
+                        ),
                     ],
                 ),
-                dmc.Button("Auto-preencher", id="btn-last", compact=True, size="xs"),
                 html.Div(id="container-envio"),
             ],
         )
@@ -193,23 +191,14 @@ def preencher_auto(n, frases):
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="alterar_frase"),
-    Output("store-ordem-frase-atual", "data", allow_duplicate=True),
-    Input("btn-next", "n_clicks"),
-    Input("btn-back", "n_clicks"),
-    State("store-ordem-frase-atual", "data"),
-    prevent_initial_call=True,
-)
-
-# ATUALIZA COMPONENTES SEGUNDO A FRASE ATUAL
-clientside_callback(
-    ClientsideFunction(
-        namespace="clientside", function_name="atualizar_componentes_frase"
-    ),
+    Output("store-ordem-frase-atual", "data"),
     Output("text-frase", "children"),
     Output("nota-av", "value"),
     Output("btn-next", "disabled"),
     Output("btn-back", "disabled"),
-    Input("store-ordem-frase-atual", "data"),
+    Input("btn-next", "n_clicks"),
+    Input("btn-back", "n_clicks"),
+    State("store-ordem-frase-atual", "data"),
     State("store-frases", "data"),
     State("store-ordem-frases", "data"),
 )
@@ -243,8 +232,8 @@ def habilitar_envio(status_pronto):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return dmc.Alert(
-            bg="#D9D9D9",
+        return dmc.Card(
+            bg="#e9e9e9",
             px="1rem",
             children=dmc.Group(
                 position="apart",
@@ -268,6 +257,7 @@ def habilitar_envio(status_pronto):
         )
 
 
+# ENVIAR RESPOSTA
 @callback(
     Output("url", "search", allow_duplicate=True),
     Output("notificacoes", "children", allow_duplicate=True),
