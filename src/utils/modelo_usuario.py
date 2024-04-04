@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 from typing import Any, Literal, Optional, Union
 
 import dash_mantine_components as dmc
@@ -25,6 +26,14 @@ CARGOS_PADROES = sorted(
 )
 
 
+class Perfil(str, Enum):
+    dev = "dev"
+    admin = "adm"
+    gestor = "gst"
+    usuario = "usr"
+    candidato = "cdt"
+
+
 class Usuario(BaseModel, UserMixin):
     id_: ObjectId = Field(alias="_id")
     nome: str
@@ -38,9 +47,7 @@ class Usuario(BaseModel, UserMixin):
     empresa_nome: Optional[
         str
     ] = None  # Não faz parte do esquema no DB, é calculado no model_post_init
-    admin: bool = False
-    gestor: bool = False
-    recruta: bool = False
+    perfil: Perfil = Perfil.usuario
 
     class Config:
         arbitrary_types_allowed = True
@@ -118,11 +125,11 @@ class Usuario(BaseModel, UserMixin):
         return True
 
     def buscar_empresas(self) -> Cursor | None:
-        if self.admin:
+        if self.perfil in [Perfil.dev, Perfil.admin]:
             return db("Boopt", "Empresas").find(
                 projection={"_id": 1, "nome": 1}, sort={"nome": 1}
             )
-        elif self.gestor:
+        elif self.perfil == Perfil.gestor:
             return db("Boopt", "Empresas").find(
                 {"_id": self.empresa},
                 projection={"_id": 1, "nome": 1},
@@ -140,9 +147,7 @@ class NovoUsuario(BaseModel):
     data: str
     cargo: str
     empresa: Union[None, str, ObjectId]
-    admin: bool = False
-    gestor: bool = False
-    recruta: bool = False
+    perfil: Perfil
 
     class Config:
         arbitrary_types_allowed = True
@@ -333,22 +338,14 @@ def layout_nao_autorizado():
     ]
 
 
-def checar_login(_func=None, *, admin: bool = False, gestor: bool = False):
-    """
-    A decorator function that checks if the user is authenticated and has the necessary role permissions before allowing access to the decorated function.
-    It takes in either a function or keyword arguments for admin and gestor roles, and returns a wrapper function that enforces the authentication and role permissions.
-    """
-
+def checar_perfil(_func=None, *, permitir: list[Perfil] = None):
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
-            if current_user.is_authenticated:
-                if (
-                    (not admin and not gestor)
-                    or (admin and current_user.admin)
-                    or (gestor and current_user.gestor)
-                ):
-                    return func(*args, **kwargs)
-
+            usr_atual: Usuario = current_user
+            if usr_atual.is_authenticated and (
+                permitir is None or usr_atual.perfil in permitir
+            ):
+                return func(*args, **kwargs)
             return layout_nao_autorizado()
 
         return wrapper

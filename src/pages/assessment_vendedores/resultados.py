@@ -8,7 +8,7 @@ from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.cache import cache
 from utils.modelo_assessment import AssessmentVendedor
-from utils.modelo_usuario import Usuario, checar_login, layout_nao_autorizado
+from utils.modelo_usuario import Perfil, Usuario, checar_perfil, layout_nao_autorizado
 
 from .funcoes.graficos import (
     cartao_nota_total_etapas,
@@ -25,17 +25,20 @@ register_page(
 )
 
 
-@checar_login
+@checar_perfil
 def layout(usr: str = None, resposta: str = None):
     usr_atual: Usuario = current_user
 
     if usr == usr_atual.id:
         # O usuário que está tentando acessar é o dono da resposta
         pass
-    elif usr_atual.admin:
+    elif usr_atual.perfil in [Perfil.dev, Perfil.admin]:
         # O usuário que está tentando acessar é admin
         pass
-    elif usr_atual.gestor and usr_atual.empresa == Usuario.buscar("_id", usr).empresa:
+    elif (
+        usr_atual.perfil == Perfil.gestor
+        and usr_atual.empresa == Usuario.buscar("_id", usr).empresa
+    ):
         # O usuário que está tentando acessar é gestor da empresa do dono da resposta
         pass
     else:
@@ -95,106 +98,83 @@ def construir_resultados(id_resposta: str):
         df_notas_etapas, df_notas_competencias = dfs
 
     return [
-        dmc.Col(
-            dmc.Group(
-                [
-                    dmc.Avatar(
-                        "1",
-                        color="BooptLaranja",
-                        radius="xl",
-                    ),
-                    dmc.Text("Sua nota:", weight=700),
-                    cartao_nota_total_etapas(df_notas_etapas),
-                ]
-            ),
-            span=12,
-        ),
-        dmc.Col(
-            dmc.Group(
-                [
-                    dmc.Avatar(
-                        "2",
-                        color="BooptLaranja",
-                        radius="xl",
-                    ),
-                    dmc.Text(
-                        "Pontuação por Etapa do Atendimento Comercial",
-                        weight=700,
-                    ),
-                ]
-            ),
-            span=12,
-        ),
-        dmc.Col(
-            dcc.Graph(
-                figure=radar_etapas(df_notas_etapas),
-                config=dict(displayModeBar=False, locale="pt-br"),
-            ),
-            span=12,
-        ),
-        dmc.Col(
+        dmc.Group(
             [
-                dmc.Group(
-                    [
-                        dmc.Avatar(
-                            "3",
-                            color="BooptLaranja",
-                            radius="xl",
-                        ),
-                        dmc.Text(
-                            "Competências por Grupo",
-                            weight=700,
-                        ),
-                    ]
+                dmc.Avatar(
+                    "1",
+                    color="BooptLaranja",
+                    radius="xl",
                 ),
-                dmc.Group(
-                    [
-                        dmc.Text(
-                            "Competência baixa: Nota 0 a 5",
-                            color="red",
-                            size="sm",
-                        ),
-                        dmc.Text(
-                            "Competência média: Nota 6 a 7",
-                            color="yellow",
-                            size="sm",
-                        ),
-                        dmc.Text(
-                            "Competência alta: Nota 8 a 10",
-                            color="green",
-                            size="sm",
-                        ),
-                    ]
+                dmc.Text("Sua nota:", weight=700),
+                cartao_nota_total_etapas(df_notas_etapas),
+            ]
+        ),
+        dmc.Group(
+            [
+                dmc.Avatar(
+                    "2",
+                    color="BooptLaranja",
+                    radius="xl",
                 ),
-            ],
-            span=12,
+                dmc.Text(
+                    "Pontuação por Etapa do Atendimento Comercial",
+                    weight=700,
+                ),
+            ]
         ),
-        dmc.Col(
-            dcc.Graph(
-                figure=rosca_grupo(df_notas_competencias),
-                config=dict(displayModeBar=False, locale="pt-br"),
-            ),
-            sm=6,
+        dcc.Graph(
+            figure=radar_etapas(df_notas_etapas),
+            config=dict(displayModeBar=False, locale="pt-br"),
         ),
-        dmc.Col(tabela_competencias(df_notas_competencias), sm=6),
-        dmc.Col(
-            dmc.Group(
-                [
-                    dmc.Avatar(
-                        "4",
-                        color="BooptLaranja",
-                        radius="xl",
-                    ),
-                    dmc.Text("Nota por Competência:", weight=700),
-                ]
-            ),
-            span=12,
+        dmc.Group(
+            [
+                dmc.Avatar(
+                    "3",
+                    color="BooptLaranja",
+                    radius="xl",
+                ),
+                dmc.Text(
+                    "Competências por Grupo",
+                    weight=700,
+                ),
+            ]
         ),
-        dmc.Col(
-            dcc.Graph(
-                figure=radar_comp(df_notas_competencias),
-                config=dict(displayModeBar=False, locale="pt-br"),
-            ),
+        dmc.Group(
+            [
+                dmc.Text(
+                    "Competência baixa: Nota 0 a 5",
+                    color="red",
+                    size="sm",
+                ),
+                dmc.Text(
+                    "Competência média: Nota 6 a 7",
+                    color="yellow",
+                    size="sm",
+                ),
+                dmc.Text(
+                    "Competência alta: Nota 8 a 10",
+                    color="green",
+                    size="sm",
+                ),
+            ]
+        ),
+        dcc.Graph(
+            figure=rosca_grupo(df_notas_competencias),
+            config=dict(displayModeBar=False, locale="pt-br"),
+        ),
+        dmc.Group(
+            [
+                dmc.Avatar(
+                    "4",
+                    color="BooptLaranja",
+                    radius="xl",
+                ),
+                dmc.Text("Nota por Competência:", weight=700),
+            ]
+        ),
+        dcc.Graph(
+            figure=radar_comp(df_notas_competencias),
+            config=dict(displayModeBar=False, locale="pt-br"),
         ),
     ]
 

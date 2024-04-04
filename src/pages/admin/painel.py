@@ -1,12 +1,12 @@
 import dash_mantine_components as dmc
 from dash import register_page
 from dash_iconify import DashIconify
-from utils.modelo_usuario import checar_login
+from utils.modelo_usuario import Perfil, checar_perfil
 
 register_page(__name__, path="/app/admin", title="Painel de gestão")
 
 
-@checar_login(admin=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin])
 def layout():
     modulos: tuple[str] = (
         {

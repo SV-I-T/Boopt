@@ -2,7 +2,7 @@ import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, get_asset_url, html
 from dash_iconify import DashIconify
 from flask_login import current_user
-from utils.modelo_usuario import Usuario
+from utils.modelo_usuario import Perfil, Usuario
 
 
 def layout_navbar():
@@ -94,7 +94,7 @@ def menu_usuario(_, path):
                             ),
                             active=path.startswith("/app/admin"),
                         )
-                        if (usr.gestor or usr.admin)
+                        if (usr.perfil in [Perfil.dev, Perfil.admin, Perfil.gestor])
                         else None,
                         dmc.NavLink(
                             label="Sair",

@@ -19,14 +19,19 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_usuario import CARGOS_PADROES, NovosUsuariosBatelada, checar_login
+from utils.modelo_usuario import (
+    CARGOS_PADROES,
+    NovosUsuariosBatelada,
+    Perfil,
+    checar_perfil,
+)
 
 register_page(
     __name__, path="/app/admin/usuarios/cadastro-massa", title="Cadastro em Massa"
 )
 
 
-@checar_login(admin=True, gestor=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
@@ -122,18 +127,23 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
         ALERTA = dmc.Alert(
             title="Atenção",
             children="Selecione uma empresa para cadastrar os usuários.",
+            color="BooptLaranja",
         )
         NOTIFICACAO = no_update
         URL = no_update
     elif not contents:
         ALERTA = dmc.Alert(
-            title="Atenção", children="Selecione um arquivo com os dados dos usuários."
+            title="Atenção",
+            children="Selecione um arquivo com os dados dos usuários.",
+            color="BooptLaranja",
         )
         NOTIFICACAO = no_update
         URL = no_update
     elif not nome.endswith(".xlsx"):
         ALERTA = dmc.Alert(
-            title="Atenção", children='O arquivo precisa ter a extensão ".xlsx".'
+            title="Atenção",
+            children='O arquivo precisa ter a extensão ".xlsx".',
+            color="BooptLaranja",
         )
         NOTIFICACAO = no_update
         URL = no_update
@@ -147,12 +157,18 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
             novos_usuarios.registrar_usuarios(empresa=ObjectId(empresa))
         except ValidationError as e:
             ALERTA = dmc.Alert(
-                title="Atenção", children=str(e.errors()[0]["ctx"]["error"])
+                title="Atenção",
+                children=str(e.errors()[0]["ctx"]["error"]),
+                color="BooptLaranja",
             )
             NOTIFICACAO = no_update
             URL = no_update
         except Exception as e:
-            ALERTA = dmc.Alert(title="Atenção", children=str(e))
+            ALERTA = dmc.Alert(
+                title="Atenção",
+                children=str(e),
+                color="BooptLaranja",
+            )
             NOTIFICACAO = no_update
             URL = no_update
         else:

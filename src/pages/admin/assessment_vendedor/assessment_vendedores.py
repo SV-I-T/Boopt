@@ -6,7 +6,7 @@ from dash import Input, Output, callback, html, register_page
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import Usuario, checar_login
+from utils.modelo_usuario import Perfil, Usuario, checar_perfil
 
 register_page(
     __name__, "/app/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
@@ -24,11 +24,11 @@ def carregar_aplicacoes():
     return aplicacoes
 
 
-@checar_login(admin=True, gestor=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
     usr_atual: Usuario = current_user
 
-    if usr_atual.admin:
+    if usr_atual.perfil in [Perfil.admin, Perfil.dev]:
         n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
     else:
         n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(

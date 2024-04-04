@@ -13,7 +13,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import Usuario, checar_login
+from utils.modelo_usuario import Perfil, Usuario, checar_perfil
 
 register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 
@@ -21,11 +21,11 @@ register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 MAX_PAGINA = 15
 
 
-@checar_login(admin=True, gestor=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
     usr_atual: Usuario = current_user
 
-    if usr_atual.admin:
+    if usr_atual.perfil in [Perfil.dev, Perfil.admin]:
         n_usuarios = db("Boopt", "Usuários").count_documents({})
     else:
         n_usuarios = db("Boopt", "Usuários").count_documents(
@@ -83,8 +83,7 @@ def layout():
                             html.Th("Nome completo", style={"width": 350}),
                             html.Th("Empresa", style={"width": 150}),
                             html.Th("Cargo", style={"width": 200}),
-                            html.Th("Gestor", style={"width": 100}),
-                            html.Th("Candidato", style={"width": 100}),
+                            html.Th("Perfil", style={"width": 100}),
                         ]
                     )
                 ),
@@ -107,7 +106,7 @@ def layout():
 def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
     usr_atual: Usuario = current_user
 
-    if not (usr_atual.gestor or usr_atual.admin):
+    if usr_atual.perfil not in [Perfil.dev, Perfil.admin]:
         raise PreventUpdate
 
     busca_regex = {"$regex": busca, "$options": "i"}
@@ -141,15 +140,13 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
                     "sobrenome",
                     "cargo",
                     "empresa",
-                    "gestor",
-                    "recruta",
-                    "admin",
+                    "perfil",
                 )
             }
         },
     ]
 
-    if not usr_atual.admin:
+    if usr_atual.perfil not in [Perfil.dev, Perfil.admin]:
         pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
 
     usuarios = db("Boopt", "Usuários").aggregate(pipeline)
@@ -163,19 +160,11 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
                                 href=f"/app/admin/usuarios/edit?id={usuario['_id']}",
                                 children=f'{usuario["nome"]} {usuario["sobrenome"]}',
                             ),
-                            DashIconify(
-                                icon="fluent:shield-person-20-filled",
-                                width=20,
-                                color="#c6c6c6",
-                            )
-                            if usuario["admin"]
-                            else None,
                         ]
                     ),
                     html.Td(usuario.get("empresa", None)),
-                    html.Td(usuario["cargo"]),
-                    html.Td(usuario["gestor"] and "Sim" or "Não"),
-                    html.Td(usuario["recruta"] and "Sim" or "Não"),
+                    html.Td(usuario.get("cargo", None)),
+                    html.Td(Perfil(usuario["perfil"]).name.capitalize()),
                 ]
             )
             for usuario in usuarios

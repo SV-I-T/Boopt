@@ -20,7 +20,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import Usuario, checar_login
+from utils.modelo_usuario import Usuario, checar_perfil
 
 EXPLICACAO_MD = """
     Olá **{vendedor}**!
@@ -40,7 +40,7 @@ register_page(
 )
 
 
-@checar_login
+@checar_perfil
 def layout(id: str = None, secao: str = "instrucoes"):
     if id is None or len(id) != 24:
         return dmc.Alert(

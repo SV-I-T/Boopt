@@ -1,8 +1,9 @@
 import dash_mantine_components as dmc
-from dash import html, register_page
+from dash import dcc, html, register_page
+from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.modelo_assessment import AssessmentVendedor
-from utils.modelo_usuario import Usuario, checar_login
+from utils.modelo_usuario import Usuario, checar_perfil
 
 register_page(
     __name__,
@@ -12,7 +13,7 @@ register_page(
 )
 
 
-@checar_login
+@checar_perfil
 def layout():
     usr_atual: Usuario = current_user
 
@@ -63,6 +64,40 @@ def layout():
                         else None,
                     ),
                 ]
+            ),
+            dmc.Card(
+                bg="#e9e9e9",
+                px="1rem",
+                mt="5rem",
+                children=dmc.Group(
+                    spacing="xl",
+                    children=[
+                        DashIconify(
+                            icon="fluent:play-48-filled",
+                            color="#fff",
+                            className="play-videos-av",
+                        ),
+                        html.Div(
+                            style={"width": 350},
+                            children=[
+                                dcc.Markdown(
+                                    "Acesse a nossa plataforma de vídeos **após realizar o teste do Assessment Boopt**"
+                                ),
+                                dmc.Anchor(
+                                    href="",
+                                    children=dmc.Button(
+                                        children="Acessar",
+                                        leftIcon=DashIconify(
+                                            icon="fluent:filmstrip-play-16-filled",
+                                            width=16,
+                                        ),
+                                        className="btn-borda-gradiente",
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
             ),
         ],
     )

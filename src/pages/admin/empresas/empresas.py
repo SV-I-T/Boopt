@@ -13,14 +13,14 @@ from dash import (
 )
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import checar_login
+from utils.modelo_usuario import Perfil, checar_perfil
 
 register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 
 MAX_PAGINA = 15
 
 
-@checar_login(admin=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin])
 def layout():
     n_empresas = db("Boopt", "Empresas").count_documents({})
     n_paginas = ceil(n_empresas / MAX_PAGINA)

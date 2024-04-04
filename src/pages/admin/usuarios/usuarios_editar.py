@@ -9,7 +9,13 @@ from dash_iconify import DashIconify
 from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_usuario import CARGOS_PADROES, NovoUsuario, Usuario, checar_login
+from utils.modelo_usuario import (
+    CARGOS_PADROES,
+    NovoUsuario,
+    Perfil,
+    Usuario,
+    checar_perfil,
+)
 
 register_page(__name__, path="/app/admin/usuarios/edit", title="Editar usuário")
 
@@ -114,19 +120,14 @@ def layout_edicao_usr(usr: Usuario = None):
                         nothingFound="Não encontrei nada",
                         value=str(usr.empresa) if usr else None,
                     ),
-                    html.Div(
-                        [
-                            dmc.Switch(
-                                id="gestor-edit-usr",
-                                label="Permissões de gestão da empresa",
-                                checked=usr.gestor if usr else False,
-                            ),
-                            dmc.Switch(
-                                id="recruta-edit-usr",
-                                label="Este usuário é um candidato",
-                                checked=usr.recruta if usr else False,
-                            ),
-                        ]
+                    dmc.Select(
+                        id="perfil-edit-usr",
+                        label="Perfil",
+                        data=[
+                            {"value": p.value, "label": p.name.capitalize()}
+                            for p in Perfil
+                        ],
+                        value=usr.perfil if usr else None,
                     ),
                 ],
             ),
@@ -135,13 +136,13 @@ def layout_edicao_usr(usr: Usuario = None):
                 children="Salvar" if usr else "Criar",
             ),
             dmc.Button(id="btn-excluir-usr", children="Excluir", color="red")
-            if usr_atual.admin and usr is not None
+            if usr_atual.perfil in [Perfil.dev, Perfil.admin] and usr is not None
             else None,
         ],
     )
 
 
-@checar_login(admin=True, gestor=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout(id: str = None):
     if not id:
         texto_titulo = "Novo usuário"
@@ -169,8 +170,7 @@ def layout(id: str = None):
     State("email-edit-usr", "value"),
     State("empresa-edit-usr", "value"),
     State("cargo-edit-usr", "value"),
-    State("gestor-edit-usr", "checked"),
-    State("recruta-edit-usr", "checked"),
+    State("perfil-edit-usr", "value"),
     State("url", "search"),
     prevent_initial_call=True,
 )
@@ -183,8 +183,7 @@ def salvar_usr(
     email: str,
     empresa: str,
     cargo: str,
-    gestor: bool,
-    recruta: bool,
+    perfil: str,
     search: str,
 ):
     if not n:
@@ -202,8 +201,7 @@ def salvar_usr(
                 "email": email,
                 "empresa": ObjectId(empresa),
                 "cargo": cargo,
-                "gestor": gestor,
-                "recruta": recruta,
+                "perfil": perfil,
             }
         )
     except (ValidationError, AssertionError) as e:
@@ -245,8 +243,7 @@ def salvar_usr(
     State("email-edit-usr", "value"),
     State("empresa-edit-usr", "value"),
     State("cargo-edit-usr", "value"),
-    State("gestor-edit-usr", "checked"),
-    State("recruta-edit-usr", "checked"),
+    State("perfil-edit-usr", "value"),
     prevent_initial_call=True,
 )
 def criar_novo_usr(
@@ -258,8 +255,7 @@ def criar_novo_usr(
     email: str,
     empresa: str,
     cargo: str,
-    gestor: bool,
-    recruta: bool,
+    perfil: str,
 ):
     if not n:
         raise PreventUpdate
@@ -273,8 +269,7 @@ def criar_novo_usr(
             email=email,
             empresa=empresa,
             cargo=cargo,
-            gestor=gestor,
-            recruta=recruta,
+            perfil=Perfil(perfil),
         )
         usr.registrar()
 

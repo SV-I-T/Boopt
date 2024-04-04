@@ -8,7 +8,7 @@ from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_assessment import AssessmentVendedor
-from utils.modelo_usuario import Usuario, checar_login
+from utils.modelo_usuario import Perfil, Usuario, checar_perfil
 
 register_page(
     __name__,
@@ -17,7 +17,7 @@ register_page(
 )
 
 
-@checar_login(admin=True, gestor=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout(empresa: str = None):
     texto_titulo = [
         "Novo Assessment Vendedor",

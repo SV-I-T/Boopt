@@ -7,7 +7,7 @@ from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_empresa import Empresa
-from utils.modelo_usuario import checar_login
+from utils.modelo_usuario import Perfil, checar_perfil
 
 register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
 
@@ -40,7 +40,7 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
     )
 
 
-@checar_login(admin=True)
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout(id: str = None):
     if not id:
         texto_titulo = [
