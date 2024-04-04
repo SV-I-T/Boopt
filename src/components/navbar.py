@@ -34,54 +34,76 @@ def menu_usuario(_, path):
     usr: Usuario = current_user
 
     if usr.is_authenticated:
-        links = [
-            {
-                "label": "Início",
-                "href": "/app/assessment-vendedor",
-                "icon": "fluent:home-20-filled",
-            },
-            {
-                "label": "Meu perfil",
-                "href": "/app/perfil",
-                "icon": "fluent:person-20-filled",
-            },
-            {
-                "label": "Painel de Gestão",
-                "href": "/app/admin",
-                "icon": "fluent:panel-left-text-20-filled",
-                "gestor": True,
-            },
-            {
-                "label": "Sair",
-                "href": "/logout",
-                "icon": "fluent:arrow-exit-20-filled",
-                "refresh": True,
-            },
-        ]
         return html.Div(
             children=[
-                dmc.Text(
-                    className="nome-usr-navbar",
-                    children=usr.nome,
-                ),
-                dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
-                dmc.Text(
-                    className="empresa-usr-navbar",
-                    children=usr.empresa_nome,
-                ),
                 html.Div(
                     className="links-nav",
                     children=[
                         dmc.NavLink(
-                            label=link["label"],
-                            href=link["href"],
-                            icon=DashIconify(icon=link["icon"], width=18),
-                            active=path.startswith(link["href"]),
-                            refresh=link.get("refresh", False),
+                            label=[
+                                dmc.Text(
+                                    className="nome-usr-navbar",
+                                    children=usr.nome,
+                                ),
+                                dmc.Text(
+                                    className="cargo-usr-navbar", children=usr.cargo
+                                ),
+                                dmc.Text(
+                                    className="empresa-usr-navbar",
+                                    children=usr.empresa_nome,
+                                ),
+                            ],
+                            href="/app/perfil",
+                            active=path.startswith("/app/perfil"),
+                        ),
+                        dmc.NavLink(
+                            label="Início",
+                            href="/app/assessment-vendedor",
+                            icon=DashIconify(icon="fluent:home-20-filled", width=18),
+                            active=path.startswith("/app/assessment-vendedor"),
+                        ),
+                        dmc.NavLink(
+                            label="Teste",
+                            href="/app/assessment-vendedor/teste",
+                            icon=DashIconify(
+                                icon="fluent:clipboard-text-edit-20-filled", width=18
+                            ),
+                            active=path.startswith("/app/assessment-vendedor/teste"),
+                        ),
+                        dmc.NavLink(
+                            label="Resultado",
+                            href="/app/assessment-vendedor/resultado",
+                            icon=DashIconify(
+                                icon="fluent:data-treemap-20-filled", width=18
+                            ),
+                            active=path.startswith(
+                                "/app/assessment-vendedor/resultado"
+                            ),
+                        ),
+                        # dmc.NavLink(
+                        #     label='Meu perfil',
+                        #     href='/app/perfil',
+                        #     icon=DashIconify(icon='fluent:person-20-filled', width=18),
+                        #     active=path.startswith('/app/perfil')
+                        # ),
+                        dmc.NavLink(
+                            label="Painel de Gestão",
+                            href="/app/admin",
+                            icon=DashIconify(
+                                icon="fluent:panel-left-text-20-filled", width=18
+                            ),
+                            active=path.startswith("/app/admin"),
                         )
-                        for link in links
-                        if ("gestor" not in link)
-                        or (link["gestor"] and (usr.gestor or usr.admin))
+                        if (usr.gestor or usr.admin)
+                        else None,
+                        dmc.NavLink(
+                            label="Sair",
+                            href="/logout",
+                            icon=DashIconify(
+                                icon="fluent:arrow-exit-20-filled", width=18
+                            ),
+                            refresh=True,
+                        ),
                     ],
                 ),
             ]
@@ -91,8 +113,6 @@ def menu_usuario(_, path):
         return dmc.Group(
             [
                 dmc.Text("Você não está logado!"),
-                dmc.Anchor(
-                    dmc.Button("Entrar"), href="/login/app/dashboard", refresh=True
-                ),
+                dmc.Anchor("Entrar", href="/login?next=/app/dashboard", refresh=True),
             ]
         )
