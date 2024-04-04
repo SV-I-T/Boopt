@@ -77,6 +77,10 @@
     font-weight: 700;
 }
 
+#navbar .mantine-NavLink-root:last-of-type {
+    margin-top: 2rem;
+}
+
 
 #navbar::before {
     content: "";
