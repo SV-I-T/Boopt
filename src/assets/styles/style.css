@@ -17,6 +17,9 @@
     font-family: Montserrat, Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important
 }
 
+body {
+    background-color: var(--cinza-bg);
+}
 
 body:not(.index-body) {
     display: flex;
@@ -26,7 +29,6 @@ body:not(.index-body) {
 body.index-body {
     height: 100vh;
     margin: 0px;
-    background-color: var(--cinza-bg);
     background-image: url("../imgs/boopt/icone_branco.svg");
     background-repeat: no-repeat;
     background-position: bottom -150px right -150px;
