@@ -3,6 +3,7 @@ from datetime import datetime
 import dash_mantine_components as dmc
 from dash import html, register_page
 from flask_login import current_user
+from utils.banco_dados import db
 from utils.modelo_usuario import Usuario, checar_perfil
 
 register_page(__name__, path="/app/perfil", title="Meu perfil")
@@ -55,7 +56,11 @@ def layout():
                     ],
                     children=[
                         dmc.TextInput(
-                            label="Empresa", value=usr.empresa_nome, disabled=True
+                            label="Empresa",
+                            value=db("Boopt", "Empresas").find_one(
+                                {"_id": usr.empresa}, {"nome": 1, "_id": 0}
+                            )["nome"],
+                            disabled=True,
                         ),
                         dmc.TextInput(label="Cargo", value=usr.cargo, disabled=True),
                         dmc.TextInput(
