@@ -91,7 +91,7 @@ def layout():
                                             icon="fluent:filmstrip-play-16-filled",
                                             width=16,
                                         ),
-                                        className="btn-borda-gradiente",
+                                        className="btn-borda-gradiente btn-acessar-videos",
                                     ),
                                 ),
                             ],
