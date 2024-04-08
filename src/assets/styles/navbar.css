@@ -7,16 +7,16 @@
     border: none;
     background-color: var(--azul-sv);
     background-image:
-        url("../imgs/boopt/icone_laranja.svg"),
+        /* url("../imgs/boopt/icone_laranja.svg"), */
         linear-gradient(0deg, var(--laranja-boopt) 0%, rgba(217, 217, 217, 0) 75%);
     background-repeat:
-        no-repeat,
+        /* no-repeat, */
         no-repeat;
     background-position:
-        bottom -250px center,
+        /* bottom -350px center, */
         top;
     background-size:
-        auto 500px,
+        /* auto 0, */
         100%;
     padding: 5rem 70px 1rem 1rem;
     z-index: -1;
