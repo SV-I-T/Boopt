@@ -44,9 +44,6 @@ class Usuario(BaseModel, UserMixin):
     email: str
     cargo: str
     empresa: ObjectId
-    empresa_nome: Optional[
-        str
-    ] = None  # Não faz parte do esquema no DB, é calculado no model_post_init
     perfil: Perfil = Perfil.usuario
 
     class Config:
@@ -56,11 +53,6 @@ class Usuario(BaseModel, UserMixin):
     @property
     def id(self) -> str:
         return str(self.id_)
-
-    def model_post_init(self, _) -> None:
-        self.empresa_nome = db("Boopt", "Empresas").find_one(
-            {"_id": self.empresa}, {"nome": 1, "_id": 0}
-        )["nome"]
 
     def logar(self, lembrar: bool = False) -> None:
         login_user(self, remember=lembrar, force=True)

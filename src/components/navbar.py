@@ -48,11 +48,8 @@ def menu_usuario(_, path):
                                 dmc.Text(
                                     className="cargo-usr-navbar", children=usr.cargo
                                 ),
-                                dmc.Text(
-                                    className="empresa-usr-navbar",
-                                    children=usr.empresa_nome,
-                                ),
                             ],
+                            icon=DashIconify(icon="fluent:person-20-filled", width=18),
                             href="/app/perfil",
                             active=path.startswith("/app/perfil"),
                         ),

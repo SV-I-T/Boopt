@@ -25,13 +25,13 @@
 #navbar .nome-usr-navbar {
     text-transform: uppercase;
     font-weight: 600;
-    font-size: 18px;
+    line-height: 1;
 }
 
-#navbar .cargo-usr-navbar,
-#navbar .empresa-usr-navbar {
-    font-size: 14px;
+#navbar .cargo-usr-navbar {
+    font-size: 10px;
     font-weight: 400;
+    line-height: 1;
 }
 
 #navbar .links-nav {
