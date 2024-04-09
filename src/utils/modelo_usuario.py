@@ -59,7 +59,7 @@ class Usuario(BaseModel, UserMixin):
 
     def sair(self) -> None:
         logout_user()
-        cache_simple.delete_memoized(Usuario.buscar_login, Usuario)
+        cache_simple.delete_memoized(Usuario.buscar_login, Usuario, self.id)
 
     @classmethod
     def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):
@@ -92,29 +92,6 @@ class Usuario(BaseModel, UserMixin):
         )
 
         assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
-
-    def alterar_senha(
-        self, senha_atual: str, senha_nova: str, senha_nova_check: str
-    ) -> bool:
-        senha_hash = db("Boopt", "Usuários").find_one(
-            {"_id": self.id_}, {"_id": 0, "senha_hash": 1}
-        )["senha_hash"]
-        assert check_password_hash(
-            senha_hash, senha_atual
-        ), "A senha atual não está correta."
-
-        assert not check_password_hash(
-            senha_hash, senha_nova
-        ), "A senha nova não pode ser igual à senha atual."
-
-        assert senha_nova == senha_nova_check, "As senhas novas não combinam."
-
-        r = db("Boopt", "Usuários").update_one(
-            {"_id": self.id_},
-            {"$set": {"senha_hash": generate_password_hash(senha_nova)}},
-        )
-        assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
-        return True
 
     def buscar_empresas(self) -> Cursor | None:
         if self.perfil in [Perfil.dev, Perfil.admin]:

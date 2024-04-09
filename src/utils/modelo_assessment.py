@@ -11,6 +11,7 @@ def id_form_padrao() -> ObjectId:
 
 class AssessmentVendedor(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
+    descricao: str = ""
     id_form: Optional[ObjectId] = Field(default_factory=id_form_padrao)
     empresa: ObjectId
     participantes: list[ObjectId] = Field(default_factory=list)
