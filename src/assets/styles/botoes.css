@@ -70,6 +70,17 @@ button {
     color: #fff;
 }
 
+.btn-link {
+    background: none;
+    color: var(--azul-sv);
+    padding: 0;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+    background: none;
+}
+
 .mantine-Button-label {
     font-weight: 400;
 }

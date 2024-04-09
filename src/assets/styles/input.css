@@ -1,4 +1,5 @@
-input {
+input,
+.mantine-Input-input {
     border-radius: 30px !important;
 }
 
