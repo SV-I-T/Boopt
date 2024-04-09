@@ -26,19 +26,19 @@ def carregar_aplicacoes():
 
 @checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
-    usr_atual: Usuario = current_user
+    usr: Usuario = current_user
 
-    if usr_atual.perfil in [Perfil.admin, Perfil.dev]:
+    if usr.perfil in [Perfil.admin, Perfil.dev]:
         n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
+        data_empresas = [
+            {"value": str(empresa["_id"]), "label": empresa["nome"]}
+            for empresa in usr.buscar_empresas()
+        ]
     else:
         n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(
-            {"empresa": usr_atual.empresa}
+            {"empresa": usr.empresa}
         )
-
-    data_empresas = [
-        {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in usr_atual.buscar_empresas()
-    ]
+        data_empresas = [str(usr.empresa)]
 
     n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
     return [
@@ -57,10 +57,12 @@ def layout():
                     placeholder="Selecione uma empresa",
                     w=250,
                     mr="auto",
+                    value=str(usr.empresa),
+                    display=None if usr.perfil == Perfil.gestor else "block",
                 ),
                 dmc.Anchor(
                     id="a-nova-aplicacao",
-                    href="/app/admin/assessment-vendedor/novo",
+                    href="/app/admin/assessment-vendedor/edit",
                     children=dmc.Button(
                         id="btn-nova-aplicacao",
                         children="Nova aplicação",
@@ -80,10 +82,10 @@ def layout():
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Data de criação", style={"width": 250}),
-                            html.Th("Participantes", style={"width": 150}),
-                            html.Th("Respostas", style={"width": 150}),
-                            html.Th("Adesão", style={"width": 150}),
+                            html.Th("Criado em", style={"width": 100}),
+                            html.Th("Descrição", style={"width": 250}),
+                            html.Th("Adesão", style={"width": 100}),
+                            html.Th("Ações", style={"width": 100}),
                         ]
                     )
                 ),
@@ -115,7 +117,6 @@ def layout():
     Input("url", "pathname"),
     Input("tabela-assessment-nav", "page"),
     Input("empresa-assessment", "value"),
-    prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(_, pagina: int, empresa: str):
     assessments = db("AssessmentVendedores", "Aplicações").aggregate(
@@ -149,17 +150,29 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                         dmc.Anchor(
                             children=assessment["_id"]
                             .generation_time.date()
-                            .strftime("%d de %B de %Y"),
-                            href=f'/app/assessment-vendedor/teste?id={str(assessment["_id"])}',
+                            .strftime("%d/%m/%Y"),
+                            href=f'/app/admin/assessment-vendedor/view?id={str(assessment["_id"])}',
                         )
                     ),
-                    html.Td(assessment["participantes"]),
-                    html.Td(assessment["respostas"]),
+                    html.Td(assessment.get("desc", "")),
                     html.Td(
-                        f'{(assessment["respostas"] / assessment["participantes"]):.0%}'
+                        f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
+                    ),
+                    html.Td(
+                        [
+                            dmc.Anchor(
+                                "Editar",
+                                href=f'/app/admin/assessment-vendedor/edit?id={assessment["_id"]}',
+                                mr="0.5rem",
+                            ),
+                            dmc.Anchor(
+                                "Ver",
+                                href=f'/app/admin/assessment-vendedores/view?id={assessment["_id"]}',
+                            ),
+                        ]
                     ),
                 ]
             )
             for assessment in assessments
         ],
-    ], f"/app/admin/assessment-vendedor/novo?empresa={empresa}"
+    ], f"/app/admin/assessment-vendedor/edit?empresa={empresa}"
