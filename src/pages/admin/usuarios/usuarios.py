@@ -106,7 +106,7 @@ def layout():
 def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
     usr_atual: Usuario = current_user
 
-    if usr_atual.perfil not in [Perfil.dev, Perfil.admin]:
+    if usr_atual.perfil not in [Perfil.dev, Perfil.admin, Perfil.gestor]:
         raise PreventUpdate
 
     busca_regex = {"$regex": busca, "$options": "i"}
