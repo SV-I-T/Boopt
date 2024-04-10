@@ -1,13 +1,16 @@
 import dash_mantine_components as dmc
 from dash import register_page
 from dash_iconify import DashIconify
-from utils.modelo_usuario import Perfil, checar_perfil
+from flask_login import current_user
+from utils.modelo_usuario import Perfil, Usuario, checar_perfil
 
 register_page(__name__, path="/app/admin", title="Painel de gestão")
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin])
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
+    usr: Usuario = current_user
+
     modulos: tuple[str] = (
         {
             "label": "Usuários",
@@ -18,6 +21,7 @@ def layout():
             "label": "Empresas",
             "href": "/app/admin/empresas",
             "icon": "fluent:building-shop-24-filled",
+            "perfil": [Perfil.admin, Perfil.dev],
         },
         {
             "label": "Assessment Vendedores",
@@ -26,7 +30,7 @@ def layout():
         },
     )
     return [
-        dmc.Title("Painel de gestão", order=1, weight=700),
+        dmc.Title("Painel de gestão", className="titulo-pagina"),
         dmc.Grid(
             children=[
                 dmc.Col(
@@ -56,6 +60,7 @@ def layout():
                     ),
                 )
                 for modulo in modulos
+                if (usr.perfil in modulo.get("perfil", [usr.perfil]))
             ],
         ),
     ]
