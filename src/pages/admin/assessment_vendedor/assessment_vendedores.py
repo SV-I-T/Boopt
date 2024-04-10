@@ -45,6 +45,7 @@ def layout():
         dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
+            position="right",
             children=[
                 dmc.Select(
                     id="empresa-assessment",
@@ -58,7 +59,7 @@ def layout():
                     w=250,
                     mr="auto",
                     value=str(usr.empresa),
-                    display=None if usr.perfil == Perfil.gestor else "block",
+                    display="none" if usr.perfil == Perfil.gestor else "block",
                 ),
                 dmc.Anchor(
                     id="a-nova-aplicacao",
@@ -83,7 +84,7 @@ def layout():
                     html.Tr(
                         [
                             html.Th("Criado em", style={"width": 100}),
-                            html.Th("Descrição", style={"width": 250}),
+                            html.Th("Descrição"),
                             html.Th("Adesão", style={"width": 100}),
                             html.Th("Ações", style={"width": 100}),
                         ]
@@ -147,14 +148,9 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
             html.Tr(
                 [
                     html.Td(
-                        dmc.Anchor(
-                            children=assessment["_id"]
-                            .generation_time.date()
-                            .strftime("%d/%m/%Y"),
-                            href=f'/app/admin/assessment-vendedor/view?id={str(assessment["_id"])}',
-                        )
+                        assessment["_id"].generation_time.date().strftime("%d/%m/%Y")
                     ),
-                    html.Td(assessment.get("desc", "")),
+                    html.Td(assessment.get("descricao", "")),
                     html.Td(
                         f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
                     ),
