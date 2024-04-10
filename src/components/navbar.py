@@ -60,30 +60,6 @@ def menu_usuario(_, path):
                             active=path.startswith("/app/assessment-vendedor"),
                         ),
                         dmc.NavLink(
-                            label="Teste",
-                            href="/app/assessment-vendedor/teste",
-                            icon=DashIconify(
-                                icon="fluent:clipboard-text-edit-20-filled", width=18
-                            ),
-                            active=path.startswith("/app/assessment-vendedor/teste"),
-                        ),
-                        dmc.NavLink(
-                            label="Resultado",
-                            href="/app/assessment-vendedor/resultado",
-                            icon=DashIconify(
-                                icon="fluent:data-treemap-20-filled", width=18
-                            ),
-                            active=path.startswith(
-                                "/app/assessment-vendedor/resultado"
-                            ),
-                        ),
-                        # dmc.NavLink(
-                        #     label='Meu perfil',
-                        #     href='/app/perfil',
-                        #     icon=DashIconify(icon='fluent:person-20-filled', width=18),
-                        #     active=path.startswith('/app/perfil')
-                        # ),
-                        dmc.NavLink(
                             label="Painel de Gestão",
                             href="/app/admin",
                             icon=DashIconify(
