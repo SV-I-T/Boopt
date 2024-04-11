@@ -3,7 +3,7 @@
     position: relative;
     justify-content: center;
     min-height: 100vh;
-    background-color: var(--cinza-bg);
+    background-color: var(--off-white);
 }
 
 div:has(>#_pages_content) {

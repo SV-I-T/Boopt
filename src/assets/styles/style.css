@@ -3,7 +3,7 @@
     --laranja-boopt: #FF7730;
     --preto-sv: #171C24;
     --input-bg: #fff;
-    --cinza-bg: #f3f3f3;
+    --off-white: #f3f3f3;
     --max-size: 1200px;
     --navbar-width: 300px;
 }
@@ -18,7 +18,7 @@
 }
 
 body {
-    background-color: var(--cinza-bg);
+    background-color: var(--off-white);
 }
 
 body:not(.index-body) {

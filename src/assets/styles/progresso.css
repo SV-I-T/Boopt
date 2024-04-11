@@ -6,6 +6,7 @@
 
 .progress-bar div:last-child {
     width: 100%;
+    min-width: 30px;
     height: 100%;
     background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
     border-radius: 30px;
