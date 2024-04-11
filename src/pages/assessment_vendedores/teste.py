@@ -21,6 +21,7 @@ from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Usuario, checar_perfil
+import polars as pl
 
 EXPLICACAO_MD = """
     Olá **{vendedor}**!
@@ -281,6 +282,9 @@ def salvar_resposta(n, frases, search):
             "id_aplicacao": ObjectId(id_aplicacao),
             "id_usuario": usr_atual.id_,
         }
+
+        dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["notas"])
+
         resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
         if resposta.inserted_id:
             return f"?id={id_aplicacao}&secao=enviado", no_update
@@ -292,3 +296,54 @@ def salvar_resposta(n, frases, search):
                 message="Erro ao salvar resposta. Tente novamente",
                 action="show",
             )
+
+
+def calcular_nota(id_aplicacao: str, notas: list[dict[str, str]]):
+    r = (
+        db("AssessmentVendedores", "Aplicações")
+        .aggregate(
+            [
+                {"$match": {"_id": ObjectId(id_aplicacao)}},
+                {
+                    "$lookup": {
+                        "from": "Formulários",
+                        "foreignField": "_id",
+                        "localField": "id_form",
+                        "as": "form",
+                    }
+                },
+                {"$set": {"form": {"$first": "$form"}}},
+                {
+                    "$project": {
+                        "form": {"_id": 0, "competencias": {"frases": {"desc": 0}}},
+                        "_id": 0,
+                        "descricao": 0,
+                        "id_form": 0,
+                        "empresa": 0,
+                        "participantes": 0,
+                    }
+                },
+            ]
+        )
+        .next()
+    )
+
+    df_competencias = (
+        pl.DataFrame(r["form"]["competencias"]).explode("frases").unnest("frases")
+    )
+    df_etapas = pl.DataFrame(r["form"]["etapas"]).explode("competencias")
+
+    nota = (
+        pl.DataFrame(notas)
+        .join(df_competencias, on="id", how="left")
+        .select(
+            pl.col("nome").alias("competencias"),
+            pl.col("notas").list.get(pl.col("nota").sub(1)).alias("pontos"),
+        )
+        .join(df_etapas, on="competencias", how="left")
+        .group_by("nome")
+        .agg(pl.col("pontos").mean())
+        .get_column("pontos")
+        .sum()
+    )
+    return nota
