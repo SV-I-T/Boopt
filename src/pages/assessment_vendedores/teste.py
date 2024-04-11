@@ -92,10 +92,10 @@ def layout(id: str = None, secao: str = "instrucoes"):
         return html.Div(
             className="center-container teste-assessment",
             children=[
-                dcc.Store(id="store-frases", data=frases, storage_type="local"),
-                dcc.Store(id="store-status-done", data=False, storage_type="local"),
-                dcc.Store(id="store-ordem-frases", data=ordem, storage_type="local"),
-                dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="local"),
+                dcc.Store(id="store-frases", data=frases, storage_type="memory"),
+                dcc.Store(id="store-status-done", data=False, storage_type="memory"),
+                dcc.Store(id="store-ordem-frases", data=ordem, storage_type="memory"),
+                dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="memory"),
                 html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
                 dmc.Text(
                     id="text-frase",
