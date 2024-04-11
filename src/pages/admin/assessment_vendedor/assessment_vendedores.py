@@ -7,6 +7,7 @@ from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Perfil, Usuario, checar_perfil
+from dash.exceptions import PreventUpdate
 
 register_page(
     __name__, "/app/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
@@ -15,32 +16,23 @@ register_page(
 MAX_PAGINA = 10
 
 
-def carregar_aplicacoes():
-    aplicacoes = list(
-        db("AssessmentVendedores", "Aplicações").find(
-            {}, {"_id": 1, "cliente": 1, "data": 1}
-        )
-    )
-    return aplicacoes
-
-
 @checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
     usr: Usuario = current_user
 
     if usr.perfil in [Perfil.admin, Perfil.dev]:
-        n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents({})
         data_empresas = [
             {"value": str(empresa["_id"]), "label": empresa["nome"]}
             for empresa in usr.buscar_empresas()
         ]
     else:
-        n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(
-            {"empresa": usr.empresa}
-        )
         data_empresas = [str(usr.empresa)]
 
+    n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(
+        {"empresa": usr.empresa}
+    )
     n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
+
     return [
         dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
         dmc.Group(
@@ -86,6 +78,7 @@ def layout():
                             html.Th("Descrição"),
                             html.Th("Criado em", style={"width": 100}),
                             html.Th("Adesão", style={"width": 100}),
+                            html.Th("Nota média", style={"width": 120}),
                             html.Th("Ações", style={"width": 100}),
                         ]
                     )
@@ -110,6 +103,25 @@ def layout():
             id="tabela-assessment-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
         ),
     ]
+
+
+@callback(
+    Output("tabela-assessment-nav", "total"),
+    Input("empresa-assessment", "value"),
+    prevent_initial_call=True,
+)
+def total_paginas(empresa: str):
+    if current_user.perfil not in [Perfil.admin, Perfil.dev, Perfil.gestor]:
+        raise PreventUpdate
+    if current_user.perfil == Perfil.gestor and str(current_user.empresa) != empresa:
+        raise PreventUpdate
+
+    return ceil(
+        db("AssessmentVendedores", "Aplicações").count_documents(
+            {"empresa": ObjectId(empresa)}
+        )
+        / MAX_PAGINA
+    )
 
 
 @callback(
@@ -138,11 +150,13 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
             },
             {
                 "$set": {
+                    "nota_media": {"$avg": "$respostas.nota"},
                     "respostas": {"$size": "$respostas"},
                 }
             },
         ]
     )
+
     return [
         *[
             html.Tr(
@@ -153,6 +167,11 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                     ),
                     html.Td(
                         f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
+                    ),
+                    html.Td(
+                        f'{assessment["nota_media"]:.1f}'
+                        if assessment["nota_media"]
+                        else "--"
                     ),
                     html.Td(
                         [
