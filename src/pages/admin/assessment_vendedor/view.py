@@ -121,14 +121,12 @@ def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
         )
     ).next()
 
-    usuarios = list(
-        db("Boopt", "Usuários").find(
-            {"_id": {"$in": r["participantes"]}},
-            {
-                "_id": {"$toString": "$_id"},
-                "nome": {"$concat": ["$nome", " ", "$sobrenome"]},
-            },
-        )
+    usuarios = db("Boopt", "Usuários").find(
+        {"_id": {"$in": r["participantes"]}},
+        {
+            "_id": {"$toString": "$_id"},
+            "nome": {"$concat": ["$nome", " ", "$sobrenome"]},
+        },
     )
 
     respostas = (
