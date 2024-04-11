@@ -68,7 +68,7 @@ def layout(id: str = None):
                                 ),
                                 html.Td(
                                     dmc.Anchor(
-                                        children=f'{row["nota"]:.1f}',
+                                        children=f'{row["nota"]:.1f}/70',
                                         href=f'/app/assessment-vendedor/resultado/?usr={usr.id}&resposta={row["_id"]}',
                                     )
                                     if row["nota"]

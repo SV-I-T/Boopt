@@ -169,7 +169,7 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                         f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
                     ),
                     html.Td(
-                        f'{assessment["nota_media"]:.1f}'
+                        f'{assessment["nota_media"]:.1f}/70'
                         if assessment["nota_media"]
                         else "--"
                     ),
