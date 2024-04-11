@@ -83,8 +83,8 @@ def layout():
                 html.Thead(
                     html.Tr(
                         [
-                            html.Th("Criado em", style={"width": 100}),
                             html.Th("Descrição"),
+                            html.Th("Criado em", style={"width": 100}),
                             html.Th("Adesão", style={"width": 100}),
                             html.Th("Ações", style={"width": 100}),
                         ]
@@ -147,10 +147,10 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
         *[
             html.Tr(
                 [
+                    html.Td(assessment.get("descricao", "")),
                     html.Td(
                         assessment["_id"].generation_time.date().strftime("%d/%m/%Y")
                     ),
-                    html.Td(assessment.get("descricao", "")),
                     html.Td(
                         f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
                     ),
@@ -163,7 +163,7 @@ def atualizar_tabela_empresas(_, pagina: int, empresa: str):
                             ),
                             dmc.Anchor(
                                 "Ver",
-                                href=f'/app/admin/assessment-vendedores/view?id={assessment["_id"]}',
+                                href=f'/app/admin/assessment-vendedor/view?id={assessment["_id"]}',
                             ),
                         ]
                     ),
