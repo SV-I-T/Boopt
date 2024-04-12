@@ -16,22 +16,19 @@ register_page(
 MAX_PAGINA = 10
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=(Perfil.dev, Perfil.admin, Perfil.gestor))
 def layout():
     usr: Usuario = current_user
 
-    if usr.perfil in [Perfil.admin, Perfil.dev]:
+    if usr.perfil == Perfil.gestor:
+        data_empresas = [str(usr.empresa)]
+    else:
         data_empresas = [
             {"value": str(empresa["_id"]), "label": empresa["nome"]}
             for empresa in usr.buscar_empresas()
         ]
-    else:
-        data_empresas = [str(usr.empresa)]
 
-    n_aplicacoes: int = db("AssessmentVendedores", "Aplicações").count_documents(
-        {"empresa": usr.empresa}
-    )
-    n_paginas = ceil(n_aplicacoes / MAX_PAGINA)
+    corpo_tabela, n_paginas = consultar_dados_tabela_assessment(1, str(usr.empresa))
 
     return [
         dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
@@ -79,23 +76,13 @@ def layout():
                             html.Th("Criado em", style={"width": 100}),
                             html.Th("Adesão", style={"width": 100}),
                             html.Th("Nota média", style={"width": 120}),
-                            html.Th("Ações", style={"width": 100}),
+                            html.Th("Ações", style={"width": 150}),
                         ]
                     )
                 ),
                 html.Tbody(
                     id="tabela-assessment-body",
-                    children=[
-                        html.Tr(
-                            children=[
-                                html.Td(
-                                    "Selecione uma empresa primeiro",
-                                    colSpan=6,
-                                    style={"text-align": "center"},
-                                )
-                            ]
-                        )
-                    ],
+                    children=corpo_tabela,
                 ),
             ],
         ),
@@ -106,88 +93,99 @@ def layout():
 
 
 @callback(
+    Output("tabela-assessment-body", "children"),
     Output("tabela-assessment-nav", "total"),
+    Output("a-nova-aplicacao", "href"),
+    Input("tabela-assessment-nav", "page"),
     Input("empresa-assessment", "value"),
     prevent_initial_call=True,
 )
-def total_paginas(empresa: str):
-    if current_user.perfil not in [Perfil.admin, Perfil.dev, Perfil.gestor]:
+def atualizar_tabela_empresas(pagina: int, empresa: str):
+    if current_user.perfil not in (Perfil.admin, Perfil.dev, Perfil.gestor):
         raise PreventUpdate
     if current_user.perfil == Perfil.gestor and str(current_user.empresa) != empresa:
         raise PreventUpdate
 
-    return ceil(
-        db("AssessmentVendedores", "Aplicações").count_documents(
-            {"empresa": ObjectId(empresa)}
+    corpo_tabela, n_paginas = consultar_dados_tabela_assessment(pagina, empresa)
+
+    return (
+        corpo_tabela,
+        n_paginas,
+        f"/app/admin/assessment-vendedor/edit?empresa={empresa}",
+    )
+
+
+def consultar_dados_tabela_assessment(
+    pagina: int, empresa: str
+) -> tuple[list[html.Tr], int]:
+    r = (
+        db("AssessmentVendedores", "Aplicações")
+        .aggregate(
+            [
+                {"$match": {"empresa": ObjectId(empresa)}},
+                {"$sort": {"_id": -1}},
+                {"$skip": (pagina - 1) * MAX_PAGINA},
+                {"$limit": MAX_PAGINA},
+                {
+                    "$facet": {
+                        "cont": [{"$count": "total"}],
+                        "data": [
+                            {"$project": {"id_form": 0}},
+                            {"$set": {"participantes": {"$size": "$participantes"}}},
+                            {
+                                "$lookup": {
+                                    "from": "Respostas",
+                                    "localField": "_id",
+                                    "foreignField": "id_aplicacao",
+                                    "as": "respostas",
+                                }
+                            },
+                            {
+                                "$set": {
+                                    "nota_media": {"$avg": "$respostas.nota"},
+                                    "respostas": {"$size": "$respostas"},
+                                }
+                            },
+                        ],
+                    }
+                },
+            ]
         )
-        / MAX_PAGINA
+        .next()
     )
 
+    assessments = r["data"]
+    total = r["cont"][0]["total"]
 
-@callback(
-    Output("tabela-assessment-body", "children"),
-    Output("a-nova-aplicacao", "href"),
-    Input("url", "pathname"),
-    Input("tabela-assessment-nav", "page"),
-    Input("empresa-assessment", "value"),
-)
-def atualizar_tabela_empresas(_, pagina: int, empresa: str):
-    assessments = db("AssessmentVendedores", "Aplicações").aggregate(
-        [
-            {"$match": {"empresa": ObjectId(empresa)}},
-            {"$sort": {"_id": -1}},
-            {"$skip": (pagina - 1) * MAX_PAGINA},
-            {"$limit": MAX_PAGINA},
-            {"$project": {"id_form": 0}},
-            {"$set": {"participantes": {"$size": "$participantes"}}},
-            {
-                "$lookup": {
-                    "from": "Respostas",
-                    "localField": "_id",
-                    "foreignField": "id_aplicacao",
-                    "as": "respostas",
-                }
-            },
-            {
-                "$set": {
-                    "nota_media": {"$avg": "$respostas.nota"},
-                    "respostas": {"$size": "$respostas"},
-                }
-            },
-        ]
-    )
+    n_paginas = ceil(total / MAX_PAGINA)
 
     return [
-        *[
-            html.Tr(
-                [
-                    html.Td(assessment.get("descricao", "")),
-                    html.Td(
-                        assessment["_id"].generation_time.date().strftime("%d/%m/%Y")
-                    ),
-                    html.Td(
-                        f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
-                    ),
-                    html.Td(
-                        f'{assessment["nota_media"]:.1f}/70'
-                        if assessment["nota_media"]
-                        else "--"
-                    ),
-                    html.Td(
-                        [
-                            dmc.Anchor(
-                                "Editar",
-                                href=f'/app/admin/assessment-vendedor/edit?id={assessment["_id"]}',
-                                mr="0.5rem",
-                            ),
-                            dmc.Anchor(
-                                "Ver",
-                                href=f'/app/admin/assessment-vendedor/view?id={assessment["_id"]}',
-                            ),
-                        ]
-                    ),
-                ]
-            )
-            for assessment in assessments
-        ],
-    ], f"/app/admin/assessment-vendedor/edit?empresa={empresa}"
+        html.Tr(
+            [
+                html.Td(assessment.get("descricao", "")),
+                html.Td(assessment["_id"].generation_time.date().strftime("%d/%m/%Y")),
+                html.Td(
+                    f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
+                ),
+                html.Td(
+                    f'{assessment["nota_media"]:.1f}/70'
+                    if assessment["nota_media"]
+                    else "--"
+                ),
+                html.Td(
+                    [
+                        dmc.Anchor(
+                            "Editar",
+                            href=f'/app/admin/assessment-vendedor/edit?id={assessment["_id"]}',
+                            mr="0.5rem",
+                        ),
+                        dmc.Anchor(
+                            "Resultados",
+                            href=f'/app/admin/assessment-vendedor/view?id={assessment["_id"]}',
+                        ),
+                    ]
+                ),
+            ]
+        )
+        for assessment in assessments
+    ], n_paginas

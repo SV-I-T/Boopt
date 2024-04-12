@@ -25,6 +25,8 @@ MAX_PAGINA = 15
 def layout():
     usr_atual: Usuario = current_user
 
+    corpo_tabela, n_paginas = consultar_dados_tabela_usuarios(usr_atual, 1, "")
+
     return [
         dmc.Title("Gerenciar usuários", className="titulo-pagina"),
         dmc.Group(
@@ -81,13 +83,13 @@ def layout():
                 ),
                 html.Tbody(
                     id="tabela-usuarios-body",
-                    children=consultar_dados_tabela_usuarios(usr_atual, 1, ""),
+                    children=corpo_tabela,
                 ),
             ],
         ),
         dmc.Pagination(
             id="tabela-usuarios-nav",
-            total=calcular_total_paginas(usr_atual),
+            total=n_paginas,
             page=1,
             mt="1rem",
             radius="xl",
@@ -98,37 +100,28 @@ def layout():
 @callback(
     Output("tabela-usuarios-body", "children"),
     Output("tabela-usuarios-nav", "total"),
-    Input("url", "pathname"),
     Input("tabela-usuarios-nav", "page"),
     Input("usuario-filtro-btn", "n_clicks"),
     State("usuario-filtro-input", "value"),
     prevent_initial_call=True,
 )
-def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
+def atualizar_tabela_usuarios(pagina: int, n: int, busca: str):
     usr_atual: Usuario = current_user
 
     if usr_atual.perfil not in [Perfil.dev, Perfil.admin, Perfil.gestor]:
         raise PreventUpdate
-
-    corpo_tabela = consultar_dados_tabela_usuarios(usr_atual, pagina, busca)
-    total_paginas = calcular_total_paginas(usr_atual)
+    corpo_tabela, total_paginas = consultar_dados_tabela_usuarios(
+        usr_atual, pagina, busca
+    )
 
     return corpo_tabela, total_paginas
 
 
-def calcular_total_paginas(usr_atual: Usuario):
-    if usr_atual.perfil in [Perfil.dev, Perfil.admin]:
-        n_usuarios = db("Boopt", "Usuários").count_documents({})
-    else:
-        n_usuarios = db("Boopt", "Usuários").count_documents(
-            {"empresa": usr_atual.empresa}
-        )
-    n_paginas = ceil(n_usuarios / MAX_PAGINA)
-    return n_paginas
-
-
-def consultar_dados_tabela_usuarios(usr_atual: Usuario, pagina: int, busca: str):
+def consultar_dados_tabela_usuarios(
+    usr_atual: Usuario, pagina: int, busca: str
+) -> tuple[list[html.Tr], int]:
     busca_regex = {"$regex": busca, "$options": "i"}
+    print(busca_regex)
 
     pipeline = [
         {"$sort": {"nome": 1}},
@@ -149,18 +142,25 @@ def consultar_dados_tabela_usuarios(usr_atual: Usuario, pagina: int, busca: str)
                 ]
             }
         },
-        {"$skip": (pagina - 1) * MAX_PAGINA},
-        {"$limit": MAX_PAGINA},
         {
-            "$project": {
-                campo: 1
-                for campo in (
-                    "nome",
-                    "sobrenome",
-                    "cargo",
-                    "empresa",
-                    "perfil",
-                )
+            "$facet": {
+                "cont": [{"$count": "total"}],
+                "data": [
+                    {"$skip": (pagina - 1) * MAX_PAGINA},
+                    {"$limit": MAX_PAGINA},
+                    {
+                        "$project": {
+                            campo: 1
+                            for campo in (
+                                "nome",
+                                "sobrenome",
+                                "cargo",
+                                "empresa",
+                                "perfil",
+                            )
+                        }
+                    },
+                ],
             }
         },
     ]
@@ -168,12 +168,18 @@ def consultar_dados_tabela_usuarios(usr_atual: Usuario, pagina: int, busca: str)
     if usr_atual.perfil not in [Perfil.dev, Perfil.admin]:
         pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
 
-    usuarios = db("Boopt", "Usuários").aggregate(pipeline)
+    r = db("Boopt", "Usuários").aggregate(pipeline).next()
+    usuarios = r["data"]
+    total = r["cont"][0]["total"]
 
-    return [construir_linha_usuario(usr_atual, usuario) for usuario in usuarios]
+    n_paginas = ceil(total / MAX_PAGINA)
+
+    return [
+        construir_linha_usuario(usr_atual, usuario) for usuario in usuarios
+    ], n_paginas
 
 
-def construir_linha_usuario(usr_atual: Usuario, usuario: dict[str, str]):
+def construir_linha_usuario(usr_atual: Usuario, usuario: dict[str, str]) -> html.Tr:
     if usr_atual.perfil == Perfil.gestor and Perfil(usuario["perfil"]) not in [
         Perfil.usuario,
         Perfil.candidato,
