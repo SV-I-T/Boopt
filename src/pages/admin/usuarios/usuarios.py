@@ -81,7 +81,7 @@ def layout():
                     html.Tr(
                         [
                             html.Th("Nome completo", style={"width": 350}),
-                            html.Th("Empresa", style={"width": 150}),
+                            html.Th("Empresa", style={"width": 200}),
                             html.Th("Cargo", style={"width": 200}),
                             html.Th("Perfil", style={"width": 100}),
                         ]
