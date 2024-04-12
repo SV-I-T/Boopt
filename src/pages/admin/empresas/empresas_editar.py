@@ -4,12 +4,34 @@ import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_empresa import Empresa
 from utils.modelo_usuario import Perfil, checar_perfil
 
 register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
+
+
+@checar_perfil(permitir=(Perfil.dev, Perfil.admin))
+def layout(id: str = None):
+    if not id:
+        texto_titulo = [
+            "Nova Empresa",
+        ]
+        layout_edicao = layout_nova_empresa()
+    else:
+        empresa = Empresa.buscar("_id", id)
+        texto_titulo = [
+            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+            empresa.nome,
+        ]
+        layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
+
+    return [
+        dmc.Title(texto_titulo, className="titulo-pagina"),
+        layout_edicao,
+    ]
 
 
 def layout_nova_empresa(nome: str = None, segmento: str = None):
@@ -40,27 +62,6 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
     )
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
-def layout(id: str = None):
-    if not id:
-        texto_titulo = [
-            "Nova Empresa",
-        ]
-        layout_edicao = layout_nova_empresa()
-    else:
-        empresa = Empresa.buscar("_id", id)
-        texto_titulo = [
-            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
-            empresa.nome,
-        ]
-        layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
-
-    return [
-        dmc.Title(texto_titulo, className="titulo-pagina"),
-        layout_edicao,
-    ]
-
-
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-criar-empresa", "n_clicks"),
@@ -71,24 +72,31 @@ def layout(id: str = None):
 def criar_empresa(n, nome: str, segmento: str):
     if not n:
         raise PreventUpdate
+
+    usr_atual: Perfil = current_user
+    if usr_atual.perfil not in (Perfil.dev, Perfil.admin):
+        raise PreventUpdate
+
     try:
         empresa = Empresa(nome=nome, segmento=segmento)
         empresa.registrar()
+
     except (ValidationError, AssertionError) as e:
         match e:
             case ValidationError():
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-erro-criar-empresa",
             title="Atenção",
             message=str(erro),
             color="red",
             action="show",
         )
+
     else:
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="empresa-criada",
             color="green",
             title="Pronto!",
@@ -99,8 +107,6 @@ def criar_empresa(n, nome: str, segmento: str):
                 dmc.Text(" foi criada com sucesso.", span=True),
             ],
         )
-
-    return NOTIFICACAO
 
 
 @callback(
@@ -115,25 +121,31 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
     if not n:
         raise PreventUpdate
 
+    usr_atual: Perfil = current_user
+    if usr_atual.perfil not in (Perfil.dev, Perfil.admin):
+        raise PreventUpdate
+
     params = parse_qs(search[1:])
     try:
         empresa = Empresa.buscar("_id", params["id"][0])
         empresa.atualizar({"nome": nome, "segmento": segmento})
+
     except (ValidationError, AssertionError) as e:
         match e:
             case ValidationError():
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-erro-criar-empresa",
             title="Atenção",
             message=str(erro),
             color="red",
             action="show",
         )
+
     else:
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-empresa-salva",
             color="green",
             action="show",
@@ -144,4 +156,3 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
                 dmc.Text(" foi editada com sucesso.", span=True),
             ],
         )
-    return NOTIFICACAO
