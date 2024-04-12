@@ -65,3 +65,7 @@ input::invalid {
 #usr-massa-download-template .mantine-Button-label:hover {
     text-decoration: underline;
 }
+
+.mantine-Divider-root {
+    margin: 1rem 0 1rem 0;
+}
