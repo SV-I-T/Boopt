@@ -60,7 +60,7 @@ def layout(id: str = None):
                             [
                                 html.Td(row["nome"]),
                                 html.Td(
-                                    row["_id"].generation_time.strftime(
+                                    ObjectId(row["_id"]).generation_time.strftime(
                                         "%d/%m/%Y %H:%M"
                                     )
                                     if row["_id"]
