@@ -25,14 +25,6 @@ MAX_PAGINA = 15
 def layout():
     usr_atual: Usuario = current_user
 
-    if usr_atual.perfil in [Perfil.dev, Perfil.admin]:
-        n_usuarios = db("Boopt", "Usuários").count_documents({})
-    else:
-        n_usuarios = db("Boopt", "Usuários").count_documents(
-            {"empresa": usr_atual.empresa}
-        )
-
-    n_paginas = ceil(n_usuarios / MAX_PAGINA)
     return [
         dmc.Title("Gerenciar usuários", className="titulo-pagina"),
         dmc.Group(
@@ -87,21 +79,30 @@ def layout():
                         ]
                     )
                 ),
-                html.Tbody(id="tabela-usuarios-body"),
+                html.Tbody(
+                    id="tabela-usuarios-body",
+                    children=consultar_dados_tabela_usuarios(usr_atual, 1, ""),
+                ),
             ],
         ),
         dmc.Pagination(
-            id="tabela-usuarios-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+            id="tabela-usuarios-nav",
+            total=calcular_total_paginas(usr_atual),
+            page=1,
+            mt="1rem",
+            radius="xl",
         ),
     ]
 
 
 @callback(
     Output("tabela-usuarios-body", "children"),
+    Output("tabela-usuarios-nav", "total"),
     Input("url", "pathname"),
     Input("tabela-usuarios-nav", "page"),
     Input("usuario-filtro-btn", "n_clicks"),
     State("usuario-filtro-input", "value"),
+    prevent_initial_call=True,
 )
 def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
     usr_atual: Usuario = current_user
@@ -109,6 +110,24 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
     if usr_atual.perfil not in [Perfil.dev, Perfil.admin, Perfil.gestor]:
         raise PreventUpdate
 
+    corpo_tabela = consultar_dados_tabela_usuarios(usr_atual, pagina, busca)
+    total_paginas = calcular_total_paginas(usr_atual)
+
+    return corpo_tabela, total_paginas
+
+
+def calcular_total_paginas(usr_atual: Usuario):
+    if usr_atual.perfil in [Perfil.dev, Perfil.admin]:
+        n_usuarios = db("Boopt", "Usuários").count_documents({})
+    else:
+        n_usuarios = db("Boopt", "Usuários").count_documents(
+            {"empresa": usr_atual.empresa}
+        )
+    n_paginas = ceil(n_usuarios / MAX_PAGINA)
+    return n_paginas
+
+
+def consultar_dados_tabela_usuarios(usr_atual: Usuario, pagina: int, busca: str):
     busca_regex = {"$regex": busca, "$options": "i"}
 
     pipeline = [
@@ -150,23 +169,26 @@ def atualizar_tabela_usuarios(_, pagina: int, n: int, busca: str):
         pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
 
     usuarios = db("Boopt", "Usuários").aggregate(pipeline)
-    return [
-        *[
-            html.Tr(
-                [
-                    html.Td(
-                        [
-                            dmc.Anchor(
-                                href=f"/app/admin/usuarios/edit?id={usuario['_id']}",
-                                children=f'{usuario["nome"]} {usuario["sobrenome"]}',
-                            ),
-                        ]
-                    ),
-                    html.Td(usuario.get("empresa", None)),
-                    html.Td(usuario.get("cargo", None)),
-                    html.Td(Perfil(usuario["perfil"]).name.capitalize()),
-                ]
-            )
-            for usuario in usuarios
-        ],
-    ]
+
+    return [construir_linha_usuario(usr_atual, usuario) for usuario in usuarios]
+
+
+def construir_linha_usuario(usr_atual: Usuario, usuario: dict[str, str]):
+    if usr_atual.perfil == Perfil.gestor and Perfil(usuario["perfil"]) not in [
+        Perfil.usuario,
+        Perfil.candidato,
+    ]:
+        col_usr = f'{usuario["nome"]} {usuario["sobrenome"]}'
+    else:
+        col_usr = dmc.Anchor(
+            href=f"/app/admin/usuarios/edit?id={usuario['_id']}",
+            children=f'{usuario["nome"]} {usuario["sobrenome"]}',
+        )
+    return html.Tr(
+        [
+            html.Td(col_usr),
+            html.Td(usuario.get("empresa", None)),
+            html.Td(usuario.get("cargo", None)),
+            html.Td(Perfil(usuario["perfil"]).name.capitalize()),
+        ]
+    )

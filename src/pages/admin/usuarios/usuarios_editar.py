@@ -15,9 +15,38 @@ from utils.modelo_usuario import (
     Perfil,
     Usuario,
     checar_perfil,
+    layout_nao_autorizado,
 )
 
 register_page(__name__, path="/app/admin/usuarios/edit", title="Editar usuário")
+
+
+@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+def layout(id: str = None):
+    usr_atual: Usuario = current_user
+
+    if not id:
+        texto_titulo = "Novo usuário"
+        layout_edicao = layout_edicao_usr()
+
+    else:
+        usr = Usuario.buscar("_id", ObjectId(id))
+
+        if usr_atual.perfil == Perfil.gestor and usr.perfil not in [
+            Perfil.usuario,
+            Perfil.candidato,
+        ]:
+            return layout_nao_autorizado()
+
+        texto_titulo = [
+            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+            f"{usr.nome} {usr.sobrenome}",
+        ]
+        layout_edicao = layout_edicao_usr(usr)
+    return [
+        dmc.Title(texto_titulo, className="titulo-pagina"),
+        layout_edicao,
+    ]
 
 
 def layout_edicao_usr(usr: Usuario = None):
@@ -26,6 +55,19 @@ def layout_edicao_usr(usr: Usuario = None):
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
         for empresa in usr_atual.buscar_empresas()
+    ]
+
+    if usr_atual.perfil == Perfil.dev:
+        perfis_editar = [p for p in Perfil]
+    elif usr_atual.perfil == Perfil.admin:
+        perfis_editar = [Perfil.gestor, Perfil.usuario, Perfil.candidato]
+    else:
+        perfis_editar = [Perfil.usuario, Perfil.candidato]
+
+    desabilitar = usr.perfil not in perfis_editar
+
+    data_perfil = [
+        {"value": p.value, "label": p.name.capitalize()} for p in perfis_editar
     ]
 
     return html.Div(
@@ -45,6 +87,7 @@ def layout_edicao_usr(usr: Usuario = None):
                         icon=DashIconify(icon="fluent:person-24-filled", width=24),
                         name="nome",
                         value=usr.nome if usr else None,
+                        disabled=desabilitar,
                     ),
                     dmc.TextInput(
                         id="sobrenome-edit-usr",
@@ -53,6 +96,7 @@ def layout_edicao_usr(usr: Usuario = None):
                         required=True,
                         name="sobrenome",
                         value=usr.sobrenome if usr else None,
+                        disabled=desabilitar,
                     ),
                     dmc.TextInput(
                         id="cpf-edit-usr",
@@ -65,6 +109,7 @@ def layout_edicao_usr(usr: Usuario = None):
                         ),
                         name="cpf",
                         value=usr.cpf if usr else None,
+                        disabled=desabilitar,
                     ),
                     dmc.DatePicker(
                         id="data-edit-usr",
@@ -77,13 +122,12 @@ def layout_edicao_usr(usr: Usuario = None):
                         initialLevel="year",
                         clearable=False,
                         placeholder=datetime.now().strftime(r"%d de %B de %Y"),
-                        icon=DashIconify(
-                            icon="fluent:calendar-date-24-filled", width=24
-                        ),
+                        icon=DashIconify(icon="fluent:calendar-24-filled", width=24),
                         name="data",
                         value=datetime.strptime(usr.data, "%Y-%m-%d").date()
                         if usr
                         else None,
+                        disabled=desabilitar,
                     ),
                     dmc.TextInput(
                         id="email-edit-usr",
@@ -93,6 +137,7 @@ def layout_edicao_usr(usr: Usuario = None):
                         icon=DashIconify(icon="fluent:mail-24-filled", width=24),
                         name="email",
                         value=usr.email if usr else None,
+                        disabled=desabilitar,
                     ),
                     dmc.Select(
                         id="cargo-edit-usr",
@@ -103,11 +148,10 @@ def layout_edicao_usr(usr: Usuario = None):
                         creatable=True,
                         clearable=False,
                         searchable=True,
-                        icon=DashIconify(
-                            icon="fluent:person-wrench-20-filled", width=24
-                        ),
+                        icon=DashIconify(icon="fluent:briefcase-24-filled", width=24),
                         name="cargo",
                         value=usr.cargo if usr else None,
+                        disabled=desabilitar,
                     ),
                     dmc.Select(
                         id="empresa-edit-usr",
@@ -119,45 +163,39 @@ def layout_edicao_usr(usr: Usuario = None):
                         searchable=True,
                         nothingFound="Não encontrei nada",
                         value=str(usr.empresa) if usr else None,
+                        disabled=desabilitar,
+                        display="none"
+                        if usr_atual.perfil == Perfil.gestor
+                        else "block",
                     ),
                     dmc.Select(
                         id="perfil-edit-usr",
                         label="Perfil",
-                        data=[
-                            {"value": p.value, "label": p.name.capitalize()}
-                            for p in Perfil
-                        ],
+                        icon=DashIconify(
+                            icon="fluent:person-passkey-24-filled", width=24
+                        ),
+                        data=data_perfil,
                         value=usr.perfil if usr else None,
+                        disabled=desabilitar,
                     ),
                 ],
             ),
             dmc.Button(
                 id="btn-salvar-usr" if usr else "btn-criar-usr",
                 children="Salvar" if usr else "Criar",
+                disabled=desabilitar,
             ),
-            dmc.Button(id="btn-excluir-usr", children="Excluir", color="red")
-            if usr_atual.perfil in [Perfil.dev, Perfil.admin] and usr is not None
+            dmc.Button(
+                id="btn-excluir-usr",
+                children="Excluir",
+                color="red",
+                disabled=desabilitar,
+            )
+            if usr_atual.perfil in [Perfil.dev, Perfil.admin, Perfil.gestor]
+            and usr is not None
             else None,
         ],
     )
-
-
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
-def layout(id: str = None):
-    if not id:
-        texto_titulo = "Novo usuário"
-        layout_edicao = layout_edicao_usr()
-    else:
-        usr = Usuario.buscar("_id", ObjectId(id))
-        texto_titulo = [
-            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
-            f"{usr.nome} {usr.sobrenome}",
-        ]
-        layout_edicao = layout_edicao_usr(usr)
-    return [
-        dmc.Title(texto_titulo, className="titulo-pagina"),
-        layout_edicao,
-    ]
 
 
 @callback(
@@ -186,7 +224,12 @@ def salvar_usr(
     perfil: str,
     search: str,
 ):
-    if not n:
+    usr_atual: Usuario = current_user
+    if (
+        not n
+        or not usr_atual.is_authenticated
+        or (usr_atual.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
+    ):
         raise PreventUpdate
     params = parse_qs(search[1:])
 
@@ -201,7 +244,7 @@ def salvar_usr(
                 "email": email,
                 "empresa": ObjectId(empresa),
                 "cargo": cargo,
-                "perfil": perfil,
+                "perfil": Perfil(perfil),
             }
         )
     except (ValidationError, AssertionError) as e:
@@ -257,7 +300,12 @@ def criar_novo_usr(
     cargo: str,
     perfil: str,
 ):
-    if not n:
+    usr_atual: Usuario = current_user
+    if (
+        not n
+        or not usr_atual.is_authenticated
+        or (usr_atual.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
+    ):
         raise PreventUpdate
 
     try:
@@ -311,7 +359,12 @@ def criar_novo_usr(
     prevent_initial_call=True,
 )
 def confirmar_exclusao_usr(n: int, botao: str, search: str):
-    if not n:
+    usr_atual: Usuario = current_user
+    if (
+        not n
+        or not usr_atual.is_authenticated
+        or (usr_atual.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
+    ):
         raise PreventUpdate
 
     if botao == "Excluir":
