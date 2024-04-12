@@ -21,7 +21,7 @@ from utils.modelo_usuario import (
 register_page(__name__, path="/app/admin/usuarios/edit", title="Editar usuário")
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=(Perfil.dev, Perfil.admin, Perfil.gestor))
 def layout(id: str = None):
     usr_atual: Usuario = current_user
 
@@ -32,10 +32,10 @@ def layout(id: str = None):
     else:
         usr = Usuario.buscar("_id", ObjectId(id))
 
-        if usr_atual.perfil == Perfil.gestor and usr.perfil not in [
+        if usr_atual.perfil == Perfil.gestor and usr.perfil not in (
             Perfil.usuario,
             Perfil.candidato,
-        ]:
+        ):
             return layout_nao_autorizado()
 
         texto_titulo = [
@@ -73,6 +73,7 @@ def layout_edicao_usr(usr: Usuario = None):
     return html.Div(
         className="editar-usr",
         children=[
+            dmc.Title("Informações Pessoais", className="secao-pagina"),
             dmc.SimpleGrid(
                 cols=2,
                 breakpoints=[
@@ -111,6 +112,16 @@ def layout_edicao_usr(usr: Usuario = None):
                         value=usr.cpf if usr else None,
                         disabled=desabilitar,
                     ),
+                    dmc.TextInput(
+                        id="email-edit-usr",
+                        label="E-mail",
+                        type="email",
+                        placeholder="nome@dominio.com",
+                        icon=DashIconify(icon="fluent:mail-24-filled", width=24),
+                        name="email",
+                        value=usr.email if usr else None,
+                        disabled=desabilitar,
+                    ),
                     dmc.DatePicker(
                         id="data-edit-usr",
                         label="Data de Nascimento",
@@ -129,16 +140,16 @@ def layout_edicao_usr(usr: Usuario = None):
                         else None,
                         disabled=desabilitar,
                     ),
-                    dmc.TextInput(
-                        id="email-edit-usr",
-                        label="E-mail",
-                        type="email",
-                        placeholder="nome@dominio.com",
-                        icon=DashIconify(icon="fluent:mail-24-filled", width=24),
-                        name="email",
-                        value=usr.email if usr else None,
-                        disabled=desabilitar,
-                    ),
+                ],
+            ),
+            dmc.Divider(),
+            dmc.Title("Informações Profissionais", className="secao-pagina"),
+            dmc.SimpleGrid(
+                cols=2,
+                breakpoints=[
+                    {"maxWidth": 567, "cols": 1},
+                ],
+                children=[
                     dmc.Select(
                         id="cargo-edit-usr",
                         label="Cargo/Função",
@@ -175,6 +186,7 @@ def layout_edicao_usr(usr: Usuario = None):
                             icon="fluent:person-passkey-24-filled", width=24
                         ),
                         data=data_perfil,
+                        required=True,
                         value=usr.perfil if usr else None,
                         disabled=desabilitar,
                     ),
@@ -225,43 +237,63 @@ def salvar_usr(
     search: str,
 ):
     usr_atual: Usuario = current_user
+
     if (
         not n
         or not usr_atual.is_authenticated
-        or (usr_atual.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
+        or (usr_atual.perfil not in (Perfil.admin, Perfil.gestor, Perfil.dev))
     ):
         raise PreventUpdate
+
     params = parse_qs(search[1:])
+    id_usr = params["id"][0]
 
     try:
-        usr = Usuario.buscar("_id", params["id"][0])
-        usr.atualizar(
-            {
-                "nome": nome,
-                "sobrenome": sobrenome,
-                "cpf": cpf,
-                "data": data,
-                "email": email,
-                "empresa": ObjectId(empresa),
-                "cargo": cargo,
-                "perfil": Perfil(perfil),
-            }
+        usr = Usuario.buscar("_id", id_usr)
+
+        if usr_atual.perfil == Perfil.gestor:
+            if usr_atual.empresa != usr.empresa:
+                raise AssertionError(
+                    "Não você não pode editar um usuário de outra empresa."
+                )
+            if usr.perfil not in (Perfil.usuario, Perfil.candidato):
+                raise AssertionError(
+                    "Não você não tem permissão para editar este usuário."
+                )
+            if Perfil(perfil) not in (Perfil.usuario, Perfil.candidato):
+                raise AssertionError(
+                    f"Não você não tem permissão para atribuir este perfil: {perfil.capitalize()}."
+                )
+
+        atualizacoes = (
+            ("nome", usr.nome, nome),
+            ("sobrenome", usr.sobrenome, sobrenome),
+            ("cpf", usr.cpf, cpf),
+            ("data", usr.data, data),
+            ("email", usr.email, email),
+            ("empresa", usr.empresa, ObjectId(empresa)),
+            ("cargo", usr.cargo, cargo),
+            ("perfil", usr.perfil, Perfil(perfil)),
         )
+
+        usr.atualizar({k: v2 for k, v1, v2 in atualizacoes if v1 != v2})
+
     except (ValidationError, AssertionError) as e:
         match e:
             case ValidationError():
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-erro-edit-usr",
             title="Atenção",
             message=str(erro),
             action="show",
             color="red",
         )
+
     else:
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-salvar-usr-suc",
             title="Pronto!",
             message=[
@@ -272,8 +304,6 @@ def salvar_usr(
             color="green",
             action="show",
         )
-
-    return NOTIFICACAO
 
 
 @callback(
@@ -301,12 +331,21 @@ def criar_novo_usr(
     perfil: str,
 ):
     usr_atual: Usuario = current_user
+
     if (
         not n
         or not usr_atual.is_authenticated
-        or (usr_atual.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
+        or (usr_atual.perfil not in (Perfil.admin, Perfil.gestor, Perfil.dev))
     ):
         raise PreventUpdate
+
+    if usr_atual.perfil == Perfil.gestor:
+        if str(usr_atual.empresa) != empresa:
+            raise AssertionError("Não você não pode criar um usuário de outra empresa.")
+        if Perfil(perfil) not in (Perfil.usuario, Perfil.candidato):
+            raise AssertionError(
+                f"Não você não tem permissão para atribuir este perfil: {perfil.capitalize()}."
+            )
 
     try:
         usr = NovoUsuario(
@@ -327,15 +366,16 @@ def criar_novo_usr(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        NOTIFICACAO = NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-erro-edit-usr",
             title="Atenção",
             message=str(erro),
             action="show",
             color="red",
         )
+
     else:
-        NOTIFICACAO = dmc.Notification(
+        return dmc.Notification(
             id="notificacao-novo-usr-suc",
             title="Pronto!",
             message=[
@@ -347,10 +387,9 @@ def criar_novo_usr(
             action="show",
         )
 
-    return NOTIFICACAO
-
 
 @callback(
+    Output("notificacoes", "children", allow_duplicate=True),
     Output("btn-excluir-usr", "children"),
     Output("url", "href"),
     Input("btn-excluir-usr", "n_clicks"),
@@ -360,6 +399,7 @@ def criar_novo_usr(
 )
 def confirmar_exclusao_usr(n: int, botao: str, search: str):
     usr_atual: Usuario = current_user
+
     if (
         not n
         or not usr_atual.is_authenticated
@@ -368,15 +408,37 @@ def confirmar_exclusao_usr(n: int, botao: str, search: str):
         raise PreventUpdate
 
     if botao == "Excluir":
+        NOTIFICACAO = no_update
         BOTAO = "Confirmar"
         HREF = no_update
+
     else:
         params = parse_qs(search[1:])
-        id = params["id"][0]
+        id_usr = params["id"][0]
 
-        r = db("Boopt", "Usuários").delete_one({"_id": ObjectId(id)})
+        r = db("Boopt", "Usuários").delete_one(
+            {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa}
+        )
 
-        BOTAO = no_update
-        HREF = "/admin/usuarios"
+        if not r.acknowledged:
+            NOTIFICACAO = dmc.Notification(
+                id="notificacao-excluir-usr",
+                title="Atenção",
+                message="Houve um erro ao excluir o usuário. Tente novamente mais tarde.",
+                color="red",
+                action="show",
+            )
+            BOTAO = HREF = no_update
 
-    return BOTAO, HREF
+        else:
+            NOTIFICACAO = dmc.Notification(
+                id="notificacao-excluir-usr",
+                title="Pronto!",
+                message="O usuário foi excluído com sucesso.",
+                color="green",
+                action="show",
+            )
+            BOTAO = no_update
+            HREF = "/admin/usuarios"
+
+    return NOTIFICACAO, BOTAO, HREF
