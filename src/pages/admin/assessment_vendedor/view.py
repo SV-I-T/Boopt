@@ -104,7 +104,13 @@ def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
                                     }
                                 },
                             },
-                            {"$project": {"notas": 0}},
+                            {
+                                "$project": {
+                                    "_id": {"$toString": "$_id"},
+                                    "id_usuario": {"$toString": "$id_usuario"},
+                                    "nota": 1,
+                                }
+                            },
                         ],
                         "as": "respostas",
                     }
@@ -133,8 +139,9 @@ def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
         pl.DataFrame(map(str, r["participantes"]))
         .rename({"column_0": "id_usuario"})
         .join(
-            pl.DataFrame(r["respostas"]).with_columns(
-                pl.col("id_usuario").map_elements(str)
+            pl.DataFrame(
+                r["respostas"],
+                schema={"_id": str, "id_usuario": str, "nota": float},
             ),
             on="id_usuario",
             how="left",
