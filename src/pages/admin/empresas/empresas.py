@@ -1,29 +1,24 @@
-from math import ceil
-
 import dash_mantine_components as dmc
 from dash import (
-    ClientsideFunction,
     Input,
     Output,
     State,
     callback,
-    clientside_callback,
     html,
     register_page,
 )
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import Perfil, checar_perfil
+from utils.modelo_usuario import Perfil, checar_perfil, Usuario
+from flask_login import current_user
+from dash.exceptions import PreventUpdate
 
 register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 
-MAX_PAGINA = 15
 
-
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin])
+@checar_perfil(permitir=(Perfil.dev, Perfil.admin))
 def layout():
-    n_empresas = db("Boopt", "Empresas").count_documents({})
-    n_paginas = ceil(n_empresas / MAX_PAGINA)
+    corpo_tabela = consultar_dados_tabela_empresas("")
     return [
         dmc.Title("Gerenciamento de empresas", className="titulo-pagina"),
         dmc.Group(
@@ -69,23 +64,30 @@ def layout():
                         ]
                     )
                 ),
-                html.Tbody(id="tabela-empresas-body"),
+                html.Tbody(id="tabela-empresas-body", children=corpo_tabela),
             ],
-        ),
-        dmc.Pagination(
-            id="tabela-empresas-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
         ),
     ]
 
 
 @callback(
     Output("tabela-empresas-body", "children"),
-    Input("url", "pathname"),
-    Input("tabela-empresas-nav", "page"),
     Input("empresa-filtro-btn", "n_clicks"),
     State("empresa-filtro-input", "value"),
+    prevent_initial_call=True,
 )
-def atualizar_tabela_empresas(_, pagina, n, busca):
+def atualizar_tabela_empresas(n: int, busca: str):
+    usr: Usuario = current_user
+
+    if usr.perfil not in (Perfil.admin, Perfil.dev) or not n:
+        raise PreventUpdate
+
+    corpo_tabela = consultar_dados_tabela_empresas(busca)
+
+    return corpo_tabela
+
+
+def consultar_dados_tabela_empresas(busca: str):
     busca_regex = {"$regex": busca, "$options": "i"}
     empresas = db("Boopt", "Empresas").aggregate(
         [
@@ -94,8 +96,6 @@ def atualizar_tabela_empresas(_, pagina, n, busca):
                     "$or": [{campo: busca_regex} for campo in ("nome", "segmento")]
                 }
             },
-            {"$skip": (pagina - 1) * MAX_PAGINA},
-            {"$limit": MAX_PAGINA},
             {"$sort": {"nome": 1}},
             {
                 "$lookup": {
