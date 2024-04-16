@@ -6,6 +6,7 @@
     --off-white: #f3f3f3;
     --max-size: 1200px;
     --navbar-width: 300px;
+    --burger-header-height: 50px;
 }
 
 * {
@@ -18,7 +19,7 @@
 }
 
 body {
-    background-color: var(--off-white);
+    background-color: var(--off-white) !important;
 }
 
 body:not(.index-body) {

@@ -1,5 +1,15 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        abrir_barra_lateral: function (opened) {
+            const navbar = document.getElementById('navbar');
+            if (opened) {
+                navbar.style.visibility = "visible";
+                navbar.style.opacity = 1;
+            } else {
+                navbar.style = "";
+            }
+            throw window.dash_clientside.PreventUpdate;
+        },
         alterar_nav_link: function (_) {
             changeActiveNavLink();
             throw dash_clientside.PreventUpdate;

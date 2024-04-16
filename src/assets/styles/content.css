@@ -35,6 +35,7 @@ div:has(>#_pages_content) {
     }
 
     #_pages_content {
+        top: var(--burger-header-height);
         padding-left: 1rem;
         padding-right: 1rem;
     }
@@ -47,7 +48,6 @@ div:has(>#_pages_content) {
     }
 
     #_pages_content {
-        /* padding-left: 0rem; */
         padding-right: 50px;
     }
 }

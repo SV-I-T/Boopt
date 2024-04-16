@@ -63,14 +63,27 @@ def layout():
                 html.Div(
                     id="page-container",
                     children=[
-                        html.Div(id="hamburger-btn"),
                         layout_navbar(),
                         page_container,
+                        html.Div(
+                            id="burger-header",
+                            children=[
+                                dmc.Burger(id="burger-btn", opened=False, color="white")
+                            ],
+                        ),
                     ],
                 ),
             ],
         ),
     )
+
+
+clientside_callback(
+    ClientsideFunction("clientside", "abrir_barra_lateral"),
+    Output("navbar", "children"),
+    Input("burger-btn", "opened"),
+    prevent_initial_call=True,
+)
 
 
 clientside_callback(
