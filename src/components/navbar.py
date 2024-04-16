@@ -2,8 +2,6 @@ import dash_mantine_components as dmc
 from dash import (
     Input,
     Output,
-    State,
-    callback,
     get_asset_url,
     html,
     clientside_callback,
@@ -36,7 +34,6 @@ def layout_navbar():
 
 
 def menu_usuario(usr: Usuario):
-    path = ""
     if usr.is_authenticated:
         return html.Div(
             children=[
