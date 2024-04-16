@@ -69,8 +69,9 @@ def layout():
                 dmc.Title("Informações Profissionais", className="secao-pagina"),
                 dmc.SimpleGrid(
                     cols=2,
+                    spacing="md",
                     breakpoints=[
-                        {"maxWidth": 567, "co ls": 1},
+                        {"maxWidth": 567, "cols": 1},
                     ],
                     children=[
                         dmc.TextInput(
@@ -90,10 +91,13 @@ def layout():
                 ),
                 dmc.Divider(),
                 dmc.Title("Alteração da senha", className="secao-pagina"),
-                dmc.Group(
+                dmc.SimpleGrid(
                     mt="0.5rem",
-                    grow=True,
-                    align="start",
+                    cols=2,
+                    spacing="md",
+                    breakpoints=[
+                        {"maxWidth": 567, "cols": 1},
+                    ],
                     children=[
                         html.Div(
                             [
@@ -170,23 +174,36 @@ def habilitar_edicao_email(n: int, acao: str, email: str):
         try:
             usr.atualizar({"email": email})
         except ValidationError as _:
-            return dmc.Notification(
-                id="notificacao-email-alterado",
-                message="Não conseguimos alterar seu e-mail. Tente novamente mais tarde.",
-                color="red",
-                title="Atenção",
-                action="show",
-            ), no_update, no_update, no_update, no_update, no_update, no_update
+            return (
+                dmc.Notification(
+                    id="notificacao-email-alterado",
+                    message="Não conseguimos alterar seu e-mail. Tente novamente mais tarde.",
+                    color="red",
+                    title="Atenção",
+                    action="show",
+                ),
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+            )
 
         cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr.id)
 
-        return dmc.Notification(
-            id="notificacao-email-alterado",
-            message="Email alterado com sucesso",
-            color="green",
-            title="Pronto!",
-            action="show",
-        ), True, "Editar", *DISABLED_ALTERAR_SENHA
+        return (
+            dmc.Notification(
+                id="notificacao-email-alterado",
+                message="Email alterado com sucesso",
+                color="green",
+                title="Pronto!",
+                action="show",
+            ),
+            True,
+            "Editar",
+            *DISABLED_ALTERAR_SENHA,
+        )
     else:
         raise PreventUpdate
 
