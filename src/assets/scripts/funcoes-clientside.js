@@ -1,5 +1,9 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        alterar_nav_link: function (_) {
+            changeActiveNavLink();
+            throw dash_clientside.PreventUpdate;
+        },
         bind_valor: function (x) {
             return x;
         },

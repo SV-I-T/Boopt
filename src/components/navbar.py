@@ -1,11 +1,21 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, get_asset_url, html
+from dash import (
+    Input,
+    Output,
+    State,
+    callback,
+    get_asset_url,
+    html,
+    clientside_callback,
+    ClientsideFunction,
+)
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.modelo_usuario import Perfil, Usuario
 
 
 def layout_navbar():
+    usr: Usuario = current_user
     return html.Nav(
         children=[
             dmc.Text(
@@ -15,7 +25,7 @@ def layout_navbar():
                 mb="2rem",
                 size=20,
             ),
-            html.Div(id="menu-usr"),
+            html.Div(id="menu-usr", children=menu_usuario(usr)),
             html.Img(
                 src=get_asset_url("imgs/boopt/horizontal_branco.svg"),
                 height=30,
@@ -25,14 +35,8 @@ def layout_navbar():
     )
 
 
-@callback(
-    Output("menu-usr", "children"),
-    Input("navbar", "title"),
-    State("url", "pathname"),
-)
-def menu_usuario(_, path):
-    usr: Usuario = current_user
-
+def menu_usuario(usr: Usuario):
+    path = ""
     if usr.is_authenticated:
         return html.Div(
             children=[
@@ -51,13 +55,11 @@ def menu_usuario(_, path):
                             ],
                             icon=DashIconify(icon="fluent:person-20-filled", width=18),
                             href="/app/perfil",
-                            active=path.startswith("/app/perfil"),
                         ),
                         dmc.NavLink(
                             label="Início",
                             href="/app/assessment-vendedor",
                             icon=DashIconify(icon="fluent:home-20-filled", width=18),
-                            active=path.startswith("/app/assessment-vendedor"),
                         ),
                         dmc.NavLink(
                             label="Painel de Gestão",
@@ -65,7 +67,6 @@ def menu_usuario(_, path):
                             icon=DashIconify(
                                 icon="fluent:panel-left-text-20-filled", width=18
                             ),
-                            active=path.startswith("/app/admin"),
                         )
                         if (usr.perfil in [Perfil.dev, Perfil.admin, Perfil.gestor])
                         else None,
@@ -89,3 +90,10 @@ def menu_usuario(_, path):
                 dmc.Anchor("Entrar", href="/login?next=/app/dashboard", refresh=True),
             ]
         )
+
+
+clientside_callback(
+    ClientsideFunction(namespace="clientside", function_name="alterar_nav_link"),
+    Output("menu-usr", "children"),
+    Input("menu-usr", "children"),
+)
