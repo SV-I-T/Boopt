@@ -1,22 +1,40 @@
 #navbar {
     position: fixed;
+    display: flex;
+    flex-direction: column;
     top: 0px;
     bottom: 0px;
     left: 0px;
     background-color: transparent;
     border: none;
-    background-color: var(--azul-sv);
+    background-color: var(--off-white);
     background-image:
-        linear-gradient(0deg, var(--laranja-boopt) 0%, rgba(217, 217, 217, 0) 75%);
+        url('../imgs/boopt/logo_borda_gradiente.svg');
     background-repeat:
         no-repeat;
     background-position:
-        top;
+        bottom left;
     background-size:
-        100%;
+        150%;
     padding: 5rem 70px 1rem 1rem;
     z-index: -1;
     transition: visibility 0s, opacity 100ms linear;
+}
+
+#navbar #menu-usr {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#navbar img {
+    width: auto;
+    /* bottom: 1rem;
+    position: absolute;
+    transform: translateX(-50%);
+    left: calc(50% - 25px);
+    height: 50px; */
 }
 
 #navbar .nome-usr-navbar {
@@ -31,20 +49,9 @@
     line-height: 1;
 }
 
-#navbar .links-nav {
-    margin-top: 2rem;
-}
-
-#navbar *:not(.mantine-Menu-dropdown *, .mantine-NavLink-root, .mantine-NavLink-root *) {
-    color: #fff;
-}
-
-#navbar img {
-    bottom: 1rem;
-    position: absolute;
-    transform: translateX(-50%);
-    left: calc(50% - 25px);
-    height: 50px;
+#navbar .mantine-NavLink-root:last-of-type {
+    margin-top: auto;
+    margin-bottom: 1rem;
 }
 
 #navbar .mantine-Menu-itemLabel>div {
@@ -59,24 +66,22 @@
 }
 
 #navbar .mantine-NavLink-root:not([data-active=true]) * {
-    color: #cecece;
+    color: #484848;
 }
 
 #navbar .mantine-NavLink-root[data-active=true] {
-    background-color: #f3f3f3;
+    background-color: var(--azul-sv);
+    color: #f3f3f3;
 }
 
 #navbar .mantine-NavLink-root:not([data-active=true]):hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 #navbar .mantine-NavLink-label {
     font-weight: 700;
 }
 
-#navbar .mantine-NavLink-root:last-of-type {
-    margin-top: 2rem;
-}
 
 #burger-header {
     top: 0px;
@@ -92,19 +97,6 @@
     padding: 0 1rem 0 1rem;
 }
 
-#burger-header::before {
-    content: "";
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 15px;
-    bottom: 0;
-    background-color: var(--off-white);
-    border-radius: 15px 15px 0 0;
-    /* box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2); */
-}
-
 @media only screen and (max-width: 1000px) {
     #navbar {
         width: 300px;
@@ -113,28 +105,15 @@
         z-index: 10000000000;
         visibility: hidden;
         opacity: 0;
+        border: 1px solid black;
     }
 }
 
 @media only screen and (min-width: 1000px) {
     #navbar {
         width: var(--navbar-width);
-        display: block;
         visibility: visible;
         opacity: 1;
-    }
-
-    #navbar::before {
-        content: "";
-        display: block;
-        position: absolute;
-        right: 0;
-        width: 30px;
-        top: 0;
-        bottom: 0;
-        background-color: var(--off-white);
-        border-radius: 30px 0 0 0;
-        box-shadow: -20px 0px 20px -10px rgba(0, 0, 0, 0.2);
     }
 
     #burger-header {

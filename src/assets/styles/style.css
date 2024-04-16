@@ -19,12 +19,13 @@
 }
 
 body {
-    background-color: var(--off-white) !important;
+    background-color: var(--off-white);
 }
 
 body:not(.index-body) {
     display: flex;
     flex-direction: column;
+    background-color: #fff !important;
 }
 
 body.index-body {
