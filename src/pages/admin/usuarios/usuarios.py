@@ -121,7 +121,6 @@ def consultar_dados_tabela_usuarios(
     usr_atual: Usuario, pagina: int, busca: str
 ) -> tuple[list[html.Tr], int]:
     busca_regex = {"$regex": busca, "$options": "i"}
-    print(busca_regex)
 
     pipeline = [
         {"$sort": {"nome": 1}},
