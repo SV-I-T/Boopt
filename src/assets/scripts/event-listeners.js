@@ -30,6 +30,10 @@ const observeUrlChange = () => {
     const body = document.querySelector("body");
     const observer = new MutationObserver(mutations => {
         if (oldPath !== document.location.pathname) {
+            // Resetar barra lateral
+            document.getElementsByClassName('mantine-Burger-burger')[0].removeAttribute('data-opened');
+            document.getElementById('navbar').style = "";
+            // Alterar navlink ativo
             oldPath = document.location.pathname;
             changeActiveNavLink();
         }
