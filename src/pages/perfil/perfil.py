@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, html, no_update, register_page
@@ -17,17 +18,13 @@ register_page(__name__, path="/app/perfil", title="Meu perfil")
 def layout():
     usr: Usuario = current_user
     return [
-        dmc.Title("Meu perfil", className="titulo-pagina"),
+        html.H1("Meu perfil", className="titulo-pagina"),
         html.Div(
             className="editar-perfil",
             children=[
-                dmc.Title("Informações Pessoais", className="secao-pagina"),
-                dmc.SimpleGrid(
-                    cols=2,
-                    spacing="md",
-                    breakpoints=[
-                        {"maxWidth": 567, "cols": 1},
-                    ],
+                html.H1("Informações Pessoais", className="secao-pagina"),
+                html.Div(
+                    className="grid grid-2-col",
                     children=[
                         dmc.TextInput(
                             label="Nome completo",
@@ -66,13 +63,9 @@ def layout():
                     ],
                 ),
                 dmc.Divider(),
-                dmc.Title("Informações Profissionais", className="secao-pagina"),
-                dmc.SimpleGrid(
-                    cols=2,
-                    spacing="md",
-                    breakpoints=[
-                        {"maxWidth": 567, "cols": 1},
-                    ],
+                html.H1("Informações Profissionais", className="secao-pagina"),
+                html.Div(
+                    className="grid grid-2-col",
                     children=[
                         dmc.TextInput(
                             label="Empresa",
@@ -90,58 +83,42 @@ def layout():
                     ],
                 ),
                 dmc.Divider(),
-                dmc.Title("Alteração da senha", className="secao-pagina"),
-                dmc.SimpleGrid(
-                    mt="0.5rem",
-                    cols=2,
-                    spacing="md",
-                    breakpoints=[
-                        {"maxWidth": 567, "cols": 1},
-                    ],
-                    children=[
-                        html.Div(
-                            [
-                                dmc.Text(
-                                    "Mantenha sua conta segura alterando a senha padrão",
-                                    weight=300,
-                                ),
-                                dmc.Text(
-                                    "ATENÇÃO:",
-                                    color="BooptLaranja",
-                                    weight=700,
-                                    mt="1rem",
-                                ),
-                                dmc.Text(
-                                    "Para alterar sua senha, primeiro você precisa cadastrar um email",
-                                    weight=300,
-                                ),
-                            ]
-                        ),
-                        dmc.Stack(
-                            [
-                                dmc.PasswordInput(
-                                    id="input-perfil-senha-atual",
-                                    label="Senha atual",
-                                    disabled=not bool(usr.email),
-                                ),
-                                dmc.PasswordInput(
-                                    id="input-perfil-senha-nova",
-                                    label="Nova senha",
-                                    disabled=not bool(usr.email),
-                                ),
-                                dmc.PasswordInput(
-                                    id="input-perfil-senha-nova2",
-                                    label="Confirmação da nova senha",
-                                    disabled=not bool(usr.email),
-                                ),
-                                dmc.Button(
-                                    id="btn-perfil-alterar-senha",
-                                    children="Alterar senha",
-                                    disabled=not bool(usr.email),
-                                ),
-                            ]
-                        ),
-                    ],
+                html.H1("Alteração da senha", className="secao-pagina"),
+                html.P(
+                    "Mantenha sua conta segura alterando a senha padrão",
+                    className="light",
+                ),
+                html.P("ATENÇÃO:", className="bold c-laranja"),
+                html.P(
+                    "Para alterar sua senha, primeiro você precisa cadastrar um email",
+                    className="light",
+                ),
+                dmc.Stack(
+                    className="grid grid-2-col",
+                    children=html.Div(
+                        [
+                            dmc.PasswordInput(
+                                id="input-perfil-senha-atual",
+                                label="Senha atual",
+                                disabled=not bool(usr.email),
+                            ),
+                            dmc.PasswordInput(
+                                id="input-perfil-senha-nova",
+                                label="Nova senha",
+                                disabled=not bool(usr.email),
+                            ),
+                            dmc.PasswordInput(
+                                id="input-perfil-senha-nova2",
+                                label="Confirmação da nova senha",
+                                disabled=not bool(usr.email),
+                            ),
+                        ]
+                    ),
+                ),
+                dmc.Button(
+                    id="btn-perfil-alterar-senha",
+                    children="Alterar senha",
+                    disabled=not bool(usr.email),
                 ),
             ],
         ),
@@ -161,7 +138,7 @@ def layout():
     State("input-perfil-email", "value"),
     prevent_initial_call=True,
 )
-def habilitar_edicao_email(n: int, acao: str, email: str):
+def editar_email(n: int, acao: str, email: str):
     if not n or not current_user.is_authenticated:
         raise PreventUpdate
 
@@ -169,10 +146,31 @@ def habilitar_edicao_email(n: int, acao: str, email: str):
 
     if acao == "Editar":
         return no_update, False, "Salvar", *DISABLED_ALTERAR_SENHA
+
     elif acao == "Salvar":
+        if not re.compile(
+            r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
+        ).fullmatch(email):
+            return (
+                dmc.Notification(
+                    id="notificacao-email-alterado",
+                    message="E-mail inválido. Verifique e tente novamente",
+                    color="red",
+                    title="Atenção",
+                    action="show",
+                ),
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+            )
+
         usr: Usuario = current_user
         try:
             usr.atualizar({"email": email})
+
         except ValidationError as _:
             return (
                 dmc.Notification(

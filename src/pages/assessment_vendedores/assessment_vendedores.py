@@ -18,26 +18,28 @@ def layout():
     usr_atual: Usuario = current_user
 
     r = AssessmentVendedor.testes_disponiveis(usr_atual.id_)
-    ultima_aplicacao = r.get("ultima_aplicacao", None)
-    ultima_resposta_id = r.get("ultima_resposta_id", None)
+    ultima_aplicacao = r["ultima_aplicacao"] if r else None
+    ultima_resposta_id = r["ultima_resposta_id"] if r else None
 
     return html.Div(
         className="center-container",
         children=[
-            dmc.Text(
-                "Bem-vindo ao Assessment de Vendedor",
-                size=40,
-                weight=600,
-                align="center",
+            dmc.Image(
                 mb="1rem",
+                width=500,
+                height=200,
+                withPlaceholder=True,
+                alt="Logo Assessment",
+                placeholder=dmc.Text("LOGO"),
             ),
             dmc.Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ligula arcu, auctor vel tellus vitae, aliquam dignissim quam.",
+                "Te damos as boas-vindas ao Assessment de Vendedor Boopt.",
                 weight=500,
                 align="center",
                 mb="4rem",
             ),
             dmc.Group(
+                mb="4rem",
                 children=[
                     dmc.Anchor(
                         dmc.Button(
@@ -48,7 +50,6 @@ def layout():
                                 ultima_aplicacao
                                 and not ultima_aplicacao.get("resposta")
                             ),
-                            color="BooptLaranja",
                         ),
                         href=f"/app/assessment-vendedor/teste/?id={ultima_aplicacao['id']}"
                         if ultima_aplicacao and not ultima_aplicacao.get("resposta")
@@ -58,17 +59,16 @@ def layout():
                         dmc.Button(
                             children="Ver resultado",
                             disabled=not ultima_resposta_id,
+                            color="BooptLaranja",
                         ),
                         href=f"/app/assessment-vendedor/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"
                         if ultima_resposta_id
                         else None,
                     ),
-                ]
+                ],
             ),
-            dmc.Card(
-                bg="#e9e9e9",
-                px="1rem",
-                mt="5rem",
+            html.Div(
+                className="card card-videos-av",
                 children=dmc.Group(
                     spacing="xl",
                     children=[
@@ -78,7 +78,6 @@ def layout():
                             className="play-videos-av",
                         ),
                         html.Div(
-                            style={"width": 350},
                             children=[
                                 dcc.Markdown(
                                     "Acesse a nossa plataforma de vídeos **após realizar o teste do Assessment Boopt**"
@@ -88,10 +87,11 @@ def layout():
                                     children=dmc.Button(
                                         children="Acessar",
                                         leftIcon=DashIconify(
-                                            icon="fluent:filmstrip-play-16-filled",
+                                            icon="fluent:filmstrip-play-16-regular",
                                             width=16,
                                         ),
-                                        className="btn-borda-gradiente btn-acessar-videos",
+                                        className="btn-borda-gradiente",
+                                        disabled=not ultima_resposta_id,
                                     ),
                                 ),
                             ],

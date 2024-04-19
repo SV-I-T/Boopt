@@ -49,6 +49,13 @@ class Usuario(BaseModel, UserMixin):
     class Config:
         arbitrary_types_allowed = True
 
+    @field_validator("email", mode="before")
+    @classmethod
+    def validar_email_nulo(cls, v: Any) -> str:
+        if v is None:
+            return ""
+        return v
+
     @computed_field
     @property
     def id(self) -> str:
@@ -73,12 +80,13 @@ class Usuario(BaseModel, UserMixin):
     @classmethod
     @cache_simple.memoize(timeout=600)
     def buscar_login(cls, _id: str) -> dict | None:
-        print("Carregando usuário")
         if _id == "None":
             return None
-        return db("Boopt", "Usuários").find_one(
+        usr = db("Boopt", "Usuários").find_one(
             {"_id": ObjectId(_id)},
         )
+        print(f"Carregando usuário {usr['nome']} {usr['sobrenome']}")
+        return usr
 
     def validar_senha(self, senha: str) -> None:
         assert check_password_hash(
@@ -115,23 +123,23 @@ class NovoUsuario(BaseModel):
     email: Optional[str] = None
     data: str
     cargo: str
-    empresa: Union[None, str, ObjectId]
+    empresa: ObjectId
     perfil: Perfil
 
     class Config:
         arbitrary_types_allowed = True
         str_strip_whitespace = True
 
-    @field_validator("empresa", mode="before")
-    @classmethod
-    def validar_empresa(cls, v: Any) -> ObjectId | None:
-        assert bool(v), "O campo 'Empresa' é obrigatório"
-        if not v:
-            return None
-        elif isinstance(v, str):
-            return ObjectId(v)
-        else:
-            return None
+    # @field_validator("empresa", mode="before")
+    # @classmethod
+    # def validar_empresa(cls, v: Any) -> ObjectId:
+    #     assert bool(v), "O campo 'Empresa' é obrigatório"
+    #     if not v:
+    #         return None
+    #     elif not isinstance(v, ObjectId):
+    #         return ObjectId(v)
+    #     else:
+    #         return None
 
     @field_validator(
         "nome", "sobrenome", "cpf", "data", "empresa", "cargo", mode="before"
@@ -186,10 +194,10 @@ class NovoUsuario(BaseModel):
 class NovosUsuariosBatelada(BaseModel):
     usuarios: list[NovoUsuario] = Field(default_factory=list)
 
-    def registrar_usuarios(self, empresa: ObjectId) -> None:
-        for i in range(len(self.usuarios)):
-            self.usuarios[i].empresa = empresa
-
+    def registrar_usuarios(self) -> None:
+        # print(self.usuarios)
+        # print("usuarios registrados")
+        # return
         r = db("Boopt", "Usuários").insert_many(
             [usuario.model_dump() for usuario in self.usuarios]
         )
@@ -244,7 +252,7 @@ class NovosUsuariosBatelada(BaseModel):
         return wb
 
     @classmethod
-    def carregar_planilha(cls, planilha):
+    def carregar_planilha(cls, planilha, empresa: ObjectId, perfil: Perfil):
         wb = openpyxl.load_workbook(planilha)
         assert (
             "Cadastro" in wb.sheetnames
@@ -263,14 +271,20 @@ class NovosUsuariosBatelada(BaseModel):
             == linhas[0]
         ), "O arquivo não está no modelo esperado. Certifique-se de não modificar o cabeçalho do modelo fornecido."
 
+        assert (
+            len(linhas) > 1
+        ), "Parece que o arquivo está vazio. Preencha-o e tente enviar novamente."
+
         usuarios = [
             {
                 "nome": linha[0],
                 "sobrenome": linha[1],
                 "cpf": linha[2],
-                "data": linha[3].strftime("%Y-%m-%d"),
-                "email": linha[4],
+                "data": linha[3].strftime("%Y-%m-%d") if linha[3] else None,
+                "email": linha[4] if linha[4] is not None else "",
                 "cargo": linha[5],
+                "empresa": empresa,
+                "perfil": perfil,
             }
             for linha in linhas[1:]
         ]

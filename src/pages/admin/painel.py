@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from dash import register_page
+from dash import register_page, html
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.modelo_usuario import Perfil, Usuario, checar_perfil
@@ -30,16 +30,14 @@ def layout():
         },
     )
     return [
-        dmc.Title("Painel de gestão", className="titulo-pagina"),
+        html.H1("Painel de gestão", className="titulo-pagina"),
         dmc.Grid(
             children=[
                 dmc.Col(
                     xs=6,
                     md=4,
-                    children=dmc.Card(
-                        shadow="sm",
-                        withBorder=True,
-                        className="card-painel-gestao",
+                    children=html.Div(
+                        className="card card-painel",
                         children=[
                             dmc.Group(
                                 children=[

@@ -42,5 +42,8 @@ input.input:focus {
 input[disabled] {
     color: var(--preto-sv) !important;
     opacity: 1 !important;
-    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+input::invalid {
+    outline: none !important;
 }

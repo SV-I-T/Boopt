@@ -18,13 +18,14 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
-from utils.banco_dados import db
 from utils.modelo_usuario import (
     CARGOS_PADROES,
+    Usuario,
     NovosUsuariosBatelada,
     Perfil,
     checar_perfil,
 )
+from flask_login import current_user
 
 register_page(
     __name__, path="/app/admin/usuarios/cadastro-massa", title="Cadastro em Massa"
@@ -33,52 +34,134 @@ register_page(
 
 @checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
 def layout():
+    usr_atual: Usuario = current_user
+
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in db("Boopt", "Empresas").find(
-            projection={"_id": 1, "nome": 1}, sort={"nome": 1}
-        )
+        for empresa in usr_atual.buscar_empresas()
     ]
+
+    if usr_atual.perfil == Perfil.dev:
+        perfis_editar = [p for p in Perfil]
+    elif usr_atual.perfil == Perfil.admin:
+        perfis_editar = [Perfil.gestor, Perfil.usuario, Perfil.candidato]
+    else:
+        perfis_editar = [Perfil.usuario, Perfil.candidato]
+
+    data_perfil = [
+        {"value": p.value, "label": p.name.capitalize()} for p in perfis_editar
+    ]
+
     return [
-        dmc.Title("Cadastro em massa", className="titulo-pagina"),
-        dmc.Select(
-            id="empresa-usr-massa",
-            label="Empresa de cadastro",
-            icon=DashIconify(icon="fluent:building-24-filled", width=24),
-            name="empresa",
-            data=data_empresas,
-            placeholder="Selecione uma empresa",
-            required=True,
-            searchable=True,
-            nothingFound="Não encontrei nada",
-            w=300,
-        ),
-        dmc.Button(
-            id="usr-massa-download-template",
-            children="Baixar modelo",
-            variant="subtle",
-            compact=True,
-            leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
-        ),
-        dcc.Upload(
-            id="upload-cadastro-massa",
-            className="container-upload",
-            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        html.H1("Cadastro em massa", className="titulo-pagina"),
+        html.Div(
+            className="grid grid-2-col",
             children=[
                 html.Div(
                     [
-                        dmc.Text(
-                            "Clique aqui para selecionar ou arraste o arquivo (.xlsx)"
+                        dmc.Select(
+                            id="empresa-usr-massa",
+                            label="Empresa dos usuários",
+                            icon=DashIconify(
+                                icon="fluent:building-24-filled", width=24
+                            ),
+                            name="empresa",
+                            data=data_empresas,
+                            value=str(usr_atual.empresa),
+                            placeholder="Selecione uma empresa",
+                            searchable=True,
+                            nothingFound="Não encontrei nada",
+                            w=300,
+                            display="none"
+                            if usr_atual.perfil == Perfil.gestor
+                            else "block",
                         ),
-                        dmc.Text(
-                            id="usr-massa-arquivo", children="Nenhum arquivo escolhido"
+                        dmc.Select(
+                            id="perfil-usr-massa",
+                            label="Perfil dos usuários",
+                            icon=DashIconify(
+                                icon="fluent:person-passkey-24-filled", width=24
+                            ),
+                            name="perfil",
+                            data=data_perfil,
+                            value=Perfil.usuario,
+                            placeholder="Selecione um perfil",
+                            w=300,
                         ),
+                        html.H1("Importe seu arquivo excel", className="secao-pagina"),
+                        dcc.Upload(
+                            id="upload-cadastro-massa",
+                            className="container-upload",
+                            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            style_active={},
+                            style_reject={},
+                            className_active="upload-ativo",
+                            className_reject="upload-negado",
+                            max_size=5e6,
+                            children=[
+                                "Arraste aqui ou ",
+                                html.A("selecione um arquivo"),
+                                # DashIconify(
+                                #     icon="fluent:document-add-48-regular",
+                                #     width=48,
+                                #     color="#1717FF",
+                                # ),
+                                dmc.Text(
+                                    "Tamanho máximo: 5MB",
+                                    size=14,
+                                    opacity=0.5,
+                                ),
+                                html.Div(
+                                    id="div-usr-massa-arquivo",
+                                    children=[
+                                        dmc.Divider(w="100%"),
+                                        dmc.Group(
+                                            children=[
+                                                DashIconify(
+                                                    icon="vscode-icons:file-type-excel",
+                                                    width=24,
+                                                ),
+                                                dmc.Text(id="usr-massa-arquivo"),
+                                            ],
+                                        ),
+                                    ],
+                                    style={"display": "none"},
+                                ),
+                            ],
+                        ),
+                        dmc.Button("Enviar", id="btn-criar-usrs-batelada"),
+                        html.Div(id="feedback-usr-massa"),
+                    ]
+                ),
+                html.Div(
+                    [
+                        html.P(
+                            "A importação é indicada para quando há a necessidade de adicionar uma grande quantidade de usuários ao mesmo tempo. Por padrão, a senha do usuário será definida como sua data de aniversário, no formato DDMMAAAA"
+                        ),
+                        html.H1(
+                            "Precisa de ajuda para importar seu arquivo?",
+                            className="secao-pagina",
+                        ),
+                        html.P(
+                            "Faça o download do arquivo de modelo abaixo, e preencha-o de acordo."
+                        ),
+                        dmc.Button(
+                            id="usr-massa-download-template",
+                            children="Baixar modelo",
+                            leftIcon=DashIconify(
+                                icon="fluent:arrow-download-16-filled", width=16
+                            ),
+                        ),
+                        html.H1("Como preencher o modelo?", className="secao-pagina"),
+                        dcc.Markdown("""
+Para que todos os usuários sejam validados e cadastrados, é necessário que o arquivo seja preenchido corretamente. Siga as dicas abaixo para não ter nenhum problema:
+* Não modifique o cabeçalho da planilha;
+* Não adicione novos campos e não remova campos existentes;
+"""),
                     ]
                 ),
             ],
         ),
-        dmc.Button("Enviar", id="btn-criar-usrs-batelada"),
-        html.Div(id="feedback-usr-massa"),
     ]
 
 
@@ -91,6 +174,7 @@ def baixar_template_cadastro_massa(n):
     if not n:
         raise PreventUpdate
 
+    return dcc.send_file("./assets/template_cadastro.xlsx")
     buffer = io.BytesIO()
     wb = NovosUsuariosBatelada.gerar_modelo(cargos_padres=CARGOS_PADROES)
     wb.save(buffer)
@@ -103,7 +187,7 @@ def baixar_template_cadastro_massa(n):
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "bind_valor"),
+    ClientsideFunction("clientside", "upload_arquivo_usr_batelada"),
     Output("usr-massa-arquivo", "children"),
     Input("upload-cadastro-massa", "filename"),
     prevent_initial_call=True,
@@ -118,15 +202,24 @@ clientside_callback(
     State("upload-cadastro-massa", "contents"),
     State("upload-cadastro-massa", "filename"),
     State("empresa-usr-massa", "value"),
+    State("perfil-usr-massa", "value"),
     prevent_initial_call=True,
 )
-def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
+def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, perfil: str):
     if not n:
         raise PreventUpdate
     if not empresa:
         ALERTA = dmc.Alert(
             title="Atenção",
             children="Selecione uma empresa para cadastrar os usuários.",
+            color="BooptLaranja",
+        )
+        NOTIFICACAO = no_update
+        URL = no_update
+    elif not perfil:
+        ALERTA = dmc.Alert(
+            title="Atenção",
+            children="Selecione um perfil para cadastrar os usuários.",
             color="BooptLaranja",
         )
         NOTIFICACAO = no_update
@@ -152,13 +245,19 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str):
             _, content_string = contents.split(",")
             decoded = base64.b64decode(content_string)
             novos_usuarios = NovosUsuariosBatelada.carregar_planilha(
-                io.BytesIO(decoded)
+                io.BytesIO(decoded), empresa=ObjectId(empresa), perfil=Perfil(perfil)
             )
-            novos_usuarios.registrar_usuarios(empresa=ObjectId(empresa))
+            novos_usuarios.registrar_usuarios()
         except ValidationError as e:
             ALERTA = dmc.Alert(
-                title="Atenção",
-                children=str(e.errors()[0]["ctx"]["error"]),
+                className="alert-erros",
+                title=f"{e.error_count()} erros encontrados",
+                children=[
+                    dcc.Markdown(
+                        f'**Linha {erro["loc"][1]+1}**: {erro["ctx"]["error"]}'
+                    )
+                    for erro in e.errors()
+                ],
                 color="BooptLaranja",
             )
             NOTIFICACAO = no_update

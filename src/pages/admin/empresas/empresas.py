@@ -20,7 +20,7 @@ register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 def layout():
     corpo_tabela = consultar_dados_tabela_empresas("")
     return [
-        dmc.Title("Gerenciamento de empresas", className="titulo-pagina"),
+        html.H1("Gerenciamento de empresas", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             spacing="sm",

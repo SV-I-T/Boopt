@@ -1,6 +1,7 @@
 :root {
     --azul-sv: #1618ff;
     --laranja-boopt: #FF7730;
+    --roxo-boopt: #88469B;
     --preto-sv: #171C24;
     --input-bg: #fff;
     --off-white: #f3f3f3;
@@ -28,13 +29,8 @@ body:not(.index-body) {
     background-color: #fff !important;
 }
 
-body.index-body {
-    height: 100vh;
-    margin: 0px;
-    background-image: url("../imgs/boopt/icone_branco.svg");
-    background-repeat: no-repeat;
-    background-position: bottom -150px right -150px;
-    background-size: 500px;
+a {
+    color: var(--azul-sv);
 }
 
 h1.titulo-pagina {
@@ -48,26 +44,51 @@ h1.secao-pagina {
     margin-bottom: 0.5rem;
 }
 
-@media only screen and (max-width: 767px) {
-    .mantine-Container-root {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .mantine-Paper-root {
-        box-shadow: none !important;
-        border: none !important;
-    }
+p.bold {
+    font-weight: 700;
 }
 
-input::invalid {
-    outline: none !important;
+p.light {
+    font-weight: 300;
 }
 
-#usr-massa-download-template .mantine-Button-label:hover {
-    text-decoration: underline;
+p.c-azul {
+    color: var(--azul-sv);
+}
+
+p.c-laranja {
+    color: var(--laranja-boopt);
 }
 
 .mantine-Divider-root {
     margin: 1rem 0 1rem 0;
+}
+
+.mantine-Grid-root {
+    margin: 0;
+}
+
+div.grid {
+    display: grid;
+    column-gap: 2rem;
+    row-gap: .5rem;
+    margin-bottom: 1rem;
+    align-items: end;
+}
+
+@media only screen and (min-width: 567px) {
+    div.grid.grid-2-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    div.grid.grid-3-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media only screen and (max-width: 567px) {
+    div.grid {
+        grid-template-columns: repeat(1, 1fr);
+
+    }
 }

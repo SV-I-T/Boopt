@@ -1,17 +1,3 @@
-div.editar-usr {
-    max-width: 800px;
-    width: 100%;
-}
-
-div.editar-usr .mantine-SimpleGrid-root {
-    align-items: end;
-    margin-bottom: 1rem;
-}
-
-div.editar-usr .mantine-SimpleGrid-root .mantine-Switch-root {
-    margin-bottom: 0.25rem;
-}
-
 #btn-salvar-usr,
 #btn-criar-usr {
     margin-right: 0.5rem;
@@ -20,4 +6,10 @@ div.editar-usr .mantine-SimpleGrid-root .mantine-Switch-root {
 
 #btn-excluir-usr {
     width: 150px;
+}
+
+.mantine-Alert-root.alert-erros p,
+.mantine-Alert-root.alert-erros strong {
+    margin: 0;
+    font-size: 14px;
 }

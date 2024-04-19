@@ -28,7 +28,7 @@ def layout():
     corpo_tabela, n_paginas = consultar_dados_tabela_usuarios(usr_atual, 1, "")
 
     return [
-        dmc.Title("Gerenciar usuários", className="titulo-pagina"),
+        html.H1("Gerenciar usuários", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             spacing="sm",
@@ -59,7 +59,6 @@ def layout():
                     children=dmc.Button(
                         id="btn-modal-usr-massa",
                         children="Cadastro em massa",
-                        variant="light",
                     ),
                 ),
             ],

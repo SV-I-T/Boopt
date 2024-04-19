@@ -11,6 +11,16 @@
     text-align: center;
 }
 
+body.login-body {
+    background-color: var(--off-white) !important;
+    height: 100vh;
+    margin: 0px;
+    background-image: url("../imgs/boopt/icone_branco.svg");
+    background-repeat: no-repeat;
+    background-position: bottom -150px right -150px;
+    background-size: 500px;
+}
+
 .login-container {
     flex-grow: 1;
     flex-direction: column;

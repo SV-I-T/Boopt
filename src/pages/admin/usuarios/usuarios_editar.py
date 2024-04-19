@@ -44,7 +44,7 @@ def layout(id: str = None):
         ]
         layout_edicao = layout_edicao_usr(usr)
     return [
-        dmc.Title(texto_titulo, className="titulo-pagina"),
+        html.H1(texto_titulo, className="titulo-pagina"),
         layout_edicao,
     ]
 
@@ -64,7 +64,10 @@ def layout_edicao_usr(usr: Usuario = None):
     else:
         perfis_editar = [Perfil.usuario, Perfil.candidato]
 
-    desabilitar = usr.perfil not in perfis_editar
+    if usr:
+        desabilitar = usr.perfil not in perfis_editar
+    else:
+        desabilitar = False
 
     data_perfil = [
         {"value": p.value, "label": p.name.capitalize()} for p in perfis_editar
@@ -73,18 +76,14 @@ def layout_edicao_usr(usr: Usuario = None):
     return html.Div(
         className="editar-usr",
         children=[
-            dmc.Title("Informações Pessoais", className="secao-pagina"),
-            dmc.SimpleGrid(
-                cols=2,
-                breakpoints=[
-                    {"maxWidth": 567, "cols": 1},
-                ],
+            html.H1("Informações Pessoais", className="secao-pagina"),
+            html.Div(
+                className="grid grid-2-col",
                 children=[
                     dmc.TextInput(
                         id="nome-edit-usr",
                         label="Nome",
                         type="text",
-                        required=True,
                         icon=DashIconify(icon="fluent:person-24-filled", width=24),
                         name="nome",
                         value=usr.nome if usr else None,
@@ -94,7 +93,6 @@ def layout_edicao_usr(usr: Usuario = None):
                         id="sobrenome-edit-usr",
                         label="Sobrenome",
                         type="text",
-                        required=True,
                         name="sobrenome",
                         value=usr.sobrenome if usr else None,
                         disabled=desabilitar,
@@ -102,7 +100,6 @@ def layout_edicao_usr(usr: Usuario = None):
                     dmc.TextInput(
                         id="cpf-edit-usr",
                         label="CPF",
-                        required=True,
                         description="Somente números",
                         placeholder="12345678910",
                         icon=DashIconify(
@@ -114,7 +111,7 @@ def layout_edicao_usr(usr: Usuario = None):
                     ),
                     dmc.TextInput(
                         id="email-edit-usr",
-                        label="E-mail",
+                        label="E-mail (opcional)",
                         type="email",
                         placeholder="nome@dominio.com",
                         icon=DashIconify(icon="fluent:mail-24-filled", width=24),
@@ -125,7 +122,6 @@ def layout_edicao_usr(usr: Usuario = None):
                     dmc.DatePicker(
                         id="data-edit-usr",
                         label="Data de Nascimento",
-                        required=True,
                         description="Será a senha do usuário",
                         locale="pt-br",
                         inputFormat="DD [de] MMMM [de] YYYY",
@@ -143,17 +139,13 @@ def layout_edicao_usr(usr: Usuario = None):
                 ],
             ),
             dmc.Divider(),
-            dmc.Title("Informações Profissionais", className="secao-pagina"),
-            dmc.SimpleGrid(
-                cols=2,
-                breakpoints=[
-                    {"maxWidth": 567, "cols": 1},
-                ],
+            html.H1("Informações Profissionais", className="secao-pagina"),
+            html.Div(
+                className="grid grid-2-col",
                 children=[
                     dmc.Select(
                         id="cargo-edit-usr",
                         label="Cargo/Função",
-                        required=True,
                         description="Selecione a opção que melhor se encaixa ao cargo",
                         data=CARGOS_PADROES,
                         creatable=True,
@@ -170,10 +162,13 @@ def layout_edicao_usr(usr: Usuario = None):
                         icon=DashIconify(icon="fluent:building-24-filled", width=24),
                         name="empresa",
                         data=data_empresas,
-                        required=True,
                         searchable=True,
                         nothingFound="Não encontrei nada",
-                        value=str(usr.empresa) if usr else None,
+                        value=str(usr.empresa)
+                        if usr
+                        else str(usr_atual.empresa)
+                        if id
+                        else None,
                         disabled=desabilitar,
                         display="none"
                         if usr_atual.perfil == Perfil.gestor
@@ -186,11 +181,19 @@ def layout_edicao_usr(usr: Usuario = None):
                             icon="fluent:person-passkey-24-filled", width=24
                         ),
                         data=data_perfil,
-                        required=True,
-                        value=usr.perfil if usr else None,
+                        value=usr.perfil if usr else Perfil.usuario,
                         disabled=desabilitar,
                     ),
                 ],
+            ),
+            dmc.Divider(),
+            html.H1("Segurança", className="secao-pagina"),
+            html.Div(
+                className="grid grid-2-col",
+                children=dmc.Button(
+                    "Resetar a senha (não funciona ainda)",
+                    disabled=desabilitar,
+                ),
             ),
             dmc.Button(
                 id="btn-salvar-usr" if usr else "btn-criar-usr",
@@ -339,22 +342,23 @@ def criar_novo_usr(
     ):
         raise PreventUpdate
 
-    if usr_atual.perfil == Perfil.gestor:
-        if str(usr_atual.empresa) != empresa:
-            raise AssertionError("Não você não pode criar um usuário de outra empresa.")
-        if Perfil(perfil) not in (Perfil.usuario, Perfil.candidato):
-            raise AssertionError(
-                f"Não você não tem permissão para atribuir este perfil: {perfil.capitalize()}."
-            )
-
     try:
+        if usr_atual.perfil == Perfil.gestor:
+            if str(usr_atual.empresa) != empresa:
+                raise AssertionError(
+                    "Não você não pode criar um usuário de outra empresa."
+                )
+            if Perfil(perfil) not in (Perfil.usuario, Perfil.candidato):
+                raise AssertionError(
+                    f"Não você não tem permissão para atribuir este perfil: {perfil.capitalize()}."
+                )
         usr = NovoUsuario(
             nome=nome,
             sobrenome=sobrenome,
             cpf=cpf,
             data=data,
             email=email,
-            empresa=empresa,
+            empresa=ObjectId(empresa),
             cargo=cargo,
             perfil=Perfil(perfil),
         )

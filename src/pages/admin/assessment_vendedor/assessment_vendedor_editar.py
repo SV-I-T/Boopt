@@ -45,7 +45,7 @@ def layout(empresa: str = None, id: str = None):
         assessment = None
 
     return [
-        dmc.Title(texto_titulo, className="titulo-pagina"),
+        html.H1(texto_titulo, className="titulo-pagina"),
         html.Div(
             className="editar-assessment",
             children=[

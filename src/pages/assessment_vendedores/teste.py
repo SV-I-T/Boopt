@@ -26,11 +26,15 @@ import polars as pl
 EXPLICACAO_MD = """
     Olá **{vendedor}**!
     
-    Esse mapeamento tem como objetivo analisar o quanto você tem desenvolvido as  competências essenciais para ser um vendedor de sucesso.
+    Esse mapeamento tem como objetivo analisar o quanto você tem desenvolvido as competências essenciais para ser um vendedor de sucesso.
     
-    **Escolha um local calmo e livre de interrupções** para responder esse formulário. **Você só poderá enviar uma vez**, então procure estar concentrado no exercício e responda com sinceridade, isso trará um resultado mais realista. A previsão de término é em apenas 10 minutos ⏳.
+    Escolha um local calmo e livre de interrupções para responder esse formulário.
 
-    Funciona da seguinte maneira: A seguir, teremos afirmações que devem ser classificadas de 1 a 5, onde:
+    Procure estar concentrado no exercício e responda com sinceridade, isso trará um resultado mais realista.
+
+    **A previsão de término é de apenas 10 minutos.**
+
+    Funciona da seguinte maneira: Abaixo, teremos afirmações que devem ser classificadas de 1 a 5, onde:
     * **1 significa**: Não me identifico nada
     * **5 significa**: Me identifico muito
 """
@@ -61,6 +65,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 children=dmc.Button(
                     "Começar teste",
                     color="SVAzul",
+                    mt="4rem",
                 ),
             ),
         ]
@@ -97,7 +102,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 dcc.Store(id="store-ordem-frases", data=ordem, storage_type="memory"),
                 dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="memory"),
                 html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
-                dmc.Text(
+                html.P(
                     id="text-frase",
                     children=frase_atual["frase"],
                 ),
@@ -106,9 +111,8 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     position="center",
                     mb="1rem",
                     children=[
-                        dmc.Text(
+                        html.P(
                             "Não me identifico",
-                            color="BooptLaranja",
                             className="label-teste",
                         ),
                         dcc.RadioItems(
@@ -121,9 +125,8 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             inline=True,
                             value=None,
                         ),
-                        dmc.Text(
+                        html.P(
                             "Me identifico muito",
-                            color="SVAzul",
                             className="label-teste",
                         ),
                     ],
@@ -162,12 +165,9 @@ def layout(id: str = None, secao: str = "instrucoes"):
         )
     elif secao == "enviado":
         return [
-            dmc.Title("Obrigado!"),
-            dmc.Text(
-                [
-                    "Você pode conferir seu resultado agora mesmo clicando ",
-                    dmc.Anchor("aqui", href="/app/assessment-vendedor", underline=True),
-                ]
+            html.H1("Obrigado!", className="titulo-pagina"),
+            dcc.Markdown(
+                "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/assessment-vendedor)"
             ),
         ]
 
@@ -233,18 +233,16 @@ def habilitar_envio(status_pronto):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return dmc.Card(
-            bg="#e9e9e9",
-            px="1rem",
+        return html.Div(
+            className="card",
             children=dmc.Group(
                 position="apart",
                 children=[
                     html.Div(
                         [
-                            dmc.Text("Tudo pronto!", weight=700, color="SVAzul"),
-                            dmc.Text(
+                            html.P("Tudo pronto!", className="bold c-azul"),
+                            html.P(
                                 "Você pode revisar suas respostas ou enviá-las agora mesmo.",
-                                weight=400,
                             ),
                         ]
                     ),

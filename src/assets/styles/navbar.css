@@ -16,13 +16,13 @@
         bottom left;
     background-size:
         150%;
-    padding: 5rem 70px 1rem 1rem;
+    padding: 3rem 70px 1rem 1rem;
     z-index: -1;
     transition: visibility 0s, opacity 100ms linear;
 }
 
 #navbar #menu-usr {
-    margin-top: 2rem;
+    margin-top: 0rem;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -30,11 +30,8 @@
 
 #navbar img {
     width: auto;
-    /* bottom: 1rem;
-    position: absolute;
-    transform: translateX(-50%);
-    left: calc(50% - 25px);
-    height: 50px; */
+    height: 50px;
+    margin-bottom: 2rem;
 }
 
 #navbar .nome-usr-navbar {

@@ -31,7 +31,7 @@ def layout():
     corpo_tabela, n_paginas = consultar_dados_tabela_assessment(1, str(usr.empresa))
 
     return [
-        dmc.Title("Gerenciar Assessment Vendedor", className="titulo-pagina"),
+        html.H1("Gerenciar Assessment Vendedor", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             position="right",
@@ -155,6 +155,10 @@ def consultar_dados_tabela_assessment(
     )
 
     assessments = r["data"]
+
+    if not assessments:
+        return [html.Tr([html.Td("Sem aplicações", colSpan=5)])], 1
+
     total = r["cont"][0]["total"]
 
     n_paginas = ceil(total / MAX_PAGINA)

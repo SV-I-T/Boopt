@@ -14,7 +14,12 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             changeActiveNavLink();
             throw dash_clientside.PreventUpdate;
         },
-        bind_valor: function (x) {
+        upload_arquivo_usr_batelada: function (x) {
+            if (x) {
+                document.getElementById('div-usr-massa-arquivo').style.display = 'block';
+            } else {
+                document.getElementById('div-usr-massa-arquivo').style.display = 'none';
+            }
             return x;
         },
         ativar: function (x) {

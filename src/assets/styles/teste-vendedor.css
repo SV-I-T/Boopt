@@ -1,11 +1,3 @@
-.play-videos-av {
-    background-image: linear-gradient(45deg, var(--azul-sv) 20%, var(--laranja-boopt) 80%);
-    border-radius: 50px;
-    padding: 20px;
-    height: 80px;
-    width: 80px;
-}
-
 #text-frase {
     font-weight: 500;
     font-size: 26px;
@@ -20,9 +12,18 @@ div.teste-assessment {
     justify-content: space-between !important;
 }
 
+
 .label-teste {
     font-size: 18px;
     font-weight: 500;
+}
+
+p.label-teste:first-child {
+    color: var(--laranja-boopt);
+}
+
+p.label-teste:last-child {
+    color: var(--azul-sv);
 }
 
 .radio-notas-frase {
@@ -60,22 +61,22 @@ div.teste-assessment {
 .radio-notas-frase label:nth-child(5),
 .radio-notas-frase label:nth-child(1) input,
 .radio-notas-frase label:nth-child(5) input {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
 }
 
 .radio-notas-frase label:nth-child(2),
 .radio-notas-frase label:nth-child(4),
 .radio-notas-frase label:nth-child(2) input,
 .radio-notas-frase label:nth-child(4) input {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
 }
 
 .radio-notas-frase label:nth-child(3),
 .radio-notas-frase label:nth-child(3) input {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
 }
 
 .radio-notas-frase label:nth-child(1) input,
