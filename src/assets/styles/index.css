@@ -1,0 +1,147 @@
+.index-body {
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.index-body p,
+.index-body strong {
+    line-height: 1.5;
+}
+
+.index-body header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.index-body header img {
+    width: 250px;
+}
+
+.index-body div.promo {
+    height: 800px;
+    padding: 5rem 3rem;
+    background-color: var(--azul-sv);
+    background:
+        url('../imgs/laptop_screen_mockup_15\ 1.png') no-repeat bottom right/auto 70%,
+        radial-gradient(circle farthest-corner at right, var(--laranja-boopt), var(--azul-sv));
+    border-radius: 30px;
+}
+
+.index-body div.promo p,
+.index-body div.promo h1 {
+    color: #fff;
+    width: 50%;
+}
+
+.index-body div.promo h1 {
+    font-size: 64px;
+}
+
+.index-body div.promo p,
+.index-body div.promo strong {
+    font-size: 20px;
+    line-height: 1.7;
+}
+
+.index-body div.promo button.btn {
+    color: var(--azul-sv);
+    font-size: 20px;
+    font-weight: 600;
+    border: none;
+    padding: 1rem 5rem;
+    box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.25);
+    transition: transform ease 100ms;
+}
+
+.index-body div.promo button.btn:hover {
+    transform: scale(1.05);
+}
+
+.index-body div.map-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.index-body h2 {
+    color: var(--azul-sv);
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.index-body div.map-lista h2 {
+    text-align: center;
+}
+
+.index-body div.map-lista ul {
+    padding: 0;
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 2rem;
+}
+
+.index-body div.map-lista ul li {
+    padding: 2rem;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+}
+
+.index-body div.map-lista ul li span {
+    width: 80px;
+    height: 80px;
+    color: var(--azul-sv);
+    margin: 2rem 0;
+}
+
+.index-body div.map-lista ul li,
+.index-body div.historia-boopt {
+    background-color: #e7e7e7;
+    border-radius: 20px;
+    box-shadow: 4px 6px 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+.index-body div.historia-boopt {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    column-gap: 2rem;
+    border-radius: 50px;
+    padding: 1rem 4rem;
+}
+
+.index-body div.historia-boopt img {
+    width: 170px;
+    align-self: center;
+    justify-self: center;
+}
+
+.index-body div.historia-boopt button {
+    background:
+        linear-gradient(90deg, #e7e7e7 0%, #e7e7e7 100%) padding-box,
+        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
+    border: 2px solid transparent;
+    color: #000;
+    transition: all 100ms ease-out 0s;
+}
+
+.index-body div.historia-boopt button:hover {
+    background:
+        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
+    background-color: white;
+    color: #fff;
+}
+
+.index-body footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.index-body footer img {
+    height: 50px;
+}
