@@ -1,0 +1,28 @@
+div.grid {
+    display: grid;
+    column-gap: 2rem;
+    row-gap: .5rem;
+    margin-bottom: 1rem;
+    align-items: start;
+}
+
+div.grid.grid-a-end {
+    align-items: end;
+}
+
+@media only screen and (min-width: 567px) {
+    div.grid.grid-2-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    div.grid.grid-3-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media only screen and (max-width: 567px) {
+    div.grid {
+        grid-template-columns: repeat(1, 1fr);
+
+    }
+}

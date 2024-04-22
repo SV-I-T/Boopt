@@ -78,7 +78,7 @@ def layout_edicao_usr(usr: Usuario = None):
         children=[
             html.H1("Informações Pessoais", className="secao-pagina"),
             html.Div(
-                className="grid grid-2-col",
+                className="grid grid-2-col grid-a-end",
                 children=[
                     dmc.TextInput(
                         id="nome-edit-usr",
