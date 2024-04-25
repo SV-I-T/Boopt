@@ -1,11 +1,11 @@
 import dash_mantine_components as dmc
-from dash import register_page, html
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil
-from utils.modelo_assessment import AssessmentVendedor
-from utils.banco_dados import db
-from bson import ObjectId
-from flask_login import current_user
 import polars as pl
+from bson import ObjectId
+from dash import html, register_page
+from flask_login import current_user
+from utils.banco_dados import db
+from utils.modelo_assessment import AssessmentVendedor
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(
     __name__,
@@ -14,7 +14,7 @@ register_page(
 )
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout(id: str = None):
     usr: Usuario = current_user
 
@@ -131,7 +131,7 @@ def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
         {"_id": {"$in": r["participantes"]}},
         {
             "_id": {"$toString": "$_id"},
-            "nome": {"$concat": ["$nome", " ", "$sobrenome"]},
+            "nome": "$nome",
         },
     )
 

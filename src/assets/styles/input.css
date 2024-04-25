@@ -1,6 +1,8 @@
 input,
-.mantine-Input-input {
-    border-radius: 30px !important;
+.mantine-PasswordInput-input,
+.mantine-TextInput-input,
+.mantine-Select-input {
+    border-radius: 40px !important;
 }
 
 input.input {
@@ -39,9 +41,9 @@ input.input:focus {
     outline: none;
 }
 
-input[disabled] {
+input[disabled],
+textarea[disabled] {
     color: var(--preto-sv) !important;
-    opacity: 1 !important;
 }
 
 input::invalid {

@@ -15,8 +15,9 @@
 
 div:has(>#_pages_content) {
     width: 100%;
-    max-width: 1000px;
     height: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 #_pages_content {
@@ -25,6 +26,7 @@ div:has(>#_pages_content) {
     position: relative;
     width: 100%;
     height: 100%;
+    max-width: 1000px;
 }
 
 .center-container {

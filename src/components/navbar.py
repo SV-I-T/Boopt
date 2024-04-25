@@ -1,15 +1,15 @@
 import dash_mantine_components as dmc
 from dash import (
+    ClientsideFunction,
     Input,
     Output,
+    clientside_callback,
     get_asset_url,
     html,
-    clientside_callback,
-    ClientsideFunction,
 )
 from dash_iconify import DashIconify
 from flask_login import current_user
-from utils.modelo_usuario import Perfil, Usuario
+from utils.modelo_usuario import Role, Usuario
 
 
 def layout_navbar():
@@ -40,7 +40,7 @@ def menu_usuario(usr: Usuario):
                 label=[
                     dmc.Text(
                         className="nome-usr-navbar",
-                        children=usr.nome,
+                        children=usr.primeiro_nome,
                     ),
                     dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
                 ],
@@ -53,11 +53,11 @@ def menu_usuario(usr: Usuario):
                 icon=DashIconify(icon="fluent:home-20-filled", width=18),
             ),
             dmc.NavLink(
-                label="Painel de Gestão",
+                label="Administração",
                 href="/app/admin",
-                icon=DashIconify(icon="fluent:panel-left-text-20-filled", width=18),
+                icon=DashIconify(icon="fluent:shield-person-20-filled", width=18),
             )
-            if (usr.perfil in [Perfil.dev, Perfil.admin, Perfil.gestor])
+            if (usr.role in [Role.DEV, Role.ADM])
             else None,
             dmc.NavLink(
                 label="Sair",

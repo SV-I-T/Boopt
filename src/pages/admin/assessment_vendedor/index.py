@@ -3,11 +3,11 @@ from math import ceil
 import dash_mantine_components as dmc
 from bson import ObjectId
 from dash import Input, Output, callback, html, register_page
+from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil
-from dash.exceptions import PreventUpdate
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(
     __name__, "/app/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
@@ -16,11 +16,11 @@ register_page(
 MAX_PAGINA = 10
 
 
-@checar_perfil(permitir=(Perfil.dev, Perfil.admin, Perfil.gestor))
+@checar_perfil(permitir=(Role.DEV, Role.ADM))
 def layout():
     usr: Usuario = current_user
 
-    if usr.perfil == Perfil.gestor:
+    if usr.role == Role.ADM:
         data_empresas = [str(usr.empresa)]
     else:
         data_empresas = [
@@ -48,7 +48,7 @@ def layout():
                     w=250,
                     mr="auto",
                     value=str(usr.empresa),
-                    display="none" if usr.perfil == Perfil.gestor else "block",
+                    display="none" if usr.role == Role.ADM else "block",
                 ),
                 dmc.Anchor(
                     id="a-nova-aplicacao",
@@ -101,9 +101,10 @@ def layout():
     prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(pagina: int, empresa: str):
-    if current_user.perfil not in (Perfil.admin, Perfil.dev, Perfil.gestor):
+    usr_atual: Usuario = current_user
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
-    if current_user.perfil == Perfil.gestor and str(current_user.empresa) != empresa:
+    if usr_atual.perfil == Role.ADM and str(usr_atual.empresa) != empresa:
         raise PreventUpdate
 
     corpo_tabela, n_paginas = consultar_dados_tabela_assessment(pagina, empresa)

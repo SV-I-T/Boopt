@@ -7,16 +7,16 @@ from dash import (
     html,
     register_page,
 )
-from dash_iconify import DashIconify
-from utils.banco_dados import db
-from utils.modelo_usuario import Perfil, checar_perfil, Usuario
-from flask_login import current_user
 from dash.exceptions import PreventUpdate
+from dash_iconify import DashIconify
+from flask_login import current_user
+from utils.banco_dados import db
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
 
 
-@checar_perfil(permitir=(Perfil.dev, Perfil.admin))
+@checar_perfil(permitir=(Role.DEV))
 def layout():
     corpo_tabela = consultar_dados_tabela_empresas("")
     return [
@@ -79,7 +79,7 @@ def layout():
 def atualizar_tabela_empresas(n: int, busca: str):
     usr: Usuario = current_user
 
-    if usr.perfil not in (Perfil.admin, Perfil.dev) or not n:
+    if usr.role not in (Perfil.admin, Perfil.dev) or not n:
         raise PreventUpdate
 
     corpo_tabela = consultar_dados_tabela_empresas(busca)

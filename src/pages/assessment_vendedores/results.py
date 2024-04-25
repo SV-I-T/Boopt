@@ -8,7 +8,7 @@ from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.cache import cache
 from utils.modelo_assessment import AssessmentVendedor
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil, layout_nao_autorizado
+from utils.modelo_usuario import Role, Usuario, checar_perfil, layout_nao_autorizado
 
 from .funcoes.graficos import (
     cartao_nota_total_etapas,
@@ -32,11 +32,11 @@ def layout(usr: str = None, resposta: str = None):
     if usr == usr_atual.id:
         # O usuário que está tentando acessar é o dono da resposta
         pass
-    elif usr_atual.perfil in [Perfil.dev, Perfil.admin]:
+    elif usr_atual.perfil in [Role.DEV]:
         # O usuário que está tentando acessar é admin
         pass
     elif (
-        usr_atual.perfil == Perfil.gestor
+        usr_atual.perfil == Role.ADM
         and usr_atual.empresa == Usuario.buscar("_id", usr).empresa
     ):
         # O usuário que está tentando acessar é gestor da empresa do dono da resposta

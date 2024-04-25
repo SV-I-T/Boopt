@@ -1,4 +1,3 @@
-from datetime import datetime
 import re
 
 import dash_mantine_components as dmc
@@ -8,7 +7,7 @@ from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.cache import cache_simple
-from utils.modelo_usuario import Usuario, checar_perfil
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 from werkzeug.security import check_password_hash, generate_password_hash
 
 register_page(__name__, path="/app/perfil", title="Meu perfil")
@@ -22,13 +21,13 @@ def layout():
         html.Div(
             className="editar-perfil",
             children=[
-                html.H1("Informações Pessoais", className="secao-pagina"),
+                html.H1("Informações pessoais", className="secao-pagina"),
                 html.Div(
                     className="grid grid-2-col",
                     children=[
                         dmc.TextInput(
                             label="Nome completo",
-                            value=f"{usr.nome} {usr.sobrenome}",
+                            value=f"{usr.nome}",
                             disabled=True,
                         ),
                         dmc.TextInput(label="CPF", value=usr.cpf, disabled=True),
@@ -48,22 +47,24 @@ def layout():
                                         "Editar",
                                         id="btn-perfil-editar-email",
                                         mb=8,
-                                        className="btn-link",
                                     ),
                                 ],
                             )
                         ),
                         dmc.TextInput(
                             label="Data de nascimento",
-                            value=datetime.strptime(usr.data, "%Y-%m-%d").strftime(
-                                "%d de %B de %Y"
-                            ),
+                            value=usr.data.strftime("%d de %B de %Y"),
+                            disabled=True,
+                        ),
+                        dmc.TextInput(
+                            label="Perfil (permissões)",
+                            value=usr.role.value.capitalize(),
                             disabled=True,
                         ),
                     ],
                 ),
                 dmc.Divider(),
-                html.H1("Informações Profissionais", className="secao-pagina"),
+                html.H1("Informações profissionais", className="secao-pagina"),
                 html.Div(
                     className="grid grid-2-col",
                     children=[
@@ -75,45 +76,55 @@ def layout():
                             disabled=True,
                         ),
                         dmc.TextInput(label="Cargo", value=usr.cargo, disabled=True),
-                        dmc.TextInput(
-                            label="Perfil",
-                            value=usr.perfil.name.capitalize(),
+                        dmc.Textarea(
+                            label="Unidade(s)",
+                            value=usr.unidades or "Sem unidades cadastradas",
                             disabled=True,
+                            radius="lg",
+                        ),
+                        dmc.Textarea(
+                            label="Clientes",
+                            value=usr.clientes,
+                            disabled=True,
+                            display="block"
+                            and usr.role in (Role.DEV, Role.CONS)
+                            or "none",
+                            radius="lg",
                         ),
                     ],
                 ),
                 dmc.Divider(),
-                html.H1("Alteração da senha", className="secao-pagina"),
+                html.H1("Alterar senha", className="secao-pagina"),
                 html.P(
-                    "Mantenha sua conta segura alterando a senha padrão",
-                    className="light",
+                    "ATENÇÃO:",
+                    className="bold c-laranja",
+                    style={"margin": 0},
                 ),
-                html.P("ATENÇÃO:", className="bold c-laranja"),
                 html.P(
                     "Para alterar sua senha, primeiro você precisa cadastrar um email",
                     className="light",
+                    style={"margin-top": 0},
                 ),
                 dmc.Stack(
-                    className="grid grid-2-col",
-                    children=html.Div(
-                        [
-                            dmc.PasswordInput(
-                                id="input-perfil-senha-atual",
-                                label="Senha atual",
-                                disabled=not bool(usr.email),
-                            ),
-                            dmc.PasswordInput(
-                                id="input-perfil-senha-nova",
-                                label="Nova senha",
-                                disabled=not bool(usr.email),
-                            ),
-                            dmc.PasswordInput(
-                                id="input-perfil-senha-nova2",
-                                label="Confirmação da nova senha",
-                                disabled=not bool(usr.email),
-                            ),
-                        ]
-                    ),
+                    mb="1rem",
+                    w="50%",
+                    children=[
+                        dmc.PasswordInput(
+                            id="input-perfil-senha-atual",
+                            label="Senha atual",
+                            disabled=not bool(usr.email),
+                        ),
+                        dmc.PasswordInput(
+                            id="input-perfil-senha-nova",
+                            label="Nova senha",
+                            disabled=not bool(usr.email),
+                        ),
+                        dmc.PasswordInput(
+                            id="input-perfil-senha-nova2",
+                            label="Confirmação da nova senha",
+                            disabled=not bool(usr.email),
+                        ),
+                    ],
                 ),
                 dmc.Button(
                     id="btn-perfil-alterar-senha",

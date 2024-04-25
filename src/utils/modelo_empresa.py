@@ -9,7 +9,7 @@ class Empresa(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     nome: str
     segmento: Optional[str] = None
-    gestores: Optional[list[ObjectId]] = None
+    unidades: list[str] = None
 
     class Config:
         str_strip_whitespace = True

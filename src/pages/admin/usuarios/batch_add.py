@@ -17,22 +17,22 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from flask_login import current_user
 from pydantic import ValidationError
 from utils.modelo_usuario import (
     CARGOS_PADROES,
-    Usuario,
     NovosUsuariosBatelada,
-    Perfil,
+    Role,
+    Usuario,
     checar_perfil,
 )
-from flask_login import current_user
 
 register_page(
     __name__, path="/app/admin/usuarios/cadastro-massa", title="Cadastro em Massa"
 )
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
 def layout():
     usr_atual: Usuario = current_user
 
@@ -41,16 +41,14 @@ def layout():
         for empresa in usr_atual.buscar_empresas()
     ]
 
-    if usr_atual.perfil == Perfil.dev:
-        perfis_editar = [p for p in Perfil]
-    elif usr_atual.perfil == Perfil.admin:
-        perfis_editar = [Perfil.gestor, Perfil.usuario, Perfil.candidato]
-    else:
-        perfis_editar = [Perfil.usuario, Perfil.candidato]
+    if usr_atual.role == Role.DEV:
+        roles_edit = [r for r in Role]
+    elif usr_atual.role == Role.CONS:
+        roles_edit = [Role.ADM, Role.GEST, Role.USR, Role.CAND]
+    elif usr_atual.role == Role.ADM:
+        roles_edit = [Role.GEST, Role.USR, Role.CAND]
 
-    data_perfil = [
-        {"value": p.value, "label": p.name.capitalize()} for p in perfis_editar
-    ]
+    data_role = [{"value": r.value, "label": r.name.capitalize()} for r in roles_edit]
 
     return [
         html.H1("Cadastro em massa", className="titulo-pagina"),
@@ -63,7 +61,7 @@ def layout():
                             id="empresa-usr-massa",
                             label="Empresa dos usuários",
                             icon=DashIconify(
-                                icon="fluent:building-24-filled", width=24
+                                icon="fluent:building-20-filled", width=20
                             ),
                             name="empresa",
                             data=data_empresas,
@@ -72,19 +70,17 @@ def layout():
                             searchable=True,
                             nothingFound="Não encontrei nada",
                             w=300,
-                            display="none"
-                            if usr_atual.perfil == Perfil.gestor
-                            else "block",
+                            display="none" if usr_atual.perfil == Role.ADM else "block",
                         ),
                         dmc.Select(
                             id="perfil-usr-massa",
                             label="Perfil dos usuários",
                             icon=DashIconify(
-                                icon="fluent:person-passkey-24-filled", width=24
+                                icon="fluent:person-passkey-20-filled", width=20
                             ),
                             name="perfil",
-                            data=data_perfil,
-                            value=Perfil.usuario,
+                            data=data_role,
+                            value=Role.USR,
                             placeholder="Selecione um perfil",
                             w=300,
                         ),
@@ -205,7 +201,7 @@ clientside_callback(
     State("perfil-usr-massa", "value"),
     prevent_initial_call=True,
 )
-def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, perfil: str):
+def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: str):
     if not n:
         raise PreventUpdate
     if not empresa:
@@ -216,7 +212,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, perfil
         )
         NOTIFICACAO = no_update
         URL = no_update
-    elif not perfil:
+    elif not role:
         ALERTA = dmc.Alert(
             title="Atenção",
             children="Selecione um perfil para cadastrar os usuários.",
@@ -245,7 +241,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, perfil
             _, content_string = contents.split(",")
             decoded = base64.b64decode(content_string)
             novos_usuarios = NovosUsuariosBatelada.carregar_planilha(
-                io.BytesIO(decoded), empresa=ObjectId(empresa), perfil=Perfil(perfil)
+                io.BytesIO(decoded), empresa=ObjectId(empresa), role=Role(role)
             )
             novos_usuarios.registrar_usuarios()
         except ValidationError as e:

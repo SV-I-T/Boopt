@@ -1,19 +1,31 @@
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, html, register_page
+from bson import ObjectId
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    dcc,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_empresa import Empresa
-from utils.modelo_usuario import Perfil, checar_perfil
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
 
 
-@checar_perfil(permitir=(Perfil.dev, Perfil.admin))
+@checar_perfil(permitir=(Role.DEV, Role.CONS))
 def layout(id: str = None):
     if not id:
         texto_titulo = [
@@ -54,9 +66,31 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
                 clearable=True,
                 value=segmento,
             ),
-            dmc.Button(
-                id="btn-criar-empresa" if nome is None else "btn-salvar-empresa",
-                children="Criar" if nome is None else "Salvar",
+            dmc.Group(
+                [
+                    dmc.Button(
+                        id="btn-criar-empresa"
+                        if nome is None
+                        else "btn-salvar-empresa",
+                        children="Criar" if nome is None else "Salvar",
+                        ml="auto",
+                        leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                    ),
+                    dmc.Button(
+                        id="btn-delete-empresa",
+                        children="Excluir",
+                        color="red",
+                        leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
+                    )
+                    if nome
+                    else None,
+                    dcc.ConfirmDialog(
+                        id="confirm-delete-empresa",
+                        message=f"Tem certeza que deseja excluir a empresa {nome!r}? Essa ação não pode ser revertida.",
+                    )
+                    if nome
+                    else None,
+                ]
             ),
         ],
     )
@@ -64,6 +98,7 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
     Input("btn-criar-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
     State("segmento-nova-empresa", "value"),
@@ -73,8 +108,8 @@ def criar_empresa(n, nome: str, segmento: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Perfil = current_user
-    if usr_atual.perfil not in (Perfil.dev, Perfil.admin):
+    usr_atual: Usuario = current_user
+    if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
     try:
@@ -93,7 +128,7 @@ def criar_empresa(n, nome: str, segmento: str):
             message=str(erro),
             color="red",
             action="show",
-        )
+        ), no_update
 
     else:
         return dmc.Notification(
@@ -106,11 +141,12 @@ def criar_empresa(n, nome: str, segmento: str):
                 dmc.Text(nome, span=True, weight=700),
                 dmc.Text(" foi criada com sucesso.", span=True),
             ],
-        )
+        ), "/app/admin/empresas"
 
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
     Input("btn-salvar-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
     State("segmento-nova-empresa", "value"),
@@ -121,8 +157,8 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Perfil = current_user
-    if usr_atual.perfil not in (Perfil.dev, Perfil.admin):
+    usr_atual: Usuario = current_user
+    if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
     params = parse_qs(search[1:])
@@ -142,7 +178,7 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
             message=str(erro),
             color="red",
             action="show",
-        )
+        ), no_update
 
     else:
         return dmc.Notification(
@@ -155,4 +191,54 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
                 dmc.Text(nome, span=True, weight=700),
                 dmc.Text(" foi editada com sucesso.", span=True),
             ],
-        )
+        ), "/app/admin/empresas"
+
+
+clientside_callback(
+    ClientsideFunction("clientside", "ativar"),
+    Output("confirm-delete-empresa", "displayed"),
+    Input("btn-delete-empresa", "n_clicks"),
+    prevent_initial_call=True,
+)
+
+
+@callback(
+    Output("notificacoes", "children", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
+    Input("confirm-delete-empresa", "submit_n_clicks"),
+    State("url", "search"),
+    prevent_initial_call=True,
+)
+def excluir_empresa(n: int, search: str):
+    if not n:
+        raise PreventUpdate
+
+    usr_atual: Usuario = current_user
+
+    if not usr_atual.is_authenticated:
+        raise PreventUpdate
+
+    if usr_atual.role not in (Role.DEV, Role.CONS):
+        raise PreventUpdate
+
+    params = parse_qs(search[1:])
+    id_empresa = params["id"][0]
+
+    r = db("Boopt", "Empresas").delete_one({"_id": ObjectId(id_empresa)})
+
+    if not r.acknowledged:
+        return dmc.Notification(
+            id="notificacao-excluir-usr",
+            title="Atenção",
+            message="Houve um erro ao excluir a empresa. Tente novamente mais tarde.",
+            color="red",
+            action="show",
+        ), no_update
+
+    return dmc.Notification(
+        id="notificacao-excluir-usr",
+        title="Pronto!",
+        message="A empresa foi excluído com sucesso.",
+        color="green",
+        action="show",
+    ), "/app/admin/empresas"

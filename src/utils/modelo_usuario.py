@@ -1,11 +1,12 @@
 import re
+from datetime import datetime
 from enum import Enum
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
 import dash_mantine_components as dmc
 import openpyxl
 from bson import ObjectId
-from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
+from flask_login import LoginManager, UserMixin, current_user
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
@@ -26,51 +27,48 @@ CARGOS_PADROES = sorted(
 )
 
 
-class Perfil(str, Enum):
-    dev = "dev"
-    admin = "adm"
-    gestor = "gst"
-    usuario = "usr"
-    candidato = "cdt"
+class Role(str, Enum):
+    DEV = "Desenvolvedor"
+    CONS = "Consultor"
+    ADM = "Administrador"
+    GEST = "Gestor"
+    USR = "Usuário"
+    CAND = "Candidato"
 
 
 class Usuario(BaseModel, UserMixin):
     id_: ObjectId = Field(alias="_id")
-    nome: str
-    sobrenome: str
-    data: str
-    senha_hash: str
-    cpf: str
-    email: str
-    cargo: str
-    empresa: ObjectId
-    perfil: Perfil = Perfil.usuario
+    nome: Optional[str] = None
+    data: Optional[datetime] = None
+    cpf: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[Role] = Role.CAND
+    empresa: Optional[ObjectId] = None
+    clientes: Optional[list[ObjectId]] = None
+    cargo: Optional[str] = None
+    unidades: Optional[list[str]] = None
 
     class Config:
         arbitrary_types_allowed = True
-
-    @field_validator("email", mode="before")
-    @classmethod
-    def validar_email_nulo(cls, v: Any) -> str:
-        if v is None:
-            return ""
-        return v
+        extra = "allow"
 
     @computed_field
     @property
     def id(self) -> str:
         return str(self.id_)
 
-    def logar(self, lembrar: bool = False) -> None:
-        login_user(self, remember=lembrar, force=True)
-
-    def sair(self) -> None:
-        logout_user()
-        cache_simple.delete_memoized(Usuario.buscar_login, Usuario, self.id)
+    @computed_field
+    @property
+    def primeiro_nome(self) -> str:
+        if len(parts := self.nome.split(" ")) >= 2:
+            return " ".join(parts[:2])
+        return " ".join(parts)
 
     @classmethod
-    def buscar(cls, identificador: Literal["_id", "email", "cpf"], valor: str):
-        if identificador == "_id":
+    def buscar(
+        cls, identificador: Literal["_id", "email", "cpf"], valor: str | ObjectId
+    ):
+        if identificador == "_id" and not isinstance(valor, ObjectId):
             valor = ObjectId(valor)
         usr = db("Boopt", "Usuários").find_one({identificador: valor})
         assert usr, "Este usuário não foi encontrado."
@@ -85,7 +83,7 @@ class Usuario(BaseModel, UserMixin):
         usr = db("Boopt", "Usuários").find_one(
             {"_id": ObjectId(_id)},
         )
-        print(f"Carregando usuário {usr['nome']} {usr['sobrenome']}")
+        print(f"Carregando usuário {usr['nome']}")
         return usr
 
     def validar_senha(self, senha: str) -> None:
@@ -93,7 +91,7 @@ class Usuario(BaseModel, UserMixin):
             self.senha_hash, senha
         ), "A senha digitada está incorreta."
 
-    def atualizar(self, novos_dados: dict[str, str]) -> None:
+    def atualizar(self, novos_dados: dict) -> None:
         r = db("Boopt", "Usuários").update_one(
             {"_id": self.id_},
             {"$set": {campo: valor for campo, valor in novos_dados.items()}},
@@ -101,49 +99,40 @@ class Usuario(BaseModel, UserMixin):
 
         assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
 
-    def buscar_empresas(self) -> Cursor | None:
-        if self.perfil in [Perfil.dev, Perfil.admin]:
-            return db("Boopt", "Empresas").find(
-                projection={"_id": 1, "nome": 1}, sort={"nome": 1}
-            )
-        elif self.perfil == Perfil.gestor:
-            return db("Boopt", "Empresas").find(
-                {"_id": self.empresa},
-                projection={"_id": 1, "nome": 1},
-                sort={"nome": 1},
-            )
+    def buscar_empresas(self) -> Cursor | list:
+        if self.role == Role.DEV:
+            query = {}
+        elif self.role == Role.CONS:
+            query = {"_id": {"$in": self.clientes}}
+        elif self.role == Role.ADM:
+            query = {"_id": self.empresa}
+        elif self.role == Role.GEST:
+            query = {"_id": self.empresa, "unidade": {"$in": self.unidades}}
+
         else:
-            return None
+            return []
+
+        return db("Boopt", "Empresas").find(
+            query, projection={"_id": 1, "nome": 1}, sort={"nome": 1}
+        )
 
 
 class NovoUsuario(BaseModel):
     nome: str
-    sobrenome: str
     cpf: str
     email: Optional[str] = None
-    data: str
+    data: datetime
     cargo: str
     empresa: ObjectId
-    perfil: Perfil
+    role: Role
+    clientes: Optional[list[ObjectId]] = None
+    unidades: Optional[list[str]] = None
 
     class Config:
         arbitrary_types_allowed = True
         str_strip_whitespace = True
 
-    # @field_validator("empresa", mode="before")
-    # @classmethod
-    # def validar_empresa(cls, v: Any) -> ObjectId:
-    #     assert bool(v), "O campo 'Empresa' é obrigatório"
-    #     if not v:
-    #         return None
-    #     elif not isinstance(v, ObjectId):
-    #         return ObjectId(v)
-    #     else:
-    #         return None
-
-    @field_validator(
-        "nome", "sobrenome", "cpf", "data", "empresa", "cargo", mode="before"
-    )
+    @field_validator("nome", "cpf", "data", "empresa", "cargo", mode="before")
     @classmethod
     def em_branco(cls, v: Any, info: ValidationInfo) -> Any:
         assert bool(v), f"O campo '{info.field_name.capitalize()}' é obrigatório."
@@ -195,9 +184,6 @@ class NovosUsuariosBatelada(BaseModel):
     usuarios: list[NovoUsuario] = Field(default_factory=list)
 
     def registrar_usuarios(self) -> None:
-        # print(self.usuarios)
-        # print("usuarios registrados")
-        # return
         r = db("Boopt", "Usuários").insert_many(
             [usuario.model_dump() for usuario in self.usuarios]
         )
@@ -252,7 +238,7 @@ class NovosUsuariosBatelada(BaseModel):
         return wb
 
     @classmethod
-    def carregar_planilha(cls, planilha, empresa: ObjectId, perfil: Perfil):
+    def carregar_planilha(cls, planilha, empresa: ObjectId, role: Role):
         wb = openpyxl.load_workbook(planilha)
         assert (
             "Cadastro" in wb.sheetnames
@@ -284,7 +270,7 @@ class NovosUsuariosBatelada(BaseModel):
                 "email": linha[4] if linha[4] is not None else "",
                 "cargo": linha[5],
                 "empresa": empresa,
-                "perfil": perfil,
+                "role": Role,
             }
             for linha in linhas[1:]
         ]
@@ -321,12 +307,12 @@ def layout_nao_autorizado():
     ]
 
 
-def checar_perfil(_func=None, *, permitir: list[Perfil] = None):
+def checar_perfil(_func=None, *, permitir: tuple[Role] = None):
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
             usr_atual: Usuario = current_user
             if usr_atual.is_authenticated and (
-                permitir is None or usr_atual.perfil in permitir
+                permitir is None or usr_atual.role in permitir
             ):
                 return func(*args, **kwargs)
             return layout_nao_autorizado()

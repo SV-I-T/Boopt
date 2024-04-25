@@ -4,7 +4,7 @@ from dash import Dash
 from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask, Response, redirect, render_template, request, url_for
-from flask_login import current_user
+from flask_login import current_user, login_user, logout_user
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
@@ -34,20 +34,19 @@ def login_get():
 
 @server.route("/login", methods=["POST"])
 def login_post():
-    usr = request.form["user"]
+    login = request.form["login"]
     senha = request.form["password"]
     lembrar = bool(request.form.get("remember"))
 
     try:
-        identificador = "email" if "@" in usr else "cpf"
-        usr = Usuario.buscar(identificador=identificador, valor=usr)
+        identificador = "email" if "@" in login else "cpf"
+        usr = Usuario.buscar(identificador=identificador, valor=login)
         usr.validar_senha(senha)
     except AssertionError as e:
         return render_template("erro_login.html", mensagem=str(e))
     else:
-        usr.logar(lembrar)
-        next = request.args.get("next", None)
-        next_url = "/app/dashboard" if next is None else next
+        login_user(usr, remember=lembrar, force=True)
+        next_url = request.args.get("next", None) or "/app/dashboard"
         response = Response(
             "", status=302, headers={"HX-Redirect": next_url, "HX-Refresh": True}
         )
@@ -56,8 +55,10 @@ def login_post():
 
 @server.route("/logout", methods=["POST", "GET"])
 def logout_post():
-    if current_user and current_user.is_authenticated:
-        current_user.sair()
+    usr_atual: Usuario = current_user
+    if usr_atual and usr_atual.is_authenticated:
+        cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr_atual.id)
+        logout_user()
     return redirect("/")
 
 

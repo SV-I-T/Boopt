@@ -13,7 +13,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 
@@ -21,7 +21,7 @@ register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
 MAX_PAGINA = 15
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout():
     usr_atual: Usuario = current_user
 
@@ -107,7 +107,7 @@ def layout():
 def atualizar_tabela_usuarios(pagina: int, n: int, busca: str):
     usr_atual: Usuario = current_user
 
-    if usr_atual.perfil not in [Perfil.dev, Perfil.admin, Perfil.gestor]:
+    if usr_atual.perfil not in [Role.DEV, Role.ADM]:
         raise PreventUpdate
     corpo_tabela, total_paginas = consultar_dados_tabela_usuarios(
         usr_atual, pagina, busca
@@ -131,19 +131,20 @@ def consultar_dados_tabela_usuarios(
                 "as": "empresa",
             }
         },
-        {"$set": {"empresa": {"$first": "$empresa.nome"}}},
+        {"$set": {"empresa_nome": {"$first": "$empresa.nome"}}},
+        {"$unset": "empresa"},
         {
             "$match": {
                 "$or": [
                     {campo: busca_regex}
-                    for campo in ("nome", "sobrenome", "cargo", "empresa")
+                    for campo in ("nome", "sobrenome", "cargo", "empresa_nome")
                 ]
             }
         },
         {
             "$facet": {
                 "cont": [{"$count": "total"}],
-                "data": [
+                "usuarios": [
                     {"$skip": (pagina - 1) * MAX_PAGINA},
                     {"$limit": MAX_PAGINA},
                     {
@@ -153,8 +154,8 @@ def consultar_dados_tabela_usuarios(
                                 "nome",
                                 "sobrenome",
                                 "cargo",
-                                "empresa",
-                                "perfil",
+                                "empresa_nome",
+                                "role",
                             )
                         }
                     },
@@ -163,11 +164,11 @@ def consultar_dados_tabela_usuarios(
         },
     ]
 
-    if usr_atual.perfil not in [Perfil.dev, Perfil.admin]:
+    if usr_atual.role not in [Role.DEV]:
         pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
 
     r = db("Boopt", "Usuários").aggregate(pipeline).next()
-    usuarios = r["data"]
+    usuarios = [Usuario(**usuario) for usuario in r["usuarios"]]
     total = r["cont"][0]["total"]
 
     n_paginas = ceil(total / MAX_PAGINA)
@@ -177,22 +178,22 @@ def consultar_dados_tabela_usuarios(
     ], n_paginas
 
 
-def construir_linha_usuario(usr_atual: Usuario, usuario: dict[str, str]) -> html.Tr:
-    if usr_atual.perfil == Perfil.gestor and Perfil(usuario["perfil"]) not in [
-        Perfil.usuario,
-        Perfil.candidato,
+def construir_linha_usuario(usr_atual: Usuario, usuario: Usuario) -> html.Tr:
+    if usr_atual.role == Role.ADM and usuario.role not in [
+        Role.usuario,
+        Role.candidato,
     ]:
-        col_usr = f'{usuario["nome"]} {usuario["sobrenome"]}'
+        col_usr = usuario.nome
     else:
         col_usr = dmc.Anchor(
-            href=f"/app/admin/usuarios/edit?id={usuario['_id']}",
-            children=f'{usuario["nome"]} {usuario["sobrenome"]}',
+            href=f"/app/admin/usuarios/edit?id={usuario.id}",
+            children=usuario.nome,
         )
     return html.Tr(
         [
             html.Td(col_usr),
-            html.Td(usuario.get("empresa", None)),
-            html.Td(usuario.get("cargo", None)),
-            html.Td(Perfil(usuario["perfil"]).name.capitalize()),
+            html.Td(usuario.empresa_nome),
+            html.Td(usuario.cargo),
+            html.Td(usuario.role),
         ]
     )

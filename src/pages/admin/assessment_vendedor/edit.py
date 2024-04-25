@@ -4,14 +4,25 @@ from urllib.parse import parse_qs
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
 from bson import ObjectId
-from dash import Input, Output, State, callback, html, register_page
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    dcc,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_assessment import AssessmentVendedor
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(
     __name__,
@@ -20,7 +31,7 @@ register_page(
 )
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout(empresa: str = None, id: str = None):
     usr: Usuario = current_user
 
@@ -29,7 +40,7 @@ def layout(empresa: str = None, id: str = None):
             {"value": str(_empresa["_id"]), "label": _empresa["nome"]}
             for _empresa in usr.buscar_empresas()
         ]
-        if usr.perfil != Perfil.gestor
+        if usr.role != Role.ADM
         else [str(usr.empresa)]
     )
 
@@ -66,7 +77,7 @@ def layout(empresa: str = None, id: str = None):
                     w=250,
                     mb="1rem",
                     disabled=bool(id),
-                    display="none" if usr.perfil == Perfil.gestor else "block",
+                    display="none" if usr.role == Role.ADM else "block",
                 ),
                 dmc.TextInput(
                     label="Descrição",
@@ -108,7 +119,7 @@ def layout(empresa: str = None, id: str = None):
                             {
                                 "_id": 0,
                                 "id": {"$toString": "$_id"},
-                                "usuario": {"$concat": ["$nome", " ", "$sobrenome"]},
+                                "usuario": "$nome",
                                 "cargo": 1,
                             },
                         )
@@ -139,10 +150,32 @@ def layout(empresa: str = None, id: str = None):
                     },
                     className="ag-theme-quartz compact",
                 ),
-                dmc.Button(
-                    id="btn-salvar-av" if id else "btn-criar-av",
-                    children="Salvar" if id else "Criar",
+                dmc.Group(
                     mt="1rem",
+                    children=[
+                        dmc.Button(
+                            id="btn-salvar-av" if id else "btn-criar-av",
+                            children="Salvar" if id else "Criar",
+                            ml="auto",
+                            leftIcon=DashIconify(
+                                icon="fluent:save-20-regular", width=20
+                            ),
+                        ),
+                        dmc.Button(
+                            id="btn-delete-av",
+                            children="Excluir",
+                            color="red",
+                            leftIcon=DashIconify(
+                                icon="fluent:delete-20-regular", width=20
+                            ),
+                        )
+                        if id
+                        else None,
+                        dcc.ConfirmDialog(
+                            id="confirm-delete-av",
+                            message="Você tem certeza que deseja excluir essa aplicação? Esta ação não poderá ser desfeita.",
+                        ),
+                    ],
                 ),
             ],
         ),
@@ -175,6 +208,7 @@ def carregar_usuarios_empresa(empresa: str):
 
 @callback(
     Output("notificacoes", "children"),
+    Output("url", "pathname", allow_duplicate=True),
     Input("btn-criar-av", "n_clicks"),
     State("empresa-novo-av", "value"),
     State("descricao-novo-av", "value"),
@@ -182,13 +216,15 @@ def carregar_usuarios_empresa(empresa: str):
     prevent_initial_call=True,
 )
 def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str]]):
-    usr: Usuario = current_user
-    if (
-        not n
-        or not usr.is_authenticated
-        or (usr.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
-    ):
-        # Bloqueia se não houve interação ou se o usuário não tem permissão
+    if not n:
+        raise PreventUpdate
+
+    usr_atual: Usuario = current_user
+
+    if not usr_atual.is_authenticated:
+        raise PreventUpdate
+
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
     if not empresa:
@@ -198,15 +234,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
             message="Selecione uma empresa",
             action="show",
             color="red",
-        )
-    if not linhas:
-        return dmc.Notification(
-            id="notificacao-criar-av",
-            title="Atenção",
-            message="Selecione pelo menos um usuário",
-            action="show",
-            color="red",
-        )
+        ), no_update
     if not descricao:
         return dmc.Notification(
             id="notificacao-criar-av",
@@ -214,10 +242,17 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
             message="Preencha a descrição da aplicação",
             action="show",
             color="red",
-        )
+        ), no_update
+    if not linhas:
+        return dmc.Notification(
+            id="notificacao-criar-av",
+            title="Atenção",
+            message="Selecione pelo menos um usuário",
+            action="show",
+            color="red",
+        ), no_update
 
-    if (usr.perfil == Perfil.gestor) and (usr.empresa != ObjectId(empresa)):
-        # Bloqueia se for um gestor e não está criando na própria empresa
+    if (usr_atual.role == Role.ADM) and (usr_atual.empresa != ObjectId(empresa)):
         raise PreventUpdate
 
     try:
@@ -226,6 +261,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
             empresa=ObjectId(empresa), participantes=participantes, descricao=descricao
         )
         nova_aplicacao.registrar()
+
     except ValidationError as e:
         erro = e.errors()[0]["ctx"]["error"]
         return dmc.Notification(
@@ -234,15 +270,15 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
             message=str(erro),
             action="show",
             color="red",
-        )
-    else:
-        return dmc.Notification(
-            id="notificacao-sucesso-criacao-av",
-            title="Pronto!",
-            message="O Assessment Vendedor foi criado com sucesso",
-            action="show",
-            color="green",
-        )
+        ), no_update
+
+    return dmc.Notification(
+        id="notificacao-sucesso-criacao-av",
+        title="Pronto!",
+        message="O Assessment Vendedor foi criado com sucesso",
+        action="show",
+        color="green",
+    ), "/app/admin/assessment-vendedor"
 
 
 @callback(
@@ -257,23 +293,16 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
 def atualizar_assessment(
     n: int, empresa: str, descricao: str, linhas: list[dict[str, str]], search: str
 ):
-    usr: Usuario = current_user
-    if (
-        not n
-        or not usr.is_authenticated
-        or (usr.perfil not in [Perfil.admin, Perfil.gestor, Perfil.dev])
-    ):
-        # Bloqueia se não houve interação ou se o usuário não tem permissão
+    if not n:
         raise PreventUpdate
 
-    if not linhas:
-        return dmc.Notification(
-            id="notificacao-criar-av",
-            title="Atenção",
-            message="Selecione pelo menos um usuário",
-            action="show",
-            color="red",
-        )
+    usr_atual: Usuario = current_user
+
+    if not usr_atual.is_authenticated:
+        raise PreventUpdate
+
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
+        raise PreventUpdate
     if not descricao:
         return dmc.Notification(
             id="notificacao-criar-av",
@@ -282,14 +311,24 @@ def atualizar_assessment(
             action="show",
             color="red",
         )
+    if not linhas:
+        return dmc.Notification(
+            id="notificacao-criar-av",
+            title="Atenção",
+            message="Selecione pelo menos um usuário",
+            action="show",
+            color="red",
+        )
 
     params = parse_qs(search[1:])
+    id_aplicacao = ObjectId(params["id"][0])
+    participantes = [ObjectId(linha["id"]) for linha in linhas]
 
     r = db("AssessmentVendedores", "Aplicações").update_one(
-        {"_id": ObjectId(params["id"][0])},
+        {"_id": id_aplicacao},
         update={
             "$set": {
-                "participantes": [ObjectId(linha["id"]) for linha in linhas],
+                "participantes": participantes,
                 "descricao": descricao,
             }
         },
@@ -311,3 +350,63 @@ def atualizar_assessment(
         action="show",
         color="green",
     )
+
+
+clientside_callback(
+    ClientsideFunction("clientside", "ativar"),
+    Output("confirm-delete-av", "displayed"),
+    Input("btn-delete-av", "n_clicks"),
+    prevent_initial_call=True,
+)
+
+
+@callback(
+    Output("notificacoes", "children", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
+    Input("confirm-delete-av", "submit_n_clicks"),
+    State("url", "search"),
+    prevent_initial_call=True,
+)
+def excluir_av(n: int, search: str):
+    if not n:
+        raise PreventUpdate
+
+    usr_atual: Usuario = current_user
+
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
+        raise PreventUpdate
+
+    params = parse_qs(search[1:])
+    id_aplicacao = ObjectId(params["id"][0])
+
+    aplicacao = db("AssessmentVendedores", "Aplicações").find_one(
+        {"_id": id_aplicacao}, {"_id": 0, "empresa": 1}
+    )
+
+    if usr_atual.role == Role.ADM and usr_atual.empresa != aplicacao["empresa"]:
+        return dmc.Notification(
+            id="notificacao-excluir-av",
+            title="Atenção",
+            message="Você não tem permissão para excluir essa aplicação.",
+            action="show",
+            color="red",
+        ), no_update
+
+    r = db("AssessmentVendedores", "Aplicações").delete_one({"_id": id_aplicacao})
+
+    if not r.acknowledged:
+        return dmc.Notification(
+            id="notificacao-excluir-av",
+            title="Atenção",
+            message="Ocorreu um erro ao tentat excluir a aplicação. Tente novamente mais tarde",
+            action="show",
+            color="red",
+        ), no_update
+
+    return dmc.Notification(
+        id="notificacao-excluir-av",
+        title="Pronto!",
+        message="A aplicação foi excluída com sucesso.",
+        action="show",
+        color="green",
+    ), "/app/admin/assessment-vendedor"

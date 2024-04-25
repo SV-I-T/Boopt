@@ -1,17 +1,18 @@
+from time import sleep
+
 import dash_mantine_components as dmc
-from dash import register_page, html
+from dash import html, register_page
 from dash_iconify import DashIconify
 from flask_login import current_user
-from utils.modelo_usuario import Perfil, Usuario, checar_perfil
+from utils.modelo_usuario import Role, Usuario, checar_perfil
 
-register_page(__name__, path="/app/admin", title="Painel de gestão")
+register_page(__name__, path="/app/admin", title="Painel de administração")
 
 
-@checar_perfil(permitir=[Perfil.dev, Perfil.admin, Perfil.gestor])
+@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout():
     usr: Usuario = current_user
-
-    modulos: tuple[str] = (
+    modules: tuple[str] = (
         {
             "label": "Usuários",
             "href": "/app/admin/usuarios",
@@ -21,7 +22,7 @@ def layout():
             "label": "Empresas",
             "href": "/app/admin/empresas",
             "icon": "fluent:building-shop-24-filled",
-            "perfil": [Perfil.admin, Perfil.dev],
+            "role": [Role.DEV, Role.CONS],
         },
         {
             "label": "Assessment Vendedores",
@@ -30,7 +31,7 @@ def layout():
         },
     )
     return [
-        html.H1("Painel de gestão", className="titulo-pagina"),
+        html.H1("Painel de administração", className="titulo-pagina"),
         dmc.Grid(
             children=[
                 dmc.Col(
@@ -41,13 +42,13 @@ def layout():
                         children=[
                             dmc.Group(
                                 children=[
-                                    DashIconify(icon=modulo["icon"], width=24),
-                                    dmc.Text(modulo["label"], weight=500),
+                                    DashIconify(icon=module["icon"], width=24),
+                                    dmc.Text(module["label"], weight=500),
                                 ],
                                 align="center",
                             ),
                             dmc.Anchor(
-                                href=modulo["href"],
+                                href=module["href"],
                                 underline=False,
                                 children=dmc.Button(
                                     "Acessar",
@@ -57,8 +58,8 @@ def layout():
                         ],
                     ),
                 )
-                for modulo in modulos
-                if (usr.perfil in modulo.get("perfil", [usr.perfil]))
+                for module in modules
+                if (usr.role in module.get("role", [usr.role]))
             ],
         ),
     ]
