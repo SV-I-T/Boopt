@@ -6,10 +6,10 @@ from utils.banco_dados import db
 
 
 def id_form_padrao() -> ObjectId:
-    return db("AssessmentVendedores", "Formulários").find_one({}, {"_id": 1})["_id"]
+    return db("Vela", "Formulários").find_one({}, {"_id": 1})["_id"]
 
 
-class AssessmentVendedor(BaseModel):
+class VelaAssessment(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     descricao: str = ""
     id_form: Optional[ObjectId] = Field(default_factory=id_form_padrao)
@@ -21,14 +21,12 @@ class AssessmentVendedor(BaseModel):
         arbitrary_types_allowed = True
 
     def registrar(self) -> None:
-        r = db("AssessmentVendedores", "Aplicações").insert_one(
-            self.model_dump(exclude={"id_"})
-        )
+        r = db("Vela", "Aplicações").insert_one(self.model_dump(exclude={"id_"}))
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
 
     @classmethod
     def resultado(cls, id_resposta: ObjectId) -> dict | None:
-        r = db("AssessmentVendedores", "Respostas").aggregate(
+        r = db("Vela", "Respostas").aggregate(
             [
                 {"$match": {"_id": ObjectId(id_resposta)}},
                 {
@@ -72,7 +70,7 @@ class AssessmentVendedor(BaseModel):
 
     @classmethod
     def testes_disponiveis(cls, id_usr: ObjectId) -> dict | None:
-        r = db("AssessmentVendedores", "Aplicações").aggregate(
+        r = db("Vela", "Aplicações").aggregate(
             [
                 {"$match": {"participantes": id_usr}},
                 # # Buscar somente a última aplicação para o usuário
@@ -116,7 +114,5 @@ class AssessmentVendedor(BaseModel):
 
     @classmethod
     def buscar_respostas(cls, id_usr: ObjectId) -> list[ObjectId]:
-        r = db("AssessmentVendedores", "Respostas").find(
-            {"id_usuario": id_usr}, {"_id": 1}
-        )
+        r = db("Vela", "Respostas").find({"id_usuario": id_usr}, {"_id": 1})
         return [i["_id"] for i in r]

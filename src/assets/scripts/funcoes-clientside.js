@@ -22,6 +22,14 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return x;
         },
+        upload_arquivo_empresa_unidades: function (x) {
+            if (x) {
+                document.getElementById('div-empresa-unidades-arquivo').style.display = 'block';
+            } else {
+                document.getElementById('div-empresa-unidades-arquivo').style.display = 'none';
+            }
+            return x;
+        },
         ativar: function (x) {
             if (!x) {
                 throw window.dash_clientside.PreventUpdate;

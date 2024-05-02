@@ -44,13 +44,18 @@ class Usuario(BaseModel, UserMixin):
     email: Optional[str] = None
     role: Optional[Role] = Role.CAND
     empresa: Optional[ObjectId] = None
-    clientes: Optional[list[ObjectId]] = None
+    clientes: Optional[list[ObjectId]] = Field(default_factory=list)
     cargo: Optional[str] = None
-    unidades: Optional[list[str]] = None
+    unidades: Optional[list[str]] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
         extra = "allow"
+
+    @classmethod
+    def atual(cls):
+        atual: Usuario = current_user
+        return atual
 
     @computed_field
     @property
@@ -91,15 +96,22 @@ class Usuario(BaseModel, UserMixin):
             self.senha_hash, senha
         ), "A senha digitada está incorreta."
 
-    def atualizar(self, novos_dados: dict) -> None:
+    def atualizar(self, novos_dados: dict[str, Any]) -> None:
         r = db("Boopt", "Usuários").update_one(
             {"_id": self.id_},
-            {"$set": {campo: valor for campo, valor in novos_dados.items()}},
+            {
+                "$set": {campo: valor for campo, valor in novos_dados.items() if valor},
+                "$unset": {
+                    campo: 1 for campo, valor in novos_dados.items() if not valor
+                },
+            },
         )
 
         assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
 
-    def buscar_empresas(self) -> Cursor | list:
+    def buscar_empresas(
+        self, project_fields: list[str] = ["_id", "nome"]
+    ) -> Cursor | list:
         if self.role == Role.DEV:
             query = {}
         elif self.role == Role.CONS:
@@ -113,7 +125,7 @@ class Usuario(BaseModel, UserMixin):
             return []
 
         return db("Boopt", "Empresas").find(
-            query, projection={"_id": 1, "nome": 1}, sort={"nome": 1}
+            query, projection={field: 1 for field in project_fields}, sort={"nome": 1}
         )
 
 
@@ -171,10 +183,10 @@ class NovoUsuario(BaseModel):
     @computed_field
     @property
     def senha_hash(self) -> str:
-        return generate_password_hash("".join(self.data.split("-")[::-1]))
+        return generate_password_hash(self.data.strftime("%d%m%Y"))
 
     def registrar(self) -> None:
-        r = db("Boopt", "Usuários").insert_one(self.model_dump())
+        r = db("Boopt", "Usuários").insert_one(self.model_dump(exclude_none=True))
         assert (
             r.acknowledged
         ), "Não conseguimos criar o usuário. Tente novamente mais tarde."
@@ -192,52 +204,6 @@ class NovosUsuariosBatelada(BaseModel):
         ), "Não conseguimos criar os usuários. Tente novamente mais tarde."
 
     @classmethod
-    def gerar_modelo(cls, cargos_padres=list[str]) -> openpyxl.Workbook:
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Cadastro"
-        ws.append(
-            [
-                "Primeiro Nome",
-                "Sobrenome",
-                "CPF",
-                "Data de Nascimento",
-                "Email",
-                "Cargo/Função",
-            ]
-        )
-        ws.column_dimensions["C"].number_format = "@"
-        ws.column_dimensions["D"].number_format = "DD/MM/YYYY"
-        for col in ("A", "B", "E"):
-            ws.column_dimensions[col].width = 32
-        for col in ("C", "D", "F"):
-            ws.column_dimensions[col].width = 16
-
-        tabela = Table(
-            displayName="Usuarios",
-            ref="A1:F2",
-            tableStyleInfo=TableStyleInfo(
-                name="TableStyleMedium2",
-                showFirstColumn=False,
-                showLastColumn=False,
-                showRowStripes=True,
-            ),
-        )
-
-        val_cargos = DataValidation(
-            type="list",
-            formula1=f'"{",".join(cargos_padres)}"',
-            allow_blank=True,
-            showErrorMessage=False,
-        )
-
-        ws.add_table(tabela)
-        ws.add_data_validation(val_cargos)
-        val_cargos.add("F2")
-
-        return wb
-
-    @classmethod
     def carregar_planilha(cls, planilha, empresa: ObjectId, role: Role):
         wb = openpyxl.load_workbook(planilha)
         assert (
@@ -247,8 +213,7 @@ class NovosUsuariosBatelada(BaseModel):
         linhas = [[cell.value for cell in row] for row in ws.rows]
         assert (
             [
-                "Primeiro Nome",
-                "Sobrenome",
+                "Nome completo",
                 "CPF",
                 "Data de Nascimento",
                 "Email",
@@ -264,13 +229,13 @@ class NovosUsuariosBatelada(BaseModel):
         usuarios = [
             {
                 "nome": linha[0],
-                "sobrenome": linha[1],
                 "cpf": linha[2],
                 "data": linha[3].strftime("%Y-%m-%d") if linha[3] else None,
                 "email": linha[4] if linha[4] is not None else "",
                 "cargo": linha[5],
                 "empresa": empresa,
-                "role": Role,
+                "role": role,
+                "unidades": None,
             }
             for linha in linhas[1:]
         ]
@@ -310,7 +275,7 @@ def layout_nao_autorizado():
 def checar_perfil(_func=None, *, permitir: tuple[Role] = None):
     def decorador(func: callable):
         def wrapper(*args, **kwargs):
-            usr_atual: Usuario = current_user
+            usr_atual = Usuario.atual()
             if usr_atual.is_authenticated and (
                 permitir is None or usr_atual.role in permitir
             ):

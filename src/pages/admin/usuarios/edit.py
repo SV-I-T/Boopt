@@ -17,7 +17,6 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.modelo_usuario import (
@@ -46,7 +45,7 @@ def autorizado(usr_atual: Usuario, usr: Usuario) -> bool:
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
 def layout(id: str = None):
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not id:
         return [
@@ -187,21 +186,6 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         value=None,
                         disabled=desabilitar,
                     ),
-                    dmc.MultiSelect(
-                        id="clientes-edit-usr",
-                        label="Clientes",
-                        data=data_empresas,
-                        value=map(str, usr_atual.clientes)
-                        if usr_atual.clientes
-                        else None,
-                        searchable=True,
-                        nothingFound="Não encontrei nada",
-                        name="clientes",
-                        disabled=desabilitar,
-                        display=usr_atual.role in (Role.DEV, Role.CONS)
-                        and "block"
-                        or "none",
-                    ),
                     dmc.Select(
                         id="role-edit-usr",
                         label="Perfil",
@@ -224,13 +208,15 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         leftIcon=DashIconify(
                             icon="fluent:arrow-reset-20-filled", width=20
                         ),
-                        mr="auto",
-                    ),
+                    )
+                    if usr
+                    else None,
                     dmc.Button(
                         id="btn-salvar-usr" if usr else "btn-criar-usr",
                         children="Salvar" if usr else "Criar",
                         disabled=desabilitar,
                         leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                        ml="auto",
                     ),
                     dmc.Button(
                         id="btn-delete-usr",
@@ -269,7 +255,6 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
     State("cargo-edit-usr", "value"),
     State("role-edit-usr", "value"),
     State("unidades-edit-usr", "value"),
-    State("clientes-edit-usr", "value"),
     State("url", "search"),
     prevent_initial_call=True,
 )
@@ -282,14 +267,13 @@ def salvar_usr(
     _empresa: str,
     cargo: str,
     role: str,
-    unidades: list[str],
-    _clientes: list[str],
+    unidades: list[str] | None,
     search: str,
 ):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not usr_atual.is_authenticated:
         raise PreventUpdate
@@ -301,7 +285,6 @@ def salvar_usr(
     id_usr = ObjectId(params["id"][0])
     data = datetime.strptime(_data, "%Y-%m-%d")
     empresa = ObjectId(_empresa)
-    clientes = [ObjectId(cliente) for cliente in _clientes]
 
     try:
         usr = Usuario.buscar("_id", id_usr)
@@ -333,7 +316,6 @@ def salvar_usr(
             ("cargo", usr.cargo, cargo or None),
             ("role", usr.role, role),
             ("unidades", usr.unidades, unidades or None),
-            ("clientes", usr.clientes, clientes or None),
         )
 
         atualizacoes = {k: v_novo for k, v, v_novo in comps if v != v_novo}
@@ -392,13 +374,12 @@ def criar_novo_usr(
     _empresa: str,
     cargo: str,
     role: str,
-    unidades: list[str],
-    _clientes: list[str],
+    unidades: list[str] | None,
 ):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not usr_atual.is_authenticated:
         raise PreventUpdate
@@ -408,10 +389,9 @@ def criar_novo_usr(
 
     data = datetime.strptime(_data, "%Y-%m-%d")
     empresa = ObjectId(_empresa)
-    clientes = [ObjectId(cliente) for cliente in _clientes]
 
     try:
-        if usr_atual.Role == Role.ADM:
+        if usr_atual.role == Role.ADM:
             if usr_atual.empresa != empresa:
                 raise AssertionError(
                     "Não você não pode criar um usuário de outra empresa."
@@ -428,7 +408,6 @@ def criar_novo_usr(
             empresa=empresa,
             cargo=cargo,
             role=role,
-            clientes=clientes or None,
             unidades=unidades or None,
         )
         usr.registrar()
@@ -476,7 +455,7 @@ def excluir_usr(n: int, search: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not usr_atual.is_authenticated:
         raise PreventUpdate
@@ -524,12 +503,12 @@ clientside_callback(
     prevent_initial_call=True,
 )
 def redefinir_senha(n: int, search: str):
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not usr_atual.is_authenticated:
         raise PreventUpdate

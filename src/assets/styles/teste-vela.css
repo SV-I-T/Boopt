@@ -1,11 +1,12 @@
 #text-frase {
     font-weight: 500;
     font-size: 26px;
-    font-size-adjust: 0.5;
     display: flex;
     text-align: center;
     align-items: center;
+    justify-content: center;
     height: 200px;
+    width: 80%;
 }
 
 div.teste-assessment {

@@ -9,18 +9,17 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Role, Usuario, checar_perfil
 
-register_page(__name__, path="/app/admin/empresas", title="Gerenciar Empresas")
+register_page(__name__, path="/app/admin/empresas", title="AMD - Empresas")
 
 
 @checar_perfil(permitir=(Role.DEV))
 def layout():
     corpo_tabela = consultar_dados_tabela_empresas("")
     return [
-        html.H1("Gerenciamento de empresas", className="titulo-pagina"),
+        html.H1("Administração de empresas", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             spacing="sm",
@@ -77,9 +76,11 @@ def layout():
     prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(n: int, busca: str):
-    usr: Usuario = current_user
+    if not n:
+        raise PreventUpdate
+    usr = Usuario.atual()
 
-    if usr.role not in (Perfil.admin, Perfil.dev) or not n:
+    if usr.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
     corpo_tabela = consultar_dados_tabela_empresas(busca)

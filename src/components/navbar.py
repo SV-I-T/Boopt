@@ -8,12 +8,11 @@ from dash import (
     html,
 )
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.modelo_usuario import Role, Usuario
 
 
 def layout_navbar():
-    usr: Usuario = current_user
+    usr = Usuario.atual()
     return html.Nav(
         children=[
             html.Img(
@@ -49,7 +48,7 @@ def menu_usuario(usr: Usuario):
             ),
             dmc.NavLink(
                 label="Início",
-                href="/app/assessment-vendedor",
+                href="/app/vela",
                 icon=DashIconify(icon="fluent:home-20-filled", width=18),
             ),
             dmc.NavLink(

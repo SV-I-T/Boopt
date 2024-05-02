@@ -55,7 +55,7 @@ def login_post():
 
 @server.route("/logout", methods=["POST", "GET"])
 def logout_post():
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
     if usr_atual and usr_atual.is_authenticated:
         cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr_atual.id)
         logout_user()

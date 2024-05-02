@@ -108,7 +108,7 @@ def criar_empresa(n, nome: str, segmento: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
     if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
@@ -157,7 +157,7 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
     if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
@@ -213,7 +213,7 @@ def excluir_empresa(n: int, search: str):
     if not n:
         raise PreventUpdate
 
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if not usr_atual.is_authenticated:
         raise PreventUpdate

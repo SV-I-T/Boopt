@@ -52,7 +52,6 @@ body.login-body {
 
 .user-input label,
 .password-input label {
-    font-size: 14px;
     font-weight: 300;
 }
 
@@ -94,10 +93,6 @@ body.login-body {
     margin-bottom: 2rem;
 }
 
-.login-options * {
-    font-size: 14px;
-}
-
 .remember-container {
     display: flex;
     align-items: center;
@@ -124,12 +119,9 @@ body.login-body {
     margin-bottom: 2rem;
 }
 
-.login-options * {
-    font-size: 14px;
-}
+
 
 .primeiro-acesso p {
-    font-size: 14px;
     margin: 0;
 }
 

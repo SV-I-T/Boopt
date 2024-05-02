@@ -3,6 +3,8 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 .index-body p,
@@ -11,28 +13,84 @@
 }
 
 .index-body header {
+    position: fixed;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(40px);
+    box-shadow: 0px 0px 2px 0px rgba(255, 255, 255, 0.25) inset;
+    z-index: 10000;
+    padding: 1rem 3rem;
 }
 
 .index-body header img {
-    width: 250px;
+    height: 100%;
+}
+
+.index-body main {
+    padding-top: 120px;
+}
+
+.index-body div.sales-enablement {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.index-body div.sales-enablement h1 {
+    font-size: 56px;
+    font-weight: 800;
+    background: linear-gradient(30deg, var(--azul-sv) 20%, var(--laranja-boopt) 80%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-background-clip: text;
+    -moz-text-fill-color: transparent;
+    text-align: center;
+}
+
+.index-body div.sales-enablement p {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.index-body div.sales-enablement button.btn {
+    font-size: 20px;
+    font-weight: 600;
+    padding: 1rem 4rem;
+    box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.25);
+    background:
+        linear-gradient(90deg, var(--off-white) 0%, var(--off-white) 100%) padding-box,
+        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
+    border: 2px solid transparent;
+    transform: scale(1);
+    transition: transform 150ms ease;
+}
+
+.index-body div.sales-enablement button.btn:hover {
+    transform: scale(1.1);
 }
 
 .index-body div.promo {
-    height: 800px;
+    margin-top: 4rem;
+    height: 550px;
     padding: 5rem 3rem;
     background-color: var(--azul-sv);
     background:
         url('../imgs/laptop_screen_mockup_15\ 1.png') no-repeat bottom right/auto 70%,
-        radial-gradient(circle farthest-corner at right, var(--laranja-boopt), var(--azul-sv));
+        linear-gradient(var(--off-white), var(--off-white)) padding-box,
+        linear-gradient(147deg, var(--laranja-boopt), var(--azul-sv)) border-box;
     border-radius: 30px;
+    border: 4px solid transparent;
 }
 
 .index-body div.promo p,
 .index-body div.promo h1 {
-    color: #fff;
     width: 50%;
 }
 
@@ -44,20 +102,6 @@
 .index-body div.promo strong {
     font-size: 20px;
     line-height: 1.7;
-}
-
-.index-body div.promo button.btn {
-    color: var(--azul-sv);
-    font-size: 20px;
-    font-weight: 600;
-    border: none;
-    padding: 1rem 5rem;
-    box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.25);
-    transition: transform ease 100ms;
-}
-
-.index-body div.promo button.btn:hover {
-    transform: scale(1.05);
 }
 
 .index-body div.map-lista {
@@ -90,20 +134,17 @@
     flex-direction: column;
     text-align: center;
     align-items: center;
+    color: #fff;
+    background: linear-gradient(270deg, var(--azul-sv), var(--laranja-boopt)) no-repeat fixed border-box;
+    border-radius: 20px;
+    box-shadow: 4px 6px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .index-body div.map-lista ul li span {
     width: 80px;
     height: 80px;
-    color: var(--azul-sv);
+    color: #fff;
     margin: 2rem 0;
-}
-
-.index-body div.map-lista ul li,
-.index-body div.historia-boopt {
-    background-color: #e7e7e7;
-    border-radius: 20px;
-    box-shadow: 4px 6px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .index-body div.historia-boopt {
@@ -120,21 +161,6 @@
     justify-self: center;
 }
 
-.index-body div.historia-boopt button {
-    background:
-        linear-gradient(90deg, #e7e7e7 0%, #e7e7e7 100%) padding-box,
-        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
-    border: 2px solid transparent;
-    color: #000;
-    transition: all 100ms ease-out 0s;
-}
-
-.index-body div.historia-boopt button:hover {
-    background:
-        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
-    background-color: white;
-    color: #fff;
-}
 
 .index-body footer {
     display: flex;

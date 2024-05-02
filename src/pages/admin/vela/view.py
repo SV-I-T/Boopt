@@ -2,24 +2,23 @@ import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
 from dash import html, register_page
-from flask_login import current_user
 from utils.banco_dados import db
-from utils.modelo_assessment import AssessmentVendedor
+from utils.modelo_assessment import VelaAssessment
 from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(
     __name__,
-    path="/app/admin/assessment-vendedor/view",
-    title="Visualizar Assessment Vendedor",
+    path="/app/admin/vela/view",
+    title="Visualizar Vela Assessment",
 )
 
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout(id: str = None):
-    usr: Usuario = current_user
+    usr = Usuario.atual()
 
-    assessment = AssessmentVendedor(
-        **db("AssessmentVendedores", "Aplicações").find_one(
+    assessment = VelaAssessment(
+        **db("Vela", "Aplicações").find_one(
             {"_id": ObjectId(id), "empresa": usr.empresa}
         )
     )
@@ -32,13 +31,12 @@ def layout(id: str = None):
     respostas_aplicacao: pl.DataFrame = baixar_respostas_aplicacao(id)
 
     return [
-        dmc.Title("Visualizar Assessment Vendedor", className="titulo-pagina"),
+        dmc.Title("Visualizar Vela Assessment", className="titulo-pagina"),
         dmc.Title(
             f'{assessment.descricao} ({assessment.id_.generation_time.strftime("%d/%m/%Y")})',
             className="secao-pagina",
         ),
         dmc.Table(
-            id="tabela-respostas-aplicacao",
             striped=True,
             highlightOnHover=True,
             withBorder=True,
@@ -69,7 +67,7 @@ def layout(id: str = None):
                                 html.Td(
                                     dmc.Anchor(
                                         children=f'{row["nota"]:.1f}/70',
-                                        href=f'/app/assessment-vendedor/resultado/?usr={usr.id}&resposta={row["_id"]}',
+                                        href=f'/app/vela/resultado/?usr={usr.id}&resposta={row["_id"]}',
                                     )
                                     if row["nota"]
                                     else "--"
@@ -86,7 +84,7 @@ def layout(id: str = None):
 
 def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
     r = (
-        db("AssessmentVendedores", "Aplicações").aggregate(
+        db("Vela", "Aplicações").aggregate(
             [
                 {"$match": {"_id": ObjectId(id_aplicacao)}},
                 {

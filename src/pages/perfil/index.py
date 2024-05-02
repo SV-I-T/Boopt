@@ -15,7 +15,7 @@ register_page(__name__, path="/app/perfil", title="Meu perfil")
 
 @checar_perfil
 def layout():
-    usr: Usuario = current_user
+    usr = Usuario.atual()
     return [
         html.H1("Meu perfil", className="titulo-pagina"),
         html.Div(
@@ -56,11 +56,6 @@ def layout():
                             value=usr.data.strftime("%d de %B de %Y"),
                             disabled=True,
                         ),
-                        dmc.TextInput(
-                            label="Perfil (permissões)",
-                            value=usr.role.value.capitalize(),
-                            disabled=True,
-                        ),
                     ],
                 ),
                 dmc.Divider(),
@@ -83,13 +78,18 @@ def layout():
                             radius="lg",
                         ),
                         dmc.Textarea(
-                            label="Clientes",
+                            label="Clientes (Apenas Consultores)",
                             value=usr.clientes,
                             disabled=True,
                             display="block"
                             and usr.role in (Role.DEV, Role.CONS)
                             or "none",
                             radius="lg",
+                        ),
+                        dmc.TextInput(
+                            label="Perfil",
+                            value=usr.role.value.capitalize(),
+                            disabled=True,
                         ),
                     ],
                 ),
@@ -178,7 +178,7 @@ def editar_email(n: int, acao: str, email: str):
                 no_update,
             )
 
-        usr: Usuario = current_user
+        usr = Usuario.atual()
         try:
             usr.atualizar({"email": email})
 
@@ -226,7 +226,7 @@ def editar_email(n: int, acao: str, email: str):
     prevent_initial_call=True,
 )
 def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
-    usr: Usuario = current_user
+    usr = Usuario.atual()
     if not n or not usr.is_authenticated:
         raise PreventUpdate
 

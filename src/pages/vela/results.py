@@ -1,13 +1,10 @@
-from urllib.parse import parse_qs
-
 import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
 from dash import dcc, register_page
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.cache import cache
-from utils.modelo_assessment import AssessmentVendedor
+from utils.modelo_assessment import VelaAssessment
 from utils.modelo_usuario import Role, Usuario, checar_perfil, layout_nao_autorizado
 
 from .funcoes.graficos import (
@@ -15,19 +12,18 @@ from .funcoes.graficos import (
     radar_comp,
     radar_etapas,
     rosca_grupo,
-    tabela_competencias,
 )
 
 register_page(
     __name__,
-    path="/app/assessment-vendedor/resultado",
-    title="Resultados - Assessment Vendedor",
+    path="/app/vela/resultado",
+    title="Resultados - Vela Assessment",
 )
 
 
 @checar_perfil
 def layout(usr: str = None, resposta: str = None):
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if usr == usr_atual.id:
         # O usuário que está tentando acessar é o dono da resposta
@@ -45,7 +41,7 @@ def layout(usr: str = None, resposta: str = None):
         # O usuário que está tentando acessar não tem permissão
         return layout_nao_autorizado()
 
-    respostas = AssessmentVendedor.buscar_respostas(ObjectId(usr))
+    respostas = VelaAssessment.buscar_respostas(ObjectId(usr))
 
     return dmc.Container(
         [
@@ -72,7 +68,7 @@ def layout(usr: str = None, resposta: str = None):
                                 children=resposta_.generation_time.date().strftime(
                                     "%d de %B de %Y",
                                 ),
-                                href=f"/app/assessment-vendedor/resultado/?usr={usr}&resposta={resposta_}",
+                                href=f"/app/vela/resultado/?usr={usr}&resposta={resposta_}",
                             )
                             if str(resposta_) != resposta
                             else None
@@ -181,7 +177,7 @@ def construir_resultados(id_resposta: str):
 
 @cache.memoize(timeout=6000)
 def dfs_resultado(id_resposta: str):
-    resposta = AssessmentVendedor.resultado(ObjectId(id_resposta))
+    resposta = VelaAssessment.resultado(ObjectId(id_resposta))
 
     if resposta is None:
         return None

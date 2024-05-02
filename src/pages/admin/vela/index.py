@@ -5,20 +5,17 @@ from bson import ObjectId
 from dash import Input, Output, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Role, Usuario, checar_perfil
 
-register_page(
-    __name__, "/app/admin/assessment-vendedor", title="Gerenciar Assessments vendedor"
-)
+register_page(__name__, "/app/admin/vela", title="ADM - Vela Assessment")
 
 MAX_PAGINA = 10
 
 
 @checar_perfil(permitir=(Role.DEV, Role.ADM))
 def layout():
-    usr: Usuario = current_user
+    usr = Usuario.atual()
 
     if usr.role == Role.ADM:
         data_empresas = [str(usr.empresa)]
@@ -28,16 +25,16 @@ def layout():
             for empresa in usr.buscar_empresas()
         ]
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_assessment(1, str(usr.empresa))
+    corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa))
 
     return [
-        html.H1("Gerenciar Assessment Vendedor", className="titulo-pagina"),
+        html.H1("Administração - Vela Assessment", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             position="right",
             children=[
                 dmc.Select(
-                    id="empresa-assessment",
+                    id="empresa-vela",
                     icon=DashIconify(icon="fluent:building-24-filled", width=24),
                     name="empresa",
                     data=data_empresas,
@@ -52,9 +49,8 @@ def layout():
                 ),
                 dmc.Anchor(
                     id="a-nova-aplicacao",
-                    href="/app/admin/assessment-vendedor/edit",
+                    href="/app/admin/vela/edit",
                     children=dmc.Button(
-                        id="btn-nova-aplicacao",
                         children="Nova aplicação",
                         leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
                         variant="gradient",
@@ -81,46 +77,44 @@ def layout():
                     )
                 ),
                 html.Tbody(
-                    id="tabela-assessment-body",
+                    id="table-vela-body",
                     children=corpo_tabela,
                 ),
             ],
         ),
         dmc.Pagination(
-            id="tabela-assessment-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+            id="table-vela-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
         ),
     ]
 
 
 @callback(
-    Output("tabela-assessment-body", "children"),
-    Output("tabela-assessment-nav", "total"),
+    Output("table-vela-body", "children"),
+    Output("table-vela-nav", "total"),
     Output("a-nova-aplicacao", "href"),
-    Input("tabela-assessment-nav", "page"),
-    Input("empresa-assessment", "value"),
+    Input("table-vela-nav", "page"),
+    Input("empresa-vela", "value"),
     prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(pagina: int, empresa: str):
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
     if usr_atual.perfil == Role.ADM and str(usr_atual.empresa) != empresa:
         raise PreventUpdate
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_assessment(pagina, empresa)
+    corpo_tabela, n_paginas = consultar_dados_tabela_vela(pagina, empresa)
 
     return (
         corpo_tabela,
         n_paginas,
-        f"/app/admin/assessment-vendedor/edit?empresa={empresa}",
+        f"/app/admin/vela/edit?empresa={empresa}",
     )
 
 
-def consultar_dados_tabela_assessment(
-    pagina: int, empresa: str
-) -> tuple[list[html.Tr], int]:
+def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr], int]:
     r = (
-        db("AssessmentVendedores", "Aplicações")
+        db("Vela", "Aplicações")
         .aggregate(
             [
                 {"$match": {"empresa": ObjectId(empresa)}},
@@ -181,12 +175,12 @@ def consultar_dados_tabela_assessment(
                     [
                         dmc.Anchor(
                             "Editar",
-                            href=f'/app/admin/assessment-vendedor/edit?id={assessment["_id"]}',
+                            href=f'/app/admin/vela/edit?id={assessment["_id"]}',
                             mr="0.5rem",
                         ),
                         dmc.Anchor(
                             "Resultados",
-                            href=f'/app/admin/assessment-vendedor/view?id={assessment["_id"]}',
+                            href=f'/app/admin/vela/view?id={assessment["_id"]}',
                         ),
                     ]
                 ),

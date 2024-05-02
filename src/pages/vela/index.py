@@ -1,23 +1,22 @@
 import dash_mantine_components as dmc
-from dash import dcc, html, register_page
+from dash import dcc, get_asset_url, html, register_page
 from dash_iconify import DashIconify
-from flask_login import current_user
-from utils.modelo_assessment import AssessmentVendedor
+from utils.modelo_assessment import VelaAssessment
 from utils.modelo_usuario import Usuario, checar_perfil
 
 register_page(
     __name__,
-    path="/app/assessment-vendedor",
-    title="Assessment Vendedor",
+    path="/app/vela",
+    title="Vela Assessment",
     redirect_from=["/app/dashboard"],
 )
 
 
 @checar_perfil
 def layout():
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
-    r = AssessmentVendedor.testes_disponiveis(usr_atual.id_)
+    r = VelaAssessment.testes_disponiveis(usr_atual.id_)
     ultima_aplicacao = r["ultima_aplicacao"] if r else None
     ultima_resposta_id = r["ultima_resposta_id"] if r else None
 
@@ -25,15 +24,13 @@ def layout():
         className="center-container",
         children=[
             dmc.Image(
+                src=get_asset_url("imgs/vela/00 - VELA 1.png"),
                 mb="1rem",
-                width=500,
-                height=200,
-                withPlaceholder=True,
-                alt="Logo Assessment",
-                placeholder=dmc.Text("LOGO"),
+                width=250,
+                alt="Logo Vela Assessment",
             ),
             dmc.Text(
-                "Te damos as boas-vindas ao Assessment de Vendedor Boopt.",
+                "Te damos as boas-vindas ao Vela Assessment.",
                 weight=500,
                 align="center",
                 mb="4rem",
@@ -51,7 +48,7 @@ def layout():
                                 and not ultima_aplicacao.get("resposta")
                             ),
                         ),
-                        href=f"/app/assessment-vendedor/teste/?id={ultima_aplicacao['id']}"
+                        href=f"/app/vela/teste/?id={ultima_aplicacao['id']}"
                         if ultima_aplicacao and not ultima_aplicacao.get("resposta")
                         else None,
                     ),
@@ -61,7 +58,7 @@ def layout():
                             disabled=not ultima_resposta_id,
                             color="BooptLaranja",
                         ),
-                        href=f"/app/assessment-vendedor/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"
+                        href=f"/app/vela/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"
                         if ultima_resposta_id
                         else None,
                     ),

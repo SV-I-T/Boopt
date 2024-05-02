@@ -11,11 +11,10 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Role, Usuario, checar_perfil
 
-register_page(__name__, "/app/admin/usuarios", name="Gerenciar usuários")
+register_page(__name__, "/app/admin/usuarios", name="ADM - Usuários")
 
 
 MAX_PAGINA = 15
@@ -23,12 +22,12 @@ MAX_PAGINA = 15
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout():
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     corpo_tabela, n_paginas = consultar_dados_tabela_usuarios(usr_atual, 1, "")
 
     return [
-        html.H1("Gerenciar usuários", className="titulo-pagina"),
+        html.H1("Administração de usuários", className="titulo-pagina"),
         dmc.Group(
             mb="1rem",
             spacing="sm",
@@ -105,7 +104,7 @@ def layout():
     prevent_initial_call=True,
 )
 def atualizar_tabela_usuarios(pagina: int, n: int, busca: str):
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     if usr_atual.perfil not in [Role.DEV, Role.ADM]:
         raise PreventUpdate

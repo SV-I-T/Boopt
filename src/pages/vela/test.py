@@ -2,6 +2,7 @@ from random import choice, sample
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
+import polars as pl
 from bson import ObjectId
 from dash import (
     ClientsideFunction,
@@ -18,10 +19,8 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.banco_dados import db
 from utils.modelo_usuario import Usuario, checar_perfil
-import polars as pl
 
 EXPLICACAO_MD = """
     Olá **{vendedor}**!
@@ -40,9 +39,7 @@ EXPLICACAO_MD = """
 """
 
 
-register_page(
-    __name__, path="/app/assessment-vendedor/teste", title="Assessment Vendedor"
-)
+register_page(__name__, path="/app/vela/teste", title="Vela Assessment - Teste")
 
 
 @checar_perfil
@@ -52,16 +49,16 @@ def layout(id: str = None, secao: str = "instrucoes"):
             "Este formulário não existe. Verifique o link", title="Erro", color="red"
         )
 
-    usr: Usuario = current_user
+    usr = Usuario.atual()
 
     if secao == "instrucoes":
         return [
             dcc.Markdown(
-                EXPLICACAO_MD.format(vendedor=usr.nome),
+                EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
                 style={"font-weight": 400, "font-size": 30},
             ),
             dmc.Anchor(
-                href=f"/app/assessment-vendedor/teste/?id={id}&secao=frases",
+                href=f"/app/vela/teste/?id={id}&secao=frases",
                 children=dmc.Button(
                     "Começar teste",
                     color="SVAzul",
@@ -71,11 +68,11 @@ def layout(id: str = None, secao: str = "instrucoes"):
         ]
 
     elif secao == "frases":
-        aplicacao = db("AssessmentVendedores", "Aplicações").find_one(
+        aplicacao = db("Vela", "Aplicações").find_one(
             {"participantes": usr.id_, "_id": ObjectId(id)}
         )
 
-        formulario_frases = db("AssessmentVendedores", "Formulários").find_one(
+        formulario_frases = db("Vela", "Formulários").find_one(
             {"_id": aplicacao["id_form"]},
             {
                 "_id": 0,
@@ -167,7 +164,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
         return [
             html.H1("Obrigado!", className="titulo-pagina"),
             dcc.Markdown(
-                "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/assessment-vendedor)"
+                "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/vela)"
             ),
         ]
 
@@ -270,7 +267,7 @@ def salvar_resposta(n, frases, search):
         raise PreventUpdate
 
     else:
-        usr_atual: Usuario = current_user
+        usr_atual = Usuario.atual()
         params = parse_qs(search[1:])
         id_aplicacao = params["id"][0]
         dados_resposta = {
@@ -283,7 +280,7 @@ def salvar_resposta(n, frases, search):
 
         dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["notas"])
 
-        resposta = db("AssessmentVendedores", "Respostas").insert_one(dados_resposta)
+        resposta = db("Vela", "Respostas").insert_one(dados_resposta)
         if resposta.inserted_id:
             return f"?id={id_aplicacao}&secao=enviado", no_update
         else:
@@ -298,7 +295,7 @@ def salvar_resposta(n, frases, search):
 
 def calcular_nota(id_aplicacao: str, notas: list[dict[str, str]]):
     r = (
-        db("AssessmentVendedores", "Aplicações")
+        db("Vela", "Aplicações")
         .aggregate(
             [
                 {"$match": {"_id": ObjectId(id_aplicacao)}},

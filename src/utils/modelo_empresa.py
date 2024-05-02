@@ -5,11 +5,16 @@ from pydantic import BaseModel, Field, field_validator
 from utils.banco_dados import db
 
 
+class Unidade(BaseModel):
+    cod: int
+    nome: str
+
+
 class Empresa(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     nome: str
     segmento: Optional[str] = None
-    unidades: list[str] = None
+    unidades: list[Unidade] = None
 
     class Config:
         str_strip_whitespace = True

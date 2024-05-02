@@ -17,10 +17,8 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from pydantic import ValidationError
 from utils.modelo_usuario import (
-    CARGOS_PADROES,
     NovosUsuariosBatelada,
     Role,
     Usuario,
@@ -34,7 +32,7 @@ register_page(
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
 def layout():
-    usr_atual: Usuario = current_user
+    usr_atual = Usuario.atual()
 
     data_empresas = [
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
@@ -48,7 +46,7 @@ def layout():
     elif usr_atual.role == Role.ADM:
         roles_edit = [Role.GEST, Role.USR, Role.CAND]
 
-    data_role = [{"value": r.value, "label": r.name.capitalize()} for r in roles_edit]
+    data_role = [r.value for r in roles_edit]
 
     return [
         html.H1("Cadastro em massa", className="titulo-pagina"),
@@ -70,7 +68,7 @@ def layout():
                             searchable=True,
                             nothingFound="Não encontrei nada",
                             w=300,
-                            display="none" if usr_atual.perfil == Role.ADM else "block",
+                            display="none" if usr_atual.role == Role.ADM else "block",
                         ),
                         dmc.Select(
                             id="perfil-usr-massa",
@@ -171,15 +169,6 @@ def baixar_template_cadastro_massa(n):
         raise PreventUpdate
 
     return dcc.send_file("./assets/template_cadastro.xlsx")
-    buffer = io.BytesIO()
-    wb = NovosUsuariosBatelada.gerar_modelo(cargos_padres=CARGOS_PADROES)
-    wb.save(buffer)
-    wb.close()
-    return dcc.send_bytes(
-        src=buffer.getvalue(),
-        filename="template_cadastro.xlsx",
-        type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
 
 
 clientside_callback(

@@ -1,9 +1,6 @@
-from time import sleep
-
 import dash_mantine_components as dmc
 from dash import html, register_page
 from dash_iconify import DashIconify
-from flask_login import current_user
 from utils.modelo_usuario import Role, Usuario, checar_perfil
 
 register_page(__name__, path="/app/admin", title="Painel de administração")
@@ -11,7 +8,7 @@ register_page(__name__, path="/app/admin", title="Painel de administração")
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
 def layout():
-    usr: Usuario = current_user
+    usr = Usuario.atual()
     modules: tuple[str] = (
         {
             "label": "Usuários",
@@ -19,14 +16,25 @@ def layout():
             "icon": "fluent:person-24-filled",
         },
         {
-            "label": "Empresas",
-            "href": "/app/admin/empresas",
+            "label": "Unidades",
+            "href": "/app/admin/unidades",
             "icon": "fluent:building-shop-24-filled",
-            "role": [Role.DEV, Role.CONS],
         },
         {
-            "label": "Assessment Vendedores",
-            "href": "/app/admin/assessment-vendedor",
+            "label": "Consultores",
+            "href": "/app/admin/consultores",
+            "icon": "fluent:briefcase-person-24-filled",
+            "role": (Role.DEV),
+        },
+        {
+            "label": "Empresas",
+            "href": "/app/admin/empresas",
+            "icon": "fluent:building-24-filled",
+            "role": (Role.DEV, Role.CONS),
+        },
+        {
+            "label": "Vela Assessment",
+            "href": "/app/admin/vela",
             "icon": "fluent:checkbox-person-24-filled",
         },
     )
