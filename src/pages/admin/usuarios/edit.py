@@ -19,14 +19,11 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_usuario import (
-    CARGOS_PADROES,
-    NovoUsuario,
-    Role,
-    Usuario,
-    checar_perfil,
-    layout_nao_autorizado,
-)
+from utils.empresa import Empresa
+from utils.login import checar_perfil, layout_nao_autorizado
+from utils.novo_usuario import NovoUsuario
+from utils.role import Role
+from utils.usuario import CARGOS_PADROES, Usuario
 from werkzeug.security import generate_password_hash
 
 register_page(__name__, path="/app/admin/usuarios/edit", title="Editar usuário")
@@ -89,6 +86,8 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
         desabilitar = False
 
     data_role = [r.value for r in roles_edit]
+
+    data_unidades = buscar_data_unidades(usr.empresa if usr else usr_atual.empresa)
 
     return html.Div(
         className="editar-usr",
@@ -158,13 +157,8 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         data=data_empresas,
                         searchable=True,
                         nothingFound="Não encontrei nada",
-                        value=str(usr.empresa)
-                        if usr
-                        else str(usr_atual.empresa)
-                        if usr_atual.role == Role.ADM
-                        else None,
-                        disabled=desabilitar,
-                        display=(usr_atual.role == Role.ADM) and "none" or "block",
+                        value=str(usr.empresa) if usr else str(usr_atual.empresa),
+                        disabled=desabilitar or usr_atual.role == Role.ADM,
                     ),
                     dmc.Select(
                         id="cargo-edit-usr",
@@ -183,7 +177,8 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                     dmc.MultiSelect(
                         id="unidades-edit-usr",
                         label="Unidade(s)",
-                        value=None,
+                        data=data_unidades,
+                        value=usr.unidades if usr else None,
                         disabled=desabilitar,
                     ),
                     dmc.Select(
@@ -243,6 +238,35 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
     )
 
 
+def buscar_data_unidades(id_empresa: ObjectId) -> list[dict[str, str]]:
+    empresa = Empresa.buscar("_id", id_empresa)
+    return [
+        {"value": unidade.cod, "label": f"({unidade.cod}) - {unidade.nome}"}
+        for unidade in empresa.unidades
+    ]
+
+
+@callback(
+    Output("unidades-edit-usr", "data"),
+    Input("empresa-edit-usr", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_data_unidades(_id_empresa: str):
+    usr_atual = Usuario.atual()
+
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
+        raise PreventUpdate
+
+    id_empresa = ObjectId(_id_empresa)
+    if usr_atual.role == Role.ADM and usr_atual.empresa != id_empresa:
+        raise PreventUpdate
+
+    if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
+        raise PreventUpdate
+
+    return buscar_data_unidades(id_empresa)
+
+
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Output("url", "href", allow_duplicate=True),
@@ -267,7 +291,7 @@ def salvar_usr(
     _empresa: str,
     cargo: str,
     role: str,
-    unidades: list[str] | None,
+    unidades: list[int] | None,
     search: str,
 ):
     if not n:
@@ -362,11 +386,10 @@ def salvar_usr(
     State("cargo-edit-usr", "value"),
     State("role-edit-usr", "value"),
     State("unidades-edit-usr", "value"),
-    State("clientes-edit-usr", "value"),
     prevent_initial_call=True,
 )
 def criar_novo_usr(
-    n,
+    n: int,
     nome: str,
     cpf: str,
     _data: str,
@@ -374,7 +397,7 @@ def criar_novo_usr(
     _empresa: str,
     cargo: str,
     role: str,
-    unidades: list[str] | None,
+    unidades: list[int] | None,
 ):
     if not n:
         raise PreventUpdate

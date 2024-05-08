@@ -3,8 +3,10 @@ import polars as pl
 from bson import ObjectId
 from dash import html, register_page
 from utils.banco_dados import db
-from utils.modelo_assessment import VelaAssessment
-from utils.modelo_usuario import Role, Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.role import Role
+from utils.usuario import Usuario
+from utils.vela import VelaAssessment
 
 register_page(
     __name__,

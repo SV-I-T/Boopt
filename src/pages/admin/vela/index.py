@@ -6,7 +6,9 @@ from dash import Input, Output, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import Role, Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.role import Role
+from utils.usuario import Usuario
 
 register_page(__name__, "/app/admin/vela", title="ADM - Vela Assessment")
 

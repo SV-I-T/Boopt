@@ -1,7 +1,6 @@
 import dash_mantine_components as dmc
 from dash import register_page
-from flask_login import current_user
-from utils.modelo_usuario import Usuario, checar_perfil
+from utils.login import checar_perfil
 
 register_page(
     __name__, path="/app/dashboard", title="Dashboard", redirect_from=["/app"]

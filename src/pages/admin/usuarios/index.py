@@ -12,7 +12,9 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import Role, Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.role import Role
+from utils.usuario import Usuario
 
 register_page(__name__, "/app/admin/usuarios", name="ADM - Usuários")
 
@@ -106,7 +108,7 @@ def layout():
 def atualizar_tabela_usuarios(pagina: int, n: int, busca: str):
     usr_atual = Usuario.atual()
 
-    if usr_atual.perfil not in [Role.DEV, Role.ADM]:
+    if usr_atual.role not in [Role.DEV, Role.ADM]:
         raise PreventUpdate
     corpo_tabela, total_paginas = consultar_dados_tabela_usuarios(
         usr_atual, pagina, busca

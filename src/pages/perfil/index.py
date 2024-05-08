@@ -1,13 +1,16 @@
 import re
 
 import dash_mantine_components as dmc
+from bson import ObjectId
 from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
 from utils.cache import cache_simple
-from utils.modelo_usuario import Role, Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.role import Role
+from utils.usuario import Usuario
 from werkzeug.security import check_password_hash, generate_password_hash
 
 register_page(__name__, path="/app/perfil", title="Meu perfil")
@@ -16,6 +19,37 @@ register_page(__name__, path="/app/perfil", title="Meu perfil")
 @checar_perfil
 def layout():
     usr = Usuario.atual()
+
+    unidades: dict[str, list[str]] = (
+        db("Boopt", "Empresas")
+        .aggregate(
+            [
+                {"$match": {"_id": usr.empresa}},
+                {
+                    "$set": {
+                        "unidades": {
+                            "$map": {
+                                "input": {
+                                    "$filter": {
+                                        "input": "$unidades",
+                                        "as": "unidade",
+                                        "cond": {
+                                            "$in": ["$$unidade.cod", usr.unidades or []]
+                                        },
+                                    }
+                                },
+                                "as": "unidade",
+                                "in": "$$unidade.nome",
+                            }
+                        }
+                    }
+                },
+                {"$project": {"unidades": 1, "_id": 0}},
+            ]
+        )
+        .next()
+    )
+
     return [
         html.H1("Meu perfil", className="titulo-pagina"),
         html.Div(
@@ -73,7 +107,8 @@ def layout():
                         dmc.TextInput(label="Cargo", value=usr.cargo, disabled=True),
                         dmc.Textarea(
                             label="Unidade(s)",
-                            value=usr.unidades or "Sem unidades cadastradas",
+                            value=", ".join(unidades["unidades"])
+                            or "Sem unidades cadastradas",
                             disabled=True,
                             radius="lg",
                         ),

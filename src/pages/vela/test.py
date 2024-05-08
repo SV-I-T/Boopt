@@ -20,7 +20,8 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from utils.banco_dados import db
-from utils.modelo_usuario import Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.usuario import Usuario
 
 EXPLICACAO_MD = """
     Olá **{vendedor}**!

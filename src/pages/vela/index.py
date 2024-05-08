@@ -1,8 +1,9 @@
 import dash_mantine_components as dmc
 from dash import dcc, get_asset_url, html, register_page
 from dash_iconify import DashIconify
-from utils.modelo_assessment import VelaAssessment
-from utils.modelo_usuario import Usuario, checar_perfil
+from utils.login import checar_perfil
+from utils.usuario import Usuario
+from utils.vela import VelaAssessment
 
 register_page(
     __name__,

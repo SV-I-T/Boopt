@@ -16,11 +16,12 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from flask_login import current_user
 from pydantic import ValidationError
 from utils.banco_dados import db
-from utils.modelo_empresa import Empresa
-from utils.modelo_usuario import Role, Usuario, checar_perfil
+from utils.empresa import Empresa
+from utils.login import checar_perfil
+from utils.role import Role
+from utils.usuario import Usuario
 
 register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
 

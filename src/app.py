@@ -5,10 +5,12 @@ from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask, Response, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
+from icecream import ic
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
-from utils.modelo_usuario import Usuario, login_manager
+from utils.login import login_manager
+from utils.usuario import Usuario
 
 locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
@@ -25,7 +27,7 @@ def index():
 @server.route("/login", methods=["GET"])
 def login_get():
     if current_user and current_user.is_authenticated:
-        return redirect("/app/dashboard")
+        return redirect("/app/vela")
     return render_template(
         "login.html",
         post_url=request.full_path,

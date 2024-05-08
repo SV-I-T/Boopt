@@ -4,8 +4,10 @@ from bson import ObjectId
 from dash import dcc, register_page
 from dash_iconify import DashIconify
 from utils.cache import cache
-from utils.modelo_assessment import VelaAssessment
-from utils.modelo_usuario import Role, Usuario, checar_perfil, layout_nao_autorizado
+from utils.login import checar_perfil, layout_nao_autorizado
+from utils.role import Role
+from utils.usuario import Usuario
+from utils.vela import VelaAssessment
 
 from .funcoes.graficos import (
     cartao_nota_total_etapas,
