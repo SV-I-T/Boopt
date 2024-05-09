@@ -2,11 +2,13 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         abrir_barra_lateral: function (opened) {
             const navbar = document.getElementById('navbar');
+            const navbar_backdrop = document.getElementById('navbar-backdrop');
             if (opened) {
-                navbar.style.visibility = "visible";
-                navbar.style.opacity = 1;
+                navbar.setAttribute('visible', 'true')
+                navbar_backdrop.setAttribute('visible', 'true')
             } else {
-                navbar.style = "";
+                navbar.removeAttribute('visible')
+                navbar_backdrop.setAttribute('visible', 'false')
             }
             throw window.dash_clientside.PreventUpdate;
         },

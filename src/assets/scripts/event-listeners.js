@@ -31,8 +31,10 @@ const observeUrlChange = () => {
     const observer = new MutationObserver(mutations => {
         if (oldPath !== document.location.pathname) {
             // Resetar barra lateral
-            document.getElementsByClassName('mantine-Burger-burger')[0].removeAttribute('data-opened');
-            document.getElementById('navbar').style = "";
+            burger = document.getElementById('burger-btn');
+            if (burger.childNodes[0].getAttribute('data-opened')) {
+                document.getElementById('burger-btn').click();
+            }
             // Alterar navlink ativo
             oldPath = document.location.pathname;
             changeActiveNavLink();

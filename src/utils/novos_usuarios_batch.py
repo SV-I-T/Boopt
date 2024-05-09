@@ -11,7 +11,6 @@ class MultipleErrors(ValueError): ...
 
 # @cache.memoize(timeout=5)
 def buscar_unidades_empresa(id_empresa: ObjectId) -> list[int]:
-    print(f"buscando unidades da empresa {id_empresa}")
     unidades: list[int] = (
         db("Boopt", "Empresas")
         .aggregate(

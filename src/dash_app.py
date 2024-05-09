@@ -66,7 +66,11 @@ def layout():
                         layout_navbar(),
                         html.Div(
                             id="wrapper",
-                            children=[html.Div(id="frame"), page_container],
+                            children=[
+                                html.Div(id="frame"),
+                                page_container,
+                                html.Div(id="navbar-backdrop"),
+                            ],
                         ),
                         html.Div(
                             id="burger-header",

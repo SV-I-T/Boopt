@@ -93,29 +93,22 @@ def layout(id: str = None, secao: str = "instrucoes"):
         frase_atual = frases[str(ordem[0])]
 
         return html.Div(
-            className="center-container teste-assessment",
+            className="center-container test-vela",
             children=[
-                dcc.Store(id="store-frases", data=frases, storage_type="memory"),
-                dcc.Store(id="store-status-done", data=False, storage_type="memory"),
-                dcc.Store(id="store-ordem-frases", data=ordem, storage_type="memory"),
-                dcc.Store(id="store-ordem-frase-atual", data=0, storage_type="memory"),
+                dcc.Store(id="store-frases-vela", data=frases, storage_type="memory"),
+                dcc.Store(id="store-status-vela", data=False, storage_type="memory"),
+                dcc.Store(id="store-ordem-vela", data=ordem, storage_type="memory"),
+                dcc.Store(id="store-frase-atual-vela", data=0, storage_type="memory"),
                 html.Div(className="progress-bar", children=[html.Div(), html.Div()]),
                 html.P(
-                    id="text-frase",
+                    id="text-frase-vela",
                     children=frase_atual["frase"],
                 ),
-                dmc.Group(
-                    align="center",
-                    position="center",
-                    mb="1rem",
-                    children=[
-                        html.P(
-                            "Não me identifico",
-                            className="label-teste",
-                        ),
+                html.Div(
+                    [
                         dcc.RadioItems(
-                            id="nota-av",
-                            className="radio-notas-frase",
+                            id="score-vela",
+                            className="radio-score-vela",
                             options=[
                                 {"value": i, "label": ""}
                                 for i in ["1", "2", "3", "4", "5"]
@@ -123,11 +116,22 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             inline=True,
                             value=None,
                         ),
-                        html.P(
-                            "Me identifico muito",
-                            className="label-teste",
+                        dmc.Group(
+                            align="center",
+                            position="center",
+                            mb="1rem",
+                            children=[
+                                html.P(
+                                    "Não me identifico",
+                                    className="label-teste",
+                                ),
+                                html.P(
+                                    "Me identifico muito",
+                                    className="label-teste",
+                                ),
+                            ],
                         ),
-                    ],
+                    ]
                 ),
                 dmc.Group(
                     mb="1rem",
@@ -138,7 +142,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             leftIcon=DashIconify(
                                 icon="fluent:chevron-left-20-filled", width=18
                             ),
-                            id="btn-back",
+                            id="btn-back-vela",
                             disabled=True,
                             color="dark",
                         ),
@@ -148,17 +152,17 @@ def layout(id: str = None, secao: str = "instrucoes"):
                                 icon="fluent:chevron-right-20-filled", width=18
                             ),
                             color="dark",
-                            id="btn-next",
+                            id="btn-next-vela",
                         ),
                         dmc.ActionIcon(
                             DashIconify(
                                 icon="fluent:arrow-shuffle-16-filled", width=16
                             ),
-                            id="btn-last",
+                            id="btn-last-vela",
                         ),
                     ],
                 ),
-                html.Div(id="container-envio"),
+                html.Div(id="send-container-vela"),
             ],
         )
     elif secao == "enviado":
@@ -172,10 +176,10 @@ def layout(id: str = None, secao: str = "instrucoes"):
 
 # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
 @callback(
-    Output("store-frases", "data", allow_duplicate=True),
-    Output("store-ordem-frase-atual", "data", allow_duplicate=True),
-    Input("btn-last", "n_clicks"),
-    State("store-frases", "data"),
+    Output("store-frases-vela", "data", allow_duplicate=True),
+    Output("store-frase-atual-vela", "data", allow_duplicate=True),
+    Input("btn-last-vela", "n_clicks"),
+    State("store-frases-vela", "data"),
     prevent_initial_call=True,
 )
 def preencher_auto(n, frases):
@@ -190,41 +194,41 @@ def preencher_auto(n, frases):
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="alterar_frase"),
-    Output("store-ordem-frase-atual", "data"),
-    Output("text-frase", "children"),
-    Output("nota-av", "value"),
-    Output("btn-next", "disabled"),
-    Output("btn-back", "disabled"),
-    Input("btn-next", "n_clicks"),
-    Input("btn-back", "n_clicks"),
-    State("store-ordem-frase-atual", "data"),
-    State("store-frases", "data"),
-    State("store-ordem-frases", "data"),
+    Output("store-frase-atual-vela", "data"),
+    Output("text-frase-vela", "children"),
+    Output("score-vela", "value"),
+    Output("btn-next-vela", "disabled"),
+    Output("btn-back-vela", "disabled"),
+    Input("btn-next-vela", "n_clicks"),
+    Input("btn-back-vela", "n_clicks"),
+    State("store-frase-atual-vela", "data"),
+    State("store-frases-vela", "data"),
+    State("store-ordem-vela", "data"),
 )
 
 # ATUALIZA O VALOR DA FRASE QUANDO CLICA NUMA NOTA
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="nota_clicada"),
-    Output("store-frases", "data"),
-    Input("nota-av", "value"),
-    State("store-ordem-frase-atual", "data"),
-    State("store-ordem-frases", "data"),
-    State("store-frases", "data"),
+    Output("store-frases-vela", "data"),
+    Input("score-vela", "value"),
+    State("store-frase-atual-vela", "data"),
+    State("store-ordem-vela", "data"),
+    State("store-frases-vela", "data"),
     prevent_initial_call=True,
 )
 
 # VERIFICA SE TODAS AS FRASES JÁ FORAM RESPONDIDAS
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="check_completado"),
-    Output("store-status-done", "data"),
-    Input("store-frases", "data"),
+    Output("store-status-vela", "data"),
+    Input("store-frases-vela", "data"),
 )
 
 
 # SE TODAS FRASES FORAM RESPONDIDAS, HABILITA O ENVIO
 @callback(
-    Output("container-envio", "children"),
-    Input("store-status-done", "data"),
+    Output("send-container-vela", "children"),
+    Input("store-status-vela", "data"),
     prevent_initial_call=True,
 )
 def habilitar_envio(status_pronto):
@@ -259,7 +263,7 @@ def habilitar_envio(status_pronto):
     Output("url", "search", allow_duplicate=True),
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
-    State("store-frases", "data"),
+    State("store-frases-vela", "data"),
     State("url", "search"),
     prevent_initial_call=True,
 )

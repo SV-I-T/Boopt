@@ -20,13 +20,6 @@ def layout_navbar():
                 src=get_asset_url("imgs/boopt/horizontal_azul.svg"),
                 height=30,
             ),
-            dmc.Text(
-                id="titulo-navbar",
-                children="Assessment de Vendedores",
-                weight=800,
-                mb="2rem",
-                size=20,
-            ),
             html.Div(id="menu-usr", children=menu_usuario(usr)),
         ],
         id="navbar",
