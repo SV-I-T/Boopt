@@ -10,9 +10,24 @@
     --burger-header-height: 50px;
 }
 
+@media only screen and (max-width: 1000px) {
+    * {
+        font-size: 16px;
+    }
+
+    input {
+        font-size: 16px !important;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    * {
+        font-size: 14px;
+    }
+}
+
 * {
     -webkit-font-smoothing: antialiased !important;
-    font-size: 14px;
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
