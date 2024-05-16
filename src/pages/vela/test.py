@@ -105,7 +105,8 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     children=frase_atual["frase"],
                 ),
                 html.Div(
-                    [
+                    style={"width": 300},
+                    children=[
                         dcc.RadioItems(
                             id="score-vela",
                             className="radio-score-vela",
@@ -116,10 +117,8 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             inline=True,
                             value=None,
                         ),
-                        dmc.Group(
-                            align="center",
-                            position="center",
-                            mb="1rem",
+                        html.Div(
+                            className="labels-teste",
                             children=[
                                 html.P(
                                     "Não me identifico",
@@ -131,7 +130,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                                 ),
                             ],
                         ),
-                    ]
+                    ],
                 ),
                 dmc.Group(
                     mb="1rem",

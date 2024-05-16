@@ -1,6 +1,5 @@
 #text-frase-vela {
     font-weight: 500;
-    font-size: 26px;
     display: flex;
     text-align: center;
     align-items: center;
@@ -15,22 +14,33 @@ div.test-vela {
 
 
 .label-teste {
+    width: 50%;
     font-size: 18px;
     font-weight: 500;
 }
 
+.labels-teste {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
 p.label-teste:first-child {
     color: var(--laranja-boopt);
+    text-align: left;
 }
 
 p.label-teste:last-child {
     color: var(--azul-sv);
+    text-align: right;
 }
 
 .radio-score-vela {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .radio-score-vela label input {
@@ -106,4 +116,16 @@ p.label-teste:last-child {
 
 .radio-score-vela label:nth-child(3) input::after {
     background-color: #5c5c5c;
+}
+
+@media only screen and (max-width: 1000px) {
+    #text-frase-vela {
+        font-size: 20px;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    #text-frase-vela {
+        font-size: 28px;
+    }
 }
