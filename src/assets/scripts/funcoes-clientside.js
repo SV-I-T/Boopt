@@ -46,10 +46,10 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         alterar_frase: async function (n_next, n_back, ordem_atual, frases, ordem) {
             const triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
             switch (triggered[0]) {
-                case "btn-next.n_clicks":
+                case "btn-next-vela.n_clicks":
                     if (n_next) { ordem_atual++; };
                     break
-                case "btn-back.n_clicks":
+                case "btn-back-vela.n_clicks":
                     if (n_back) { ordem_atual--; };
                     break
             };
