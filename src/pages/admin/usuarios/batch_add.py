@@ -17,7 +17,6 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from icecream import ic
 from pydantic import ValidationError
 from utils.login import checar_perfil
 from utils.novos_usuarios_batch import MultipleErrors, NovosUsuariosBatelada

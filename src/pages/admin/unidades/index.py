@@ -19,7 +19,6 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from icecream import ic
 from utils.banco_dados import db
 from utils.empresa import Empresa
 from utils.login import checar_perfil

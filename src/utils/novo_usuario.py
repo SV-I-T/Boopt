@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Any, Optional
 
 from bson import ObjectId
-from icecream import ic
 from pydantic import BaseModel, ValidationInfo, computed_field, field_validator
 from utils.banco_dados import db
 from utils.role import Role

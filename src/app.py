@@ -5,7 +5,6 @@ from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask, Response, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
-from icecream import ic
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
