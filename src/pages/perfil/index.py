@@ -142,7 +142,7 @@ def layout():
                 ),
                 dmc.Stack(
                     mb="1rem",
-                    w="50%",
+                    maw=400,
                     children=[
                         dmc.PasswordInput(
                             id="input-perfil-senha-atual",
