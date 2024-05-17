@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boopt</title>
+
+    <!-- FAVICON -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- FOLHAS DE ESTILO -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/iconify.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/input.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/botoes.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/promo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}" />
+    <!-- FONTE MONTESERRAT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <!-- MOSTRAR/ESCONDER SENHA -->
+    <script defer>
+        function showPassword() {
+            let input = document.getElementById("password");
+            let eye = document.getElementById("password-eye");
+            input.type = input.type === "password" ? "text" : "password";
+            eye.className = input.type === "password" ? "fluent--eye-24-filled input-icon" : "fluent--eye-off-24-filled input-icon";
+        };
+    </script>
+    <!-- HTMX -->
+    <script src="{{ url_for('static', filename='scripts/htmx.min.js') }}"></script>
+
+</head>
+
+<body class="login-body">
+    <div class="content">
+
+        <div class="promo-sidebar">
+        </div>
+        {% block content %}
+        <div class="login-container">
+            <div class="login-form">
+                <h1>LOGIN</h1>
+                <form onsubmit="javascript:void(0);" hx-post="{{ post_url }}" hx-target="#login-feedback-container"
+                    hx-swap="innerHTML">
+                    <div class="user-input">
+                        <label for="user-input">CPF OU E-MAIL</label>
+                        <div class="user-field">
+                            <input type="text" class="input" id="login-input" name="login">
+                            <i class="input-icon fluent--person-24-filled"></i>
+                        </div>
+                    </div>
+
+                    <div class="password-input">
+                        <label for="password">SENHA</label>
+                        <div class="password-field">
+                            <input type="password" id="password" class="input" name="password">
+                            <i id="password-eye" class="fluent--eye-24-filled input-icon" onclick="showPassword()"></i>
+                            <i class="input-icon fluent--lock-closed-24-filled"></i>
+                        </div>
+                    </div>
+
+                    <div class="login-options">
+                        <div class="remember-container">
+                            <input class="input" type="checkbox" name="remember" id="remember">
+                            <label for="remember">Lembrar de mim</label>
+                        </div>
+                        <div class="forgot-password">
+                            <a href="/forgot-password">Esqueceu sua senha?</a>
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-gradiente" type="submit" id="login-btn">Enviar</button>
+                </form>
+
+                <div id="login-feedback-container">
+
+                </div>
+                <div class="primeiro-acesso">
+                    <p>Primeiro acesso?</p>
+                    <p>Por padrão, sua senha é a sua data de nascimento no formato DDMMAAAA (exemplo: 22032024). Não se
+                        esqueça de trocar uma mais segura depois.</p>
+                </div>
+
+            </div>
+        </div>
+        {% endblock %}
+
+
+    </div>
+</body>
+
+</html>

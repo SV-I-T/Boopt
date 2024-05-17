@@ -1,15 +1,22 @@
 import locale
+import os
+from datetime import datetime, timedelta
 
 from dash import Dash
 from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask, Response, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
+from flask_mail import Message
+from icecream import ic
+from jose import jwt
+from jose.exceptions import ExpiredSignatureError
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import mail
 from utils.login import login_manager
 from utils.usuario import Usuario
+from werkzeug.security import generate_password_hash
 
 locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
@@ -44,7 +51,9 @@ def login_post():
         usr = Usuario.buscar(identificador=identificador, valor=login)
         usr.validar_senha(senha)
     except AssertionError as e:
-        return render_template("erro_login.html", mensagem=str(e))
+        return render_template(
+            "erro_login.html", mensagem=str(e), status="status-error"
+        )
     else:
         login_user(usr, remember=lembrar, force=True)
         next_url = request.args.get("next", None) or "/app/dashboard"
@@ -61,6 +70,86 @@ def logout_post():
         cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr_atual.id)
         logout_user()
     return redirect("/")
+
+
+@server.route("/forgot-password", methods=["GET"])
+def forgot_password_get():
+    return render_template("recover_password.html")
+
+
+@server.route("/forgot-password/<string:token>", methods=["GET"])
+def forgot_password_token_get(token: str):
+    try:
+        payload = jwt.decode(
+            token, key=os.environ["FLASK_SECRET_KEY"], algorithms="HS256"
+        )
+    except ExpiredSignatureError:
+        return render_template(
+            "recovered_password.html", success=False, message="Este link expirou."
+        )
+    try:
+        usr_id: str = payload["id"]
+        usr = Usuario.buscar("_id", usr_id)
+        nova_senha = usr.data.strftime("%d%m%Y")
+        usr.atualizar({"senha_hash": generate_password_hash(nova_senha)})
+    except Exception:
+        render_template(
+            "recovered_password.html",
+            success=False,
+            message="Desculpe, algo de errado aconteceu. Por favor, tente novamente.",
+        )
+
+    return render_template("recovered_password.html", success=True)
+
+
+@server.route("/forgot-password", methods=["POST"])
+def forgot_password_post():
+    login = request.form["login"]
+    identificador = "email" if "@" in login else "cpf"
+
+    try:
+        usr = Usuario.buscar(identificador=identificador, valor=login)
+    except AssertionError:
+        if identificador == "email":
+            return render_template(
+                "erro_login.html",
+                mensagem="Este e-mail não foi cadastrado. Por favor, tente novamente com o seu CPF.",
+                status="status-error",
+            )
+        else:
+            return render_template(
+                "erro_login.html",
+                mensagem="Não foi encontrado um usuário com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
+                status="status-error",
+            )
+    if not usr.email:
+        return render_template(
+            "erro_login.html",
+            mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha de volta ao padrão.",
+            status="status-error",
+        )
+
+    now = datetime.now()
+    exp = now + timedelta(hours=1)
+    payload = {"id": usr.id, "iat": now.timestamp(), "exp": exp.timestamp()}
+    token = jwt.encode(payload, key=os.environ["FLASK_SECRET_KEY"])
+
+    msg = Message(
+        subject="Boopt - Recuperação de senha",
+        html=render_template(
+            "email/recover_password.html",
+            nome=usr.nome,
+            link=f"{request.host_url}forgot-password/{token}",
+        ),
+        recipients=[usr.email],
+    )
+    mail.send(msg)
+
+    return render_template(
+        "erro_login.html",
+        mensagem="Verifique sua caixa de entrada.",
+        status="status-info",
+    )
 
 
 @server.before_request

@@ -545,7 +545,7 @@ def redefinir_senha(n: int, search: str):
 
         usr = Usuario.buscar("_id", id_usr)
 
-        nova_senha = "".join(usr.data.split("-")[::-1])
+        nova_senha = usr.data.strftime("%d%m%Y")
 
         r = db("Boopt", "Usuários").update_one(
             {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa},
