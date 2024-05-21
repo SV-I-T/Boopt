@@ -1,5 +1,6 @@
 import locale
 import os
+import re
 from datetime import datetime, timedelta
 
 from dash import Dash
@@ -13,7 +14,7 @@ from jose import jwt
 from jose.exceptions import ExpiredSignatureError
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
-from utils.email import mail
+from utils.email import attach_logo, mail
 from utils.login import login_manager
 from utils.usuario import Usuario
 from werkzeug.security import generate_password_hash
@@ -78,14 +79,14 @@ def forgot_password_get():
 
 
 @server.route("/forgot-password/<string:token>", methods=["GET"])
-def forgot_password_token_get(token: str):
+def forgot_password_get_token(token: str):
     try:
         payload = jwt.decode(
             token, key=os.environ["FLASK_SECRET_KEY"], algorithms="HS256"
         )
     except ExpiredSignatureError:
         return render_template(
-            "recovered_password.html", success=False, message="Este link expirou."
+            "recover_password.html", success=False, message="Este link expirou."
         )
     try:
         usr_id: str = payload["id"]
@@ -94,12 +95,12 @@ def forgot_password_token_get(token: str):
         usr.atualizar({"senha_hash": generate_password_hash(nova_senha)})
     except Exception:
         render_template(
-            "recovered_password.html",
+            "recover_password.html",
             success=False,
             message="Desculpe, algo de errado aconteceu. Por favor, tente novamente.",
         )
 
-    return render_template("recovered_password.html", success=True)
+    return render_template("recover_password.html", success=True)
 
 
 @server.route("/forgot-password", methods=["POST"])
@@ -113,19 +114,19 @@ def forgot_password_post():
         if identificador == "email":
             return render_template(
                 "erro_login.html",
-                mensagem="Este e-mail não foi cadastrado. Por favor, tente novamente com o seu CPF.",
+                mensagem="Não encontramos um cadastro com este e-mail. Por favor, tente novamente com o seu CPF.",
                 status="status-error",
             )
         else:
             return render_template(
                 "erro_login.html",
-                mensagem="Não foi encontrado um usuário com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
+                mensagem="Não encontramos um cadastro com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
                 status="status-error",
             )
     if not usr.email:
         return render_template(
             "erro_login.html",
-            mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha de volta ao padrão.",
+            mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha ao padrão. Recomendamos que adicione um e-mail após recuperar seu acesso.",
             status="status-error",
         )
 
@@ -143,11 +144,16 @@ def forgot_password_post():
         ),
         recipients=[usr.email],
     )
+    attach_logo(msg)
     mail.send(msg)
-
+    email_obfuscado = re.sub(
+        r"(?<=.)[^@](?=[^@]*?[^@]@)|(?:(?<=@.)|(?!^)\\G(?=[^@]*$)).(?=.*[^@]\\.)",
+        "*",
+        usr.email,
+    )
     return render_template(
         "erro_login.html",
-        mensagem="Verifique sua caixa de entrada.",
+        mensagem=f"Enviamos um link para redefinição da senha no e-mail {email_obfuscado}.",
         status="status-info",
     )
 
@@ -177,7 +183,7 @@ app = Dash(
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/locale/pt-br.min.js",
     ],
     external_stylesheets=[
-        "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
 )
 

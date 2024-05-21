@@ -1,11 +1,15 @@
 from os.path import join
 
-from flask_mail import Mail
+from flask_mail import Mail, Message
 
 mail = Mail()
 
 
-def template_email(body: str = "") -> str:
-    with open(join("assets", "template_email.html"), encoding="utf-8") as f:
-        template = f.read()
-    return template.format(body=body)
+def attach_logo(msg: Message):
+    msg.attach(
+        "HORIZONTAL AZUL.png",
+        "image/gif",
+        open(join("assets", "imgs", "boopt", "horizontal_azul.svg"), "rb").read(),
+        "inline",
+        [["Content-ID", "<LogoBoopt>"]],
+    )
