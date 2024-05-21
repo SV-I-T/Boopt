@@ -33,7 +33,7 @@
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
-    font-family: "Plus Jakarta Sans", Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif, system-ui !important
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, system-ui;
 }
 
 body {
