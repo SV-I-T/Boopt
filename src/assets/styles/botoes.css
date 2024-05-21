@@ -87,10 +87,20 @@ button {
 
 .btn-vela {
     background-color: transparent;
-    background: linear-gradient(90deg, var(--laranja-vela), var(--amarelo-vela)) no-repeat border-box;
+    background: linear-gradient(90deg, var(--laranja-boopt), var(--amarelo-vela)) no-repeat border-box;
     color: #fff;
 }
 
 .btn-vela:hover {
     background-size: 200%;
+}
+
+.btn-vela-iniciar {
+    height: 64px;
+    width: 230px;
+}
+
+.btn-vela-iniciar span {
+    font-size: 24px;
+    font-weight: 700;
 }

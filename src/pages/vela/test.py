@@ -13,6 +13,7 @@ from dash import (
     callback_context,
     clientside_callback,
     dcc,
+    get_asset_url,
     html,
     no_update,
     register_page,
@@ -24,8 +25,6 @@ from utils.login import checar_perfil
 from utils.usuario import Usuario
 
 EXPLICACAO_MD = """
-    Olá **{vendedor}**!
-    
     Esse mapeamento tem como objetivo analisar o quanto você tem desenvolvido as competências essenciais para ser um vendedor de sucesso.
     
     Escolha um local calmo e livre de interrupções para responder esse formulário.
@@ -33,10 +32,6 @@ EXPLICACAO_MD = """
     Procure estar concentrado no exercício e responda com sinceridade, isso trará um resultado mais realista.
 
     **A previsão de término é de apenas 10 minutos.**
-
-    Funciona da seguinte maneira: Abaixo, teremos afirmações que devem ser classificadas de 1 a 5, onde:
-    * **1 significa**: Não me identifico nada
-    * **5 significa**: Me identifico muito
 """
 
 
@@ -53,20 +48,72 @@ def layout(id: str = None, secao: str = "instrucoes"):
     usr = Usuario.atual()
 
     if secao == "instrucoes":
-        return [
-            dcc.Markdown(
-                EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
-                style={"font-weight": 400, "font-size": 30},
-            ),
-            dmc.Anchor(
-                href=f"/app/vela/teste/?id={id}&secao=frases",
-                children=dmc.Button(
-                    "Começar teste",
-                    color="SVAzul",
-                    mt="4rem",
+        return html.Div(
+            style={"display": "flex", "flex-direction": "column", "height": "100%"},
+            children=[
+                dmc.Group(
+                    children=[
+                        html.Img(
+                            src=get_asset_url("imgs/vela/vela_logo.svg"),
+                            height=90,
+                            alt="Logo Vela",
+                        ),
+                        dcc.Markdown(
+                            f"Olá **{usr.primeiro_nome}**,", className="vela-saudacao"
+                        ),
+                        html.Div(
+                            children=[html.Div()] * 3,
+                            className="vela-circles",
+                        ),
+                    ]
                 ),
-            ),
-        ]
+                dcc.Markdown(
+                    EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
+                ),
+                html.Div(
+                    style={"width": 350, "align-self": "center"},
+                    children=[
+                        html.Div(className="vela-nota-demo", children=[html.Div()] * 5),
+                        html.Div(
+                            className="labels-teste",
+                            children=[
+                                html.P(
+                                    "Discordo totalmente",
+                                    className="label-teste",
+                                ),
+                                html.P(
+                                    "Concordo totalmente",
+                                    className="label-teste",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                dmc.Group(
+                    style={"margin-top": "auto", "margin-bottom": "2rem"},
+                    position="apart",
+                    children=[
+                        dmc.Stack(
+                            spacing=0,
+                            children=[
+                                dmc.Text("Pronto para começar?", weight=700, size=40),
+                                dmc.Text(
+                                    "Vamos lá, sua jornada de autoavaliação está prestes a começar.",
+                                ),
+                            ],
+                        ),
+                        dmc.Anchor(
+                            href=f"/app/vela/teste/?id={id}&secao=frases",
+                            children=dmc.Button(
+                                "Iniciar o teste",
+                                classNames={"root": "btn-vela"},
+                                className="btn-vela-iniciar shadow",
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        )
 
     elif secao == "frases":
         aplicacao = db("Vela", "Aplicações").find_one(
@@ -105,7 +152,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     children=frase_atual["frase"],
                 ),
                 html.Div(
-                    style={"width": 300},
+                    style={"width": 350},
                     children=[
                         dcc.RadioItems(
                             id="score-vela",
@@ -121,11 +168,11 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             className="labels-teste",
                             children=[
                                 html.P(
-                                    "Não me identifico",
+                                    "Discordo totalmente",
                                     className="label-teste",
                                 ),
                                 html.P(
-                                    "Me identifico muito",
+                                    "Concordo totalmente",
                                     className="label-teste",
                                 ),
                             ],
@@ -176,7 +223,6 @@ def layout(id: str = None, secao: str = "instrucoes"):
 # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
 @callback(
     Output("store-frases-vela", "data", allow_duplicate=True),
-    Output("store-frase-atual-vela", "data", allow_duplicate=True),
     Input("btn-last-vela", "n_clicks"),
     State("store-frases-vela", "data"),
     prevent_initial_call=True,
@@ -186,8 +232,8 @@ def preencher_auto(n, frases):
         raise PreventUpdate
     else:
         for k in frases:
-            frases[k]["valor"] = choice([1, 2, 3, 4, 5])
-        return frases, 62
+            frases[k]["valor"] = choice(["1", "2", "3", "4", "5"])
+        return frases
 
 
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
@@ -234,23 +280,27 @@ def habilitar_envio(status_pronto):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return html.Div(
-            className="card",
-            children=dmc.Group(
+        return (
+            dmc.Group(
+                style={"margin-top": "auto", "flex-wrap": "nowrap"},
                 position="apart",
                 children=[
-                    html.Div(
-                        [
-                            html.P("Tudo pronto!", className="bold c-azul"),
-                            html.P(
+                    dmc.Stack(
+                        spacing=0,
+                        children=[
+                            dmc.Text("Tudo pronto!", weight=700, size=40),
+                            dmc.Text(
                                 "Você pode revisar suas respostas ou enviá-las agora mesmo.",
                             ),
-                        ]
+                        ],
                     ),
-                    dmc.Button(
-                        id="btn-enviar",
-                        children="Enviar",
-                        variant="gradient",
+                    dmc.Anchor(
+                        href=f"/app/vela/teste/?id={id}&secao=frases",
+                        children=dmc.Button(
+                            id="btn-enviar",
+                            children="Enviar",
+                            classNames={"root": "btn-vela"},
+                        ),
                     ),
                 ],
             ),

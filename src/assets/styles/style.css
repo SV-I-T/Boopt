@@ -6,29 +6,13 @@
     --input-bg: #fff;
     --off-white: #f3f3f3;
     --amarelo-vela: #FAC82C;
-    --laranja-vela: #FE7631;
     --max-size: 1200px;
     --navbar-width: 300px;
     --burger-header-height: 50px;
 }
 
-@media only screen and (max-width: 1000px) {
-    * {
-        font-size: 16px;
-    }
-
-    input {
-        font-size: 16px !important;
-    }
-}
-
-@media only screen and (min-width: 1000px) {
-    * {
-        font-size: 14px;
-    }
-}
-
 * {
+    font-size: 16px;
     -webkit-font-smoothing: antialiased !important;
 }
 
@@ -83,4 +67,8 @@ p.c-laranja {
 
 .mantine-Grid-root {
     margin: 0;
+}
+
+.shadow {
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }

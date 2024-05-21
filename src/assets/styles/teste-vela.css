@@ -1,3 +1,35 @@
+/* TELA DE INSTRUÇÕES */
+
+.vela-saudacao * {
+    font-size: 48px;
+}
+
+.vela-circles {
+    margin-left: auto;
+    display: flex;
+}
+
+.vela-circles>div {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    margin-left: -55px;
+}
+
+.vela-circles>div:first-child {
+    background: linear-gradient(145deg, var(--laranja-boopt) 25%, var(--amarelo-vela) 84%);
+}
+
+.vela-circles>div:nth-child(2) {
+    background-image: url('../imgs/vela/barco.png');
+    background-position: 0;
+}
+
+.vela-circles>div:last-child {
+    background-color: var(--preto-sv)
+}
+
+/* TELA DO TESTE */
 #text-frase-vela {
     font-weight: 500;
     display: flex;
@@ -15,7 +47,6 @@ div.test-vela {
 
 .label-teste {
     width: 50%;
-    font-size: 18px;
     font-weight: 500;
 }
 
@@ -27,43 +58,47 @@ div.test-vela {
 }
 
 p.label-teste:first-child {
-    color: var(--laranja-boopt);
+    color: var(--preto-sv);
     text-align: left;
 }
 
 p.label-teste:last-child {
-    color: var(--azul-sv);
+    color: var(--laranja-boopt);
     text-align: right;
 }
 
-.radio-score-vela {
+.radio-score-vela,
+.vela-nota-demo {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.radio-score-vela label input {
+.radio-score-vela label input,
+.vela-nota-demo>div {
     appearance: none;
     background-color: var(--off-white);
-    border-radius: 50px !important;
+    border-radius: 50% !important;
     border-width: 2px;
     border-style: solid;
 }
 
-.radio-score-vela label input::after {
+.radio-score-vela label input::after,
+.vela-nota-demo>div:nth-child(1)::after,
+.vela-nota-demo>div:nth-child(5)::after {
     content: "";
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: 50px !important;
+    border-radius: 50%;
     transform: scale(0);
-    left: 50%;
-    top: 50%;
     transition: transform 100ms ease-in;
 }
 
-.radio-score-vela label input:checked::after {
+.radio-score-vela label input:checked::after,
+.vela-nota-demo>div:nth-child(1)::after,
+.vela-nota-demo>div:nth-child(5)::after {
     transform: scale(0.8);
 }
 
@@ -71,7 +106,9 @@ p.label-teste:last-child {
 .radio-score-vela label:nth-child(1),
 .radio-score-vela label:nth-child(5),
 .radio-score-vela label:nth-child(1) input,
-.radio-score-vela label:nth-child(5) input {
+.radio-score-vela label:nth-child(5) input,
+.vela-nota-demo>div:nth-child(1),
+.vela-nota-demo>div:nth-child(5) {
     width: 70px;
     height: 70px;
 }
@@ -79,39 +116,49 @@ p.label-teste:last-child {
 .radio-score-vela label:nth-child(2),
 .radio-score-vela label:nth-child(4),
 .radio-score-vela label:nth-child(2) input,
-.radio-score-vela label:nth-child(4) input {
+.radio-score-vela label:nth-child(4) input,
+.vela-nota-demo>div:nth-child(2),
+.vela-nota-demo>div:nth-child(4) {
     width: 40px;
     height: 40px;
 }
 
 .radio-score-vela label:nth-child(3),
-.radio-score-vela label:nth-child(3) input {
+.radio-score-vela label:nth-child(3) input,
+.vela-nota-demo>div:nth-child(3) {
     width: 30px;
     height: 30px;
 }
 
 .radio-score-vela label:nth-child(1) input,
-.radio-score-vela label:nth-child(2) input {
-    border-color: var(--laranja-boopt);
+.radio-score-vela label:nth-child(2) input,
+.vela-nota-demo>div:nth-child(1),
+.vela-nota-demo>div:nth-child(2) {
+    border-color: var(--preto-sv);
 }
 
 .radio-score-vela label:nth-child(4) input,
-.radio-score-vela label:nth-child(5) input {
-    border-color: var(--azul-sv);
+.radio-score-vela label:nth-child(5) input,
+.vela-nota-demo>div:nth-child(4),
+.vela-nota-demo>div:nth-child(5) {
+    border-color: var(--laranja-boopt);
 }
 
-.radio-score-vela label:nth-child(3) input {
+.radio-score-vela label:nth-child(3) input,
+.vela-nota-demo>div:nth-child(3) {
     border-color: #5c5c5c;
 }
 
 .radio-score-vela label:nth-child(1) input::after,
-.radio-score-vela label:nth-child(2) input::after {
-    background-color: var(--laranja-boopt);
+.radio-score-vela label:nth-child(2) input::after,
+.vela-nota-demo>div:nth-child(1)::after {
+    background-color: var(--preto-sv);
 }
 
 .radio-score-vela label:nth-child(4) input::after,
-.radio-score-vela label:nth-child(5) input::after {
-    background-color: var(--azul-sv);
+.radio-score-vela label:nth-child(5) input::after,
+.vela-nota-demo>div:nth-child(5)::after {
+    background-color: var(--laranja-boopt);
 }
 
 .radio-score-vela label:nth-child(3) input::after {

@@ -8,7 +8,7 @@
     width: 100%;
     min-width: 30px;
     height: 100%;
-    background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
+    background-image: linear-gradient(90deg, var(--laranja-boopt) 50%, var(--amarelo-vela));
     border-radius: 30px;
     box-shadow: 7px 0px 12.3px -1px #99999966;
     transition: width 300ms ease 0s;
