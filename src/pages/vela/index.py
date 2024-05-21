@@ -25,7 +25,7 @@ def layout():
         className="center-container",
         children=[
             dmc.Image(
-                src=get_asset_url("imgs/vela/00 - VELA 1.png"),
+                src=get_asset_url("imgs/vela/tag_ass.svg"),
                 mb="1rem",
                 width=250,
                 alt="Logo Vela Assessment",
@@ -48,6 +48,7 @@ def layout():
                                 ultima_aplicacao
                                 and not ultima_aplicacao.get("resposta")
                             ),
+                            classNames={"root": "btn-vela"},
                         ),
                         href=f"/app/vela/teste/?id={ultima_aplicacao['id']}"
                         if ultima_aplicacao and not ultima_aplicacao.get("resposta")

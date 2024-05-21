@@ -54,7 +54,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                 dmc.Group(
                     children=[
                         html.Img(
-                            src=get_asset_url("imgs/vela/vela_logo.svg"),
+                            src=get_asset_url("imgs/vela/logo.svg"),
                             height=90,
                             alt="Logo Vela",
                         ),
