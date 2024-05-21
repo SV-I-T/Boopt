@@ -84,3 +84,13 @@ button {
 .mantine-Button-label {
     font-weight: 400;
 }
+
+.btn-vela {
+    background-color: transparent;
+    background: linear-gradient(90deg, var(--laranja-vela), var(--amarelo-vela)) no-repeat border-box;
+    color: #fff;
+}
+
+.btn-vela:hover {
+    background-size: 200%;
+}

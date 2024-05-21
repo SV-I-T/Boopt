@@ -5,6 +5,8 @@
     --preto-sv: #171C24;
     --input-bg: #fff;
     --off-white: #f3f3f3;
+    --amarelo-vela: #FAC82C;
+    --laranja-vela: #FE7631;
     --max-size: 1200px;
     --navbar-width: 300px;
     --burger-header-height: 50px;
@@ -31,7 +33,7 @@
 }
 
 *:not(.ag-icon, .ag-checkbox-input-wrapper) {
-    font-family: Montserrat, Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important
+    font-family: "Plus Jakarta Sans", Avenir, Corbel, 'URW Gothic', source-sans-pro, sans-serif, system-ui !important
 }
 
 body {
