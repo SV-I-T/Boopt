@@ -77,18 +77,27 @@
 
 
 #burger-header {
+    display: flex;
     top: 0px;
     left: 0px;
     right: 0px;
     height: calc(var(--burger-header-height));
     display: block;
     position: fixed;
-    background-color: var(--azul-sv);
-    justify-content: end;
+    background-color: var(--preto-sv);
+    justify-content: space-between;
     align-items: center;
-    padding: 0 1rem 0 1rem;
+    padding: 1rem 1rem;
     z-index: 1000000;
-    border-radius: 0 0 15px 15px;
+    border-radius: 0 0 20px 20px;
+}
+
+#burger-header>a {
+    height: 100%;
+}
+
+#burger-header img {
+    height: 100%;
 }
 
 #navbar-backdrop {

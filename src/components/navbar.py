@@ -16,9 +16,12 @@ def layout_navbar():
     usr = Usuario.atual()
     return html.Nav(
         children=[
-            html.Img(
-                src=get_asset_url("imgs/boopt/horizontal_azul.svg"),
-                height=30,
+            dmc.Anchor(
+                children=html.Img(
+                    src=get_asset_url("imgs/boopt/horizontal_azul.svg"),
+                    height=30,
+                ),
+                href="/app/vela",
             ),
             html.Div(id="menu-usr", children=menu_usuario(usr)),
         ],

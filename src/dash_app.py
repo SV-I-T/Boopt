@@ -6,6 +6,7 @@ from dash import (
     Output,
     clientside_callback,
     dcc,
+    get_asset_url,
     html,
     page_container,
 )
@@ -76,7 +77,18 @@ def layout():
                         html.Div(
                             id="burger-header",
                             children=[
-                                dmc.Burger(id="burger-btn", opened=False, color="white")
+                                dmc.Anchor(
+                                    children=html.Img(
+                                        src=get_asset_url(
+                                            "imgs/boopt/horizontal_branco.svg"
+                                        ),
+                                        alt="Logo Boopt",
+                                    ),
+                                    href="/app/vela",
+                                ),
+                                dmc.Burger(
+                                    id="burger-btn", opened=False, color="white"
+                                ),
                             ],
                         ),
                     ],
