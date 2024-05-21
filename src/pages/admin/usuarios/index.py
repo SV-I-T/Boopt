@@ -6,7 +6,11 @@ from dash import (
     Output,
     State,
     callback,
+    callback_context,
+    clientside_callback,
+    dcc,
     html,
+    no_update,
     register_page,
 )
 from dash.exceptions import PreventUpdate
@@ -23,10 +27,8 @@ MAX_PAGINA = 15
 
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
-def layout():
-    usr_atual = Usuario.atual()
-
-    corpo_tabela, n_paginas = consultar_dados_tabela_usuarios(usr_atual, 1, "")
+def layout(q: str = "", page: str = "1"):
+    page = int(page)
 
     return [
         html.H1("Administração de usuários", className="titulo-pagina"),
@@ -38,6 +40,7 @@ def layout():
                     id="usuario-filtro-input",
                     placeholder="Pesquisar por nome, empresa, cargo...",
                     w=300,
+                    value=q,
                 ),
                 dmc.ActionIcon(
                     id="usuario-filtro-btn",
@@ -64,6 +67,7 @@ def layout():
                 ),
             ],
         ),
+        dcc.Store(id="store-request-update-table-users"),
         dmc.Table(
             striped=True,
             withColumnBorders=True,
@@ -83,14 +87,13 @@ def layout():
                 ),
                 html.Tbody(
                     id="tabela-usuarios-body",
-                    children=corpo_tabela,
                 ),
             ],
         ),
         dmc.Pagination(
             id="tabela-usuarios-nav",
-            total=n_paginas,
-            page=1,
+            total=1,
+            page=page,
             mt="1rem",
             radius="xl",
         ),
@@ -100,21 +103,25 @@ def layout():
 @callback(
     Output("tabela-usuarios-body", "children"),
     Output("tabela-usuarios-nav", "total"),
+    Output("url-no-refresh", "search"),
     Input("tabela-usuarios-nav", "page"),
     Input("usuario-filtro-btn", "n_clicks"),
     State("usuario-filtro-input", "value"),
     prevent_initial_call=True,
 )
-def atualizar_tabela_usuarios(pagina: int, n: int, busca: str):
+def atualizar_tabela_usuarios(page: int, n: int, q: str):
     usr_atual = Usuario.atual()
-
     if usr_atual.role not in [Role.DEV, Role.ADM]:
         raise PreventUpdate
-    corpo_tabela, total_paginas = consultar_dados_tabela_usuarios(
-        usr_atual, pagina, busca
-    )
 
-    return corpo_tabela, total_paginas
+    q = q or ""
+    if callback_context.triggered_id != "tabela-usuarios-nav" and n:
+        page = 1
+
+    corpo_tabela, total_paginas = consultar_dados_tabela_usuarios(usr_atual, page, q)
+    search = "?" + "&".join([f"q={q}", f"page={page}"])
+
+    return corpo_tabela, total_paginas, search
 
 
 def consultar_dados_tabela_usuarios(
@@ -170,7 +177,7 @@ def consultar_dados_tabela_usuarios(
 
     r = db("Boopt", "Usuários").aggregate(pipeline).next()
     usuarios = [Usuario(**usuario) for usuario in r["usuarios"]]
-    total = r["cont"][0]["total"]
+    total = r["cont"][0]["total"] if r["cont"] else 0
 
     n_paginas = ceil(total / MAX_PAGINA)
 
