@@ -28,6 +28,14 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /* width: 250px; */
-    height: 150px;
+    transition: transform 100ms ease, border-color 100ms ease
+}
+
+.card-painel * {
+    color: #000;
+}
+
+.card-painel:hover {
+    transform: scale(1.05);
+    border-color: var(--azul-sv);
 }

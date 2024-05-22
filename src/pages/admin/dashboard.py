@@ -15,23 +15,23 @@ def layout():
         {
             "label": "Empresas",
             "href": "/app/admin/empresas",
-            "icon": "fluent:building-24-regular",
+            "icon": "fluent:building-48-regular",
             "role": (Role.DEV, Role.CONS),
         },
         {
             "label": "Unidades",
             "href": "/app/admin/unidades",
-            "icon": "fluent:building-shop-24-regular",
+            "icon": "fluent:building-retail-more-32-regular",
         },
         {
             "label": "Usuários",
             "href": "/app/admin/usuarios",
-            "icon": "fluent:person-24-regular",
+            "icon": "fluent:person-48-regular",
         },
         {
             "label": "Consultores",
             "href": "/app/admin/consultores",
-            "icon": "fluent:briefcase-person-24-regular",
+            "icon": "fluent:person-accounts-24-regular",
             "role": (Role.DEV),
         },
     )
@@ -50,25 +50,21 @@ def layout():
             className="grid grid-3-col",
             style={"gap": "1rem"},
             children=[
-                html.Div(
-                    className="card card-painel",
-                    children=[
-                        dmc.Group(
-                            children=[
-                                DashIconify(icon=module["icon"], width=24),
-                                dmc.Text(module["label"], weight=500),
-                            ],
-                            align="center",
-                        ),
-                        dmc.Anchor(
-                            href=module["href"],
-                            underline=False,
-                            children=dmc.Button(
-                                "Acessar",
-                                className="btn-borda-gradiente",
+                dmc.Anchor(
+                    href=module["href"],
+                    underline=False,
+                    children=html.Div(
+                        className="card card-painel",
+                        children=[
+                            dmc.Group(
+                                children=[
+                                    DashIconify(icon=module["icon"], width=48),
+                                    dmc.Text(module["label"], weight=500),
+                                ],
+                                align="center",
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 )
                 for module in modules_system
                 if (usr.role in module.get("role", [usr.role]))
@@ -79,25 +75,21 @@ def layout():
             className="grid grid-3-col",
             style={"gap": "1rem"},
             children=[
-                html.Div(
-                    className="card card-painel",
-                    children=[
-                        dmc.Group(
-                            children=[
-                                dmc.Image(src=get_asset_url(module["logo"])),
-                                dmc.Text(module["label"], weight=500),
-                            ],
-                            align="center",
-                        ),
-                        dmc.Anchor(
-                            href=module["href"],
-                            underline=False,
-                            children=dmc.Button(
-                                "Acessar",
-                                className="btn-borda-gradiente",
+                dmc.Anchor(
+                    href=module["href"],
+                    underline=False,
+                    children=html.Div(
+                        className="card card-painel",
+                        children=[
+                            dmc.Group(
+                                children=[
+                                    dmc.Image(src=get_asset_url(module["logo"])),
+                                    dmc.Text(module["label"], weight=500),
+                                ],
+                                align="center",
                             ),
-                        ),
-                    ],
+                        ],
+                    ),
                 )
                 for module in modules_products
             ],
