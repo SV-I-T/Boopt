@@ -185,6 +185,7 @@ app = Dash(
     external_stylesheets=[
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
+    meta_tags=[{"name": "theme-color", "content": "#171C24"}],
 )
 
 mongo.init_app(server)
