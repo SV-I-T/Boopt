@@ -46,10 +46,8 @@ def layout(empresa: str = None, id: str = None):
     )
 
     if id:
-        assessment = VelaAssessment(
-            **db("Boopt", "VelaAplicações").find_one({"_id": ObjectId(id)})
-        )
-        texto_titulo = [assessment.descricao]
+        assessment = carregar_assessment(id_aplicacao=id)
+        texto_titulo = [assessment["descricao"]]
     else:
         texto_titulo = [
             "Novo Vela Assessment",
@@ -69,7 +67,7 @@ def layout(empresa: str = None, id: str = None):
                     searchable=True,
                     nothingFound="Não encontrei nada",
                     placeholder="Selecione uma empresa",
-                    value=str(assessment.empresa)
+                    value=str(assessment["empresa"])
                     if id
                     else empresa
                     if empresa
@@ -83,7 +81,7 @@ def layout(empresa: str = None, id: str = None):
                     label="Descrição",
                     id="desc-edit-vela",
                     required=True,
-                    value=assessment.descricao
+                    value=assessment["descricao"]
                     if id
                     else f'Vela - {datetime.now().strftime("%d/%m/%Y")}',
                     mb="1rem",
@@ -105,26 +103,14 @@ def layout(empresa: str = None, id: str = None):
                         {"field": "cargo"},
                     ],
                     getRowId="params.data.id",
-                    rowData=list(
-                        db("Boopt", "Usuários").find(
-                            {
-                                "empresa": ObjectId(
-                                    assessment.empresa
-                                    if id
-                                    else empresa
-                                    if empresa
-                                    else usr.empresa
-                                )
-                            },
-                            {
-                                "_id": 0,
-                                "id": {"$toString": "$_id"},
-                                "usuario": "$nome",
-                                "cargo": 1,
-                            },
-                        )
-                    ),
-                    selectedRows=[{"id": str(id)} for id in assessment.participantes]
+                    rowData=assessment["usuarios"]
+                    if id
+                    else carregar_usuarios_empresa(empresa=empresa or usr.empresa),
+                    selectedRows=[
+                        {"id": usuario["id"]}
+                        for usuario in assessment["usuarios"]
+                        if usuario["ok"]
+                    ]
                     if id
                     else [],
                     dashGridOptions={
@@ -182,28 +168,79 @@ def layout(empresa: str = None, id: str = None):
     ]
 
 
-@callback(
-    Output("grid-usrs-vela", "rowData"),
-    Input("empresa-edit-vela", "value"),
-    prevent_initial_call=True,
-)
-def carregar_usuarios_empresa(empresa: str):
-    if not empresa:
-        raise PreventUpdate
+def carregar_assessment(id_aplicacao: str):
+    r = db("Boopt", "VelaAplicações").aggregate(
+        [
+            {"$match": {"_id": ObjectId(id_aplicacao)}},
+            {
+                "$lookup": {
+                    "from": "Usuários",
+                    "let": {"id_empresa": "$empresa"},
+                    "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$empresa", "$$id_empresa"]}}},
+                        {
+                            "$project": {
+                                "_id": 0,
+                                "id": "$_id",
+                                "usuario": "$nome",
+                                "cargo": 1,
+                            }
+                        },
+                    ],
+                    "as": "usuarios",
+                }
+            },
+            {
+                "$set": {
+                    "usuarios": {
+                        "$map": {
+                            "input": "$usuarios",
+                            "in": {
+                                "$mergeObjects": [
+                                    "$$this",
+                                    {
+                                        "ok": {"$in": ["$$this.id", "$participantes"]},
+                                        "id": {"$toString": "$$this.id"},
+                                    },
+                                ]
+                            },
+                        }
+                    }
+                }
+            },
+        ]
+    )
 
+    if r.alive:
+        return r.next()
+    return None
+
+
+def carregar_usuarios_empresa(empresa: str):
     usuarios = list(
         db("Boopt", "Usuários").find(
             {"empresa": ObjectId(empresa)},
             {
                 "_id": 0,
                 "id": {"$toString": "$_id"},
-                "usuario": {"$concat": ["$nome", " ", "$sobrenome"]},
+                "usuario": "$nome",
                 "cargo": 1,
             },
         )
     )
 
     return usuarios
+
+
+@callback(
+    Output("grid-usrs-vela", "rowData"),
+    Input("empresa-edit-vela", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_usuarios_empresa(empresa: str):
+    if not empresa:
+        raise PreventUpdate
+    return carregar_usuarios_empresa(empresa)
 
 
 @callback(
