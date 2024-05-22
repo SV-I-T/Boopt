@@ -25,13 +25,15 @@ from utils.login import checar_perfil
 from utils.usuario import Usuario
 
 EXPLICACAO_MD = """
-    Esse mapeamento tem como objetivo analisar o quanto você tem desenvolvido as competências essenciais para ser um vendedor de sucesso.
-    
-    Escolha um local calmo e livre de interrupções para responder esse formulário.
+    Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
 
-    Procure estar concentrado no exercício e responda com sinceridade, isso trará um resultado mais realista.
+    Antes de começar, procure um lugar tranquilo onde você não será interrompido. Isso ajuda a garantir que você se concentre totalmente e responda da forma mais precisa.
 
-    **A previsão de término é de apenas 10 minutos.**
+    A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-los a crescer.
+
+    **Não se preocupe, todo o processo será rápido - cerca de 20 minutos do seu tempo.**
+
+    Aqui está como funciona: Você encontrará afirmações que precisam ser avaliadas em uma escala de **Discordo totalmente** a **Concordo totalmente**.
 """
 
 
@@ -71,7 +73,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                     EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
                 ),
                 html.Div(
-                    style={"width": 350, "align-self": "center"},
+                    style={"width": 350, "align-self": "center", "margin": "2rem"},
                     children=[
                         html.Div(className="vela-nota-demo", children=[html.Div()] * 5),
                         html.Div(
@@ -116,11 +118,11 @@ def layout(id: str = None, secao: str = "instrucoes"):
         )
 
     elif secao == "frases":
-        aplicacao = db("Vela", "Aplicações").find_one(
+        aplicacao = db("Boopt", "VelaAplicações").find_one(
             {"participantes": usr.id_, "_id": ObjectId(id)}
         )
 
-        formulario_frases = db("Vela", "Formulários").find_one(
+        formulario_frases = db("Boopt", "VelaFormulários").find_one(
             {"_id": aplicacao["id_form"]},
             {
                 "_id": 0,
@@ -334,7 +336,7 @@ def salvar_resposta(n, frases, search):
 
         dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["notas"])
 
-        resposta = db("Vela", "Respostas").insert_one(dados_resposta)
+        resposta = db("Boopt", "VelaRespostas").insert_one(dados_resposta)
         if resposta.inserted_id:
             return f"?id={id_aplicacao}&secao=enviado", no_update
         else:
@@ -349,7 +351,7 @@ def salvar_resposta(n, frases, search):
 
 def calcular_nota(id_aplicacao: str, notas: list[dict[str, str]]):
     r = (
-        db("Vela", "Aplicações")
+        db("Boopt", "VelaAplicações")
         .aggregate(
             [
                 {"$match": {"_id": ObjectId(id_aplicacao)}},

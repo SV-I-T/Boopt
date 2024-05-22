@@ -20,7 +20,7 @@ def layout(id: str = None):
     usr = Usuario.atual()
 
     assessment = VelaAssessment(
-        **db("Vela", "Aplicações").find_one(
+        **db("Boopt", "VelaAplicações").find_one(
             {"_id": ObjectId(id), "empresa": usr.empresa}
         )
     )
@@ -86,12 +86,12 @@ def layout(id: str = None):
 
 def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
     r = (
-        db("Vela", "Aplicações").aggregate(
+        db("Boopt", "VelaAplicações").aggregate(
             [
                 {"$match": {"_id": ObjectId(id_aplicacao)}},
                 {
                     "$lookup": {
-                        "from": "Respostas",
+                        "from": "VelaRespostas",
                         "let": {"aplicacao": "$_id", "usuario": "$participantes"},
                         "pipeline": [
                             {

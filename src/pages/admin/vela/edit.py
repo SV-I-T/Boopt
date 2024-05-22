@@ -47,7 +47,7 @@ def layout(empresa: str = None, id: str = None):
 
     if id:
         assessment = VelaAssessment(
-            **db("Vela", "Aplicações").find_one({"_id": ObjectId(id)})
+            **db("Boopt", "VelaAplicações").find_one({"_id": ObjectId(id)})
         )
         texto_titulo = [assessment.descricao]
     else:
@@ -324,7 +324,7 @@ def atualizar_assessment(
     id_aplicacao = ObjectId(params["id"][0])
     participantes = [ObjectId(linha["id"]) for linha in linhas]
 
-    r = db("Vela", "Aplicações").update_one(
+    r = db("Boopt", "VelaAplicações").update_one(
         {"_id": id_aplicacao},
         update={
             "$set": {
@@ -379,7 +379,7 @@ def excluir_av(n: int, search: str):
     params = parse_qs(search[1:])
     id_aplicacao = ObjectId(params["id"][0])
 
-    aplicacao = db("Vela", "Aplicações").find_one(
+    aplicacao = db("Boopt", "VelaAplicações").find_one(
         {"_id": id_aplicacao}, {"_id": 0, "empresa": 1}
     )
 
@@ -392,7 +392,7 @@ def excluir_av(n: int, search: str):
             color="red",
         ), no_update
 
-    r = db("Vela", "Aplicações").delete_one({"_id": id_aplicacao})
+    r = db("Boopt", "VelaAplicações").delete_one({"_id": id_aplicacao})
 
     if not r.acknowledged:
         return dmc.Notification(

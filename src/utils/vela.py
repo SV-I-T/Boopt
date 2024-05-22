@@ -6,7 +6,7 @@ from utils.banco_dados import db
 
 
 def id_form_padrao() -> ObjectId:
-    return db("Vela", "Formulários").find_one({}, {"_id": 1})["_id"]
+    return db("Boopt", "VelaFormulários").find_one({}, {"_id": 1})["_id"]
 
 
 class VelaAssessment(BaseModel):
@@ -21,17 +21,17 @@ class VelaAssessment(BaseModel):
         arbitrary_types_allowed = True
 
     def registrar(self) -> None:
-        r = db("Vela", "Aplicações").insert_one(self.model_dump(exclude={"id_"}))
+        r = db("Boopt", "VelaAplicações").insert_one(self.model_dump(exclude={"id_"}))
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
 
     @classmethod
     def resultado(cls, id_resposta: ObjectId) -> dict | None:
-        r = db("Vela", "Respostas").aggregate(
+        r = db("Boopt", "VelaRespostas").aggregate(
             [
                 {"$match": {"_id": ObjectId(id_resposta)}},
                 {
                     "$lookup": {
-                        "from": "Aplicações",
+                        "from": "VelaAplicações",
                         "localField": "id_aplicacao",
                         "foreignField": "_id",
                         "as": "aplicacao",
@@ -39,7 +39,7 @@ class VelaAssessment(BaseModel):
                 },
                 {
                     "$lookup": {
-                        "from": "Formulários",
+                        "from": "VelaFormulários",
                         "localField": "aplicacao.id_form",
                         "foreignField": "_id",
                         "as": "form",
@@ -70,7 +70,7 @@ class VelaAssessment(BaseModel):
 
     @classmethod
     def testes_disponiveis(cls, id_usr: ObjectId) -> dict | None:
-        r = db("Vela", "Aplicações").aggregate(
+        r = db("Boopt", "VelaAplicações").aggregate(
             [
                 {"$match": {"participantes": id_usr}},
                 # # Buscar somente a última aplicação para o usuário
@@ -78,7 +78,7 @@ class VelaAssessment(BaseModel):
                 {"$limit": 1},
                 {
                     "$lookup": {
-                        "from": "Respostas",
+                        "from": "VelaRespostas",
                         "let": {"id_aplicacao": "$_id"},
                         "pipeline": [
                             {
@@ -114,5 +114,9 @@ class VelaAssessment(BaseModel):
 
     @classmethod
     def buscar_respostas(cls, id_usr: ObjectId) -> list[ObjectId]:
-        r = db("Vela", "Respostas").find({"id_usuario": id_usr}, {"_id": 1})
+        r = db("Boopt", "VelaRespostas").find({"id_usuario": id_usr}, {"_id": 1})
         return [i["_id"] for i in r]
+
+    @classmethod
+    def buscar_aplicacoes(cls, id_empresa: ObjectId):
+        r = db("Boopt", "VelaAplicações")

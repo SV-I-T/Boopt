@@ -126,7 +126,7 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
 
 def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr], int]:
     r = (
-        db("Vela", "Aplicações")
+        db("Boopt", "VelaAplicações")
         .aggregate(
             [
                 {"$match": {"empresa": ObjectId(empresa)}},
@@ -141,7 +141,7 @@ def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr
                             {"$set": {"participantes": {"$size": "$participantes"}}},
                             {
                                 "$lookup": {
-                                    "from": "Respostas",
+                                    "from": "VelaRespostas",
                                     "localField": "_id",
                                     "foreignField": "id_aplicacao",
                                     "as": "respostas",
