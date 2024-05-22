@@ -112,7 +112,7 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
     usr_atual = Usuario.atual()
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
-    if usr_atual.perfil == Role.ADM and str(usr_atual.empresa) != empresa:
+    if usr_atual.role == Role.ADM and str(usr_atual.empresa) != empresa:
         raise PreventUpdate
 
     corpo_tabela, n_paginas = consultar_dados_tabela_vela(pagina, empresa)
