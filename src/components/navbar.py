@@ -40,32 +40,32 @@ def menu_usuario(usr: Usuario):
                     ),
                     dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
                 ],
-                icon=DashIconify(icon="fluent:person-20-filled", width=20),
+                icon=DashIconify(icon="fluent:person-20-regular", width=20),
                 href="/app/perfil",
             ),
             dmc.NavLink(
                 label="Início",
                 href="/app/vela",
-                icon=DashIconify(icon="fluent:home-20-filled", width=20),
+                icon=DashIconify(icon="fluent:home-20-regular", width=20),
             ),
             dmc.NavLink(
                 label="Administração",
                 href="/app/admin",
-                icon=DashIconify(icon="fluent:shield-person-20-filled", width=20),
+                icon=DashIconify(icon="fluent:shield-person-20-regular", width=20),
             )
             if usr.role in (Role.DEV, Role.ADM)
             else None,
             dmc.NavLink(
                 label="Suporte",
                 href="/app/support",
-                icon=DashIconify(icon="fluent:chat-help-20-filled", width=20),
+                icon=DashIconify(icon="fluent:chat-help-20-regular", width=20),
             ),
             # if usr.role in (Role.DEV, Role.CONST, Role.ADM, Role.GEST)
             # else None,
             dmc.NavLink(
                 label="Sair",
                 href="/logout",
-                icon=DashIconify(icon="fluent:arrow-exit-20-filled", width=20),
+                icon=DashIconify(icon="fluent:arrow-exit-20-regular", width=20),
                 refresh=True,
             ),
         ]

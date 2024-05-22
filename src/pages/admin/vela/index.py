@@ -37,7 +37,7 @@ def layout():
             children=[
                 dmc.Select(
                     id="empresa-vela",
-                    icon=DashIconify(icon="fluent:building-24-filled", width=24),
+                    icon=DashIconify(icon="fluent:building-24-regular", width=24),
                     name="empresa",
                     data=data_empresas,
                     required=True,
@@ -50,11 +50,21 @@ def layout():
                     display="none" if usr.role == Role.ADM else "block",
                 ),
                 dmc.Anchor(
+                    href="/app/admin/vela/results",
+                    children=dmc.Button(
+                        children="Resultados",
+                        leftIcon=DashIconify(
+                            icon="fluent:chart-multiple-24-regular", width=24
+                        ),
+                        classNames={"root": "btn-vela"},
+                    ),
+                ),
+                dmc.Anchor(
                     id="a-nova-aplicacao",
                     href="/app/admin/vela/edit",
                     children=dmc.Button(
                         children="Nova aplicação",
-                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        leftIcon=DashIconify(icon="fluent:add-24-regular", width=24),
                         variant="gradient",
                     ),
                 ),

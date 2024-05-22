@@ -62,7 +62,7 @@ def layout():
                     id="usr-massa-download-template",
                     children="Baixar modelo",
                     leftIcon=DashIconify(
-                        icon="fluent:arrow-download-16-filled", width=16
+                        icon="fluent:arrow-download-16-regular", width=16
                     ),
                 ),
                 html.H1("Como preencher o modelo?", className="secao-pagina"),
@@ -84,7 +84,7 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
                 dmc.Select(
                     id="empresa-usr-massa",
                     label="Empresa dos usuários",
-                    icon=DashIconify(icon="fluent:building-20-filled", width=20),
+                    icon=DashIconify(icon="fluent:building-20-regular", width=20),
                     name="empresa",
                     data=data_empresas,
                     value=str(usr_atual.empresa),
@@ -97,7 +97,7 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
                 dmc.Select(
                     id="perfil-usr-massa",
                     label="Perfil dos usuários",
-                    icon=DashIconify(icon="fluent:person-passkey-20-filled", width=20),
+                    icon=DashIconify(icon="fluent:person-passkey-20-regular", width=20),
                     name="perfil",
                     data=data_role,
                     value=None,

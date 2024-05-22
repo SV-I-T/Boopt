@@ -58,7 +58,7 @@ def layout(id: str = None):
     return [
         html.H1(
             children=[
-                DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+                DashIconify(icon="fluent:edit-28-regular", width=28, color="#777"),
                 usr.nome,
             ],
             className="titulo-pagina",
@@ -100,7 +100,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         id="nome-edit-usr",
                         label="Nome completo",
                         type="text",
-                        icon=DashIconify(icon="fluent:person-20-filled", width=20),
+                        icon=DashIconify(icon="fluent:person-20-regular", width=20),
                         name="nome",
                         value=usr.nome if usr else None,
                         disabled=desabilitar,
@@ -111,7 +111,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         description="Somente números",
                         placeholder="12345678910",
                         icon=DashIconify(
-                            icon="fluent:slide-text-person-20-filled", width=20
+                            icon="fluent:slide-text-person-20-regular", width=20
                         ),
                         name="cpf",
                         value=usr.cpf if usr else None,
@@ -122,7 +122,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         label="E-mail (opcional)",
                         type="email",
                         placeholder="nome@dominio.com",
-                        icon=DashIconify(icon="fluent:mail-20-filled", width=20),
+                        icon=DashIconify(icon="fluent:mail-20-regular", width=20),
                         name="email",
                         value=usr.email if usr else None,
                         disabled=desabilitar,
@@ -137,7 +137,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         initialLevel="year",
                         clearable=False,
                         placeholder=datetime.now().strftime(r"%d de %B de %Y"),
-                        icon=DashIconify(icon="fluent:calendar-20-filled", width=20),
+                        icon=DashIconify(icon="fluent:calendar-20-regular", width=20),
                         name="data",
                         value=usr.data.date() if usr else None,
                         disabled=desabilitar,
@@ -152,7 +152,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                     dmc.Select(
                         id="empresa-edit-usr",
                         label="Empresa",
-                        icon=DashIconify(icon="fluent:building-20-filled", width=20),
+                        icon=DashIconify(icon="fluent:building-20-regular", width=20),
                         name="empresa",
                         data=data_empresas,
                         searchable=True,
@@ -169,7 +169,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         clearable=False,
                         searchable=True,
                         nothingFound="Não encontrei nada",
-                        icon=DashIconify(icon="fluent:briefcase-20-filled", width=20),
+                        icon=DashIconify(icon="fluent:briefcase-20-regular", width=20),
                         name="cargo",
                         value=usr.cargo if usr else None,
                         disabled=desabilitar,
@@ -185,7 +185,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         id="role-edit-usr",
                         label="Perfil",
                         icon=DashIconify(
-                            icon="fluent:person-passkey-20-filled", width=20
+                            icon="fluent:person-passkey-20-regular", width=20
                         ),
                         data=data_role,
                         value=usr.role.value if usr else Role.USR.value,
@@ -201,7 +201,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
                         children="Redefinir senha",
                         disabled=desabilitar,
                         leftIcon=DashIconify(
-                            icon="fluent:arrow-reset-20-filled", width=20
+                            icon="fluent:arrow-reset-20-regular", width=20
                         ),
                     )
                     if usr

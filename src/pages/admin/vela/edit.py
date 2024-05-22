@@ -62,7 +62,7 @@ def layout(empresa: str = None, id: str = None):
             children=[
                 dmc.Select(
                     id="empresa-edit-vela",
-                    icon=DashIconify(icon="fluent:building-24-filled", width=24),
+                    icon=DashIconify(icon="fluent:building-24-regular", width=24),
                     name="empresa",
                     data=data_empresas,
                     required=True,

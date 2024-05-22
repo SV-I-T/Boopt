@@ -14,7 +14,7 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, path="/app/admin/empresas", title="AMD - Empresas")
+register_page(__name__, path="/app/admin/empresas", title="ADM - Empresas")
 
 
 @checar_perfil(permitir=(Role.DEV))
@@ -33,7 +33,7 @@ def layout():
                 ),
                 dmc.ActionIcon(
                     id="empresa-filtro-btn",
-                    children=DashIconify(icon="fluent:search-20-filled", width=24),
+                    children=DashIconify(icon="fluent:search-20-regular", width=24),
                     color="theme.primaryColor",
                     variant="subtle",
                     mr="auto",
@@ -43,7 +43,7 @@ def layout():
                     children=dmc.Button(
                         id="btn-nova-empresa",
                         children="Nova empresa",
-                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        leftIcon=DashIconify(icon="fluent:add-24-regular", width=24),
                         variant="gradient",
                     ),
                 ),

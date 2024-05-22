@@ -15,23 +15,23 @@ def layout():
         {
             "label": "Empresas",
             "href": "/app/admin/empresas",
-            "icon": "fluent:building-24-filled",
+            "icon": "fluent:building-24-regular",
             "role": (Role.DEV, Role.CONS),
         },
         {
             "label": "Unidades",
             "href": "/app/admin/unidades",
-            "icon": "fluent:building-shop-24-filled",
+            "icon": "fluent:building-shop-24-regular",
         },
         {
             "label": "Usuários",
             "href": "/app/admin/usuarios",
-            "icon": "fluent:person-24-filled",
+            "icon": "fluent:person-24-regular",
         },
         {
             "label": "Consultores",
             "href": "/app/admin/consultores",
-            "icon": "fluent:briefcase-person-24-filled",
+            "icon": "fluent:briefcase-person-24-regular",
             "role": (Role.DEV),
         },
     )
@@ -39,7 +39,7 @@ def layout():
         {
             "label": "Vela Assessment",
             "href": "/app/admin/vela",
-            "logo": "img/vela/...",
+            "logo": "imgs/vela/tag_ass.svg",
         },
     )
 

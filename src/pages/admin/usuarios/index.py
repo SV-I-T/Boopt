@@ -44,7 +44,7 @@ def layout(q: str = "", page: str = "1"):
                 ),
                 dmc.ActionIcon(
                     id="usuario-filtro-btn",
-                    children=DashIconify(icon="fluent:search-20-filled", width=24),
+                    children=DashIconify(icon="fluent:search-20-regular", width=24),
                     color="theme.primaryColor",
                     variant="subtle",
                     mr="auto",
@@ -54,7 +54,7 @@ def layout(q: str = "", page: str = "1"):
                     children=dmc.Button(
                         id="btn-novo-usr",
                         children="Novo Usuário",
-                        leftIcon=DashIconify(icon="fluent:add-24-filled", width=24),
+                        leftIcon=DashIconify(icon="fluent:add-24-regular", width=24),
                         variant="gradient",
                     ),
                 ),
