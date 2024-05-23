@@ -1,18 +1,24 @@
+import pickle
 from typing import Optional
 
+import polars as pl
 from bson import ObjectId
 from pydantic import BaseModel, Field
 from utils.banco_dados import db
 
 
-def id_form_padrao() -> ObjectId:
-    return db("Boopt", "VelaFormulários").find_one({}, {"_id": 1})["_id"]
+class VelaAssessmentDataFrames(BaseModel):
+    competencias: pl.DataFrame
+    etapas: pl.DataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class VelaAssessment(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     descricao: str = ""
-    id_form: Optional[ObjectId] = Field(default_factory=id_form_padrao)
+    v_form: Optional[ObjectId] = 1
     empresa: ObjectId
     participantes: list[ObjectId] = Field(default_factory=list)
 
@@ -120,3 +126,9 @@ class VelaAssessment(BaseModel):
     @classmethod
     def buscar_aplicacoes(cls, id_empresa: ObjectId):
         r = db("Boopt", "VelaAplicações")
+
+    @classmethod
+    def carregar_formulario(cls, v_form: int = 1) -> VelaAssessmentDataFrames:
+        with open("./utils/vela_form.pickle", "rb") as f:
+            dfs = VelaAssessmentDataFrames(**pickle.load(f)[str(v_form)])
+        return dfs
