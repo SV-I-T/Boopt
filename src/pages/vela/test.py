@@ -20,9 +20,11 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from icecream import ic
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.usuario import Usuario
+from utils.vela import VelaAssessment
 
 EXPLICACAO_MD = """
     Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
@@ -276,12 +278,15 @@ clientside_callback(
 @callback(
     Output("send-container-vela", "children"),
     Input("store-status-vela", "data"),
+    State("url", "search"),
     prevent_initial_call=True,
 )
-def habilitar_envio(status_pronto):
+def habilitar_envio(status_pronto, search):
     if not status_pronto:
         raise PreventUpdate
     else:
+        params = parse_qs(search[1:])
+        id_aplicacao = params["id"][0]
         return (
             dmc.Group(
                 style={"margin-top": "auto", "flex-wrap": "nowrap"},
@@ -297,7 +302,7 @@ def habilitar_envio(status_pronto):
                         ],
                     ),
                     dmc.Anchor(
-                        href=f"/app/vela/teste/?id={id}&secao=frases",
+                        href=f"/app/vela/teste/?id={id_aplicacao}&secao=frases",
                         children=dmc.Button(
                             id="btn-enviar",
                             children="Enviar",
@@ -327,14 +332,13 @@ def salvar_resposta(n, frases, search):
         params = parse_qs(search[1:])
         id_aplicacao = params["id"][0]
         dados_resposta = {
-            "notas": [
-                {"id": int(k), "nota": int(v["valor"])} for k, v in frases.items()
-            ],
+            "frases": {k: int(v["valor"]) for k, v in frases.items()},
             "id_aplicacao": ObjectId(id_aplicacao),
             "id_usuario": usr_atual.id_,
         }
+        ic(dados_resposta)
 
-        dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["notas"])
+        dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["frases"])
 
         resposta = db("Boopt", "VelaRespostas").insert_one(dados_resposta)
         if resposta.inserted_id:
@@ -349,43 +353,15 @@ def salvar_resposta(n, frases, search):
             )
 
 
-def calcular_nota(id_aplicacao: str, notas: list[dict[str, str]]):
-    r = (
-        db("Boopt", "VelaAplicações")
-        .aggregate(
-            [
-                {"$match": {"_id": ObjectId(id_aplicacao)}},
-                {
-                    "$lookup": {
-                        "from": "Formulários",
-                        "foreignField": "_id",
-                        "localField": "id_form",
-                        "as": "form",
-                    }
-                },
-                {"$set": {"form": {"$first": "$form"}}},
-                {
-                    "$project": {
-                        "form": {"_id": 0, "competencias": {"frases": {"desc": 0}}},
-                        "_id": 0,
-                        "descricao": 0,
-                        "id_form": 0,
-                        "empresa": 0,
-                        "participantes": 0,
-                    }
-                },
-            ]
-        )
-        .next()
-    )
+def calcular_nota(id_aplicacao: str, frases: dict[str, int]):
+    dfs = VelaAssessment.carregar_formulario()
+    df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
-    df_competencias = (
-        pl.DataFrame(r["form"]["competencias"]).explode("frases").unnest("frases")
-    )
-    df_etapas = pl.DataFrame(r["form"]["etapas"]).explode("competencias")
+    ic(frases)
 
     nota = (
-        pl.DataFrame(notas)
+        pl.DataFrame(list(frases.items()), schema={"id": str, "nota": int})
+        .with_columns(pl.col("id").cast(pl.Int64))
         .join(df_competencias, on="id", how="left")
         .select(
             pl.col("nome").alias("competencias"),
