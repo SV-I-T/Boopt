@@ -95,6 +95,9 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             } else {
                 throw window.dash_clientside.PreventUpdate;
             }
+        },
+        atualizar_infos_player: async function (currentTime, duration) {
+            return "Progresso: " + (currentTime ? `${(currentTime * 100 / duration).toFixed(0)}%` : "0%")
         }
     }
 });

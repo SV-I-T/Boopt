@@ -18,7 +18,7 @@ class VelaAssessmentDataFrames(BaseModel):
 class VelaAssessment(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     descricao: str = ""
-    v_form: Optional[ObjectId] = 1
+    v_form: Optional[int] = 1
     empresa: ObjectId
     participantes: list[ObjectId] = Field(default_factory=list)
 
