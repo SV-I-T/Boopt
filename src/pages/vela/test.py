@@ -357,8 +357,6 @@ def calcular_nota(id_aplicacao: str, frases: dict[str, int]):
     dfs = VelaAssessment.carregar_formulario()
     df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
-    ic(frases)
-
     nota = (
         pl.DataFrame(list(frases.items()), schema={"id": str, "nota": int})
         .with_columns(pl.col("id").cast(pl.Int64))

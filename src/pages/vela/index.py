@@ -82,7 +82,7 @@ def layout():
                                     "Acesse a nossa plataforma de vídeos **após realizar o teste do Assessment Boopt**"
                                 ),
                                 dmc.Anchor(
-                                    href="",
+                                    href="/app/vela/videos",
                                     children=dmc.Button(
                                         children="Acessar",
                                         leftIcon=DashIconify(

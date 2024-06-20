@@ -1,0 +1,9 @@
+.vela-card-metricas {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.vela-card-metricas label {
+    font-size: 12px !important;
+}

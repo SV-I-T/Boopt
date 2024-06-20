@@ -1,33 +1,43 @@
 /* TELA DE INSTRUÇÕES */
 
-.vela-saudacao * {
-    font-size: 48px;
+@media only screen and (max-width:1000px) {
+    .vela-saudacao * {
+        font-size: 24px;
+    }
+
 }
 
-.vela-circles {
-    margin-left: auto;
-    display: flex;
+@media only screen and (min-width:1000px) {
+    .vela-saudacao * {
+        font-size: 48px;
+    }
+
+    .vela-circles {
+        margin-left: auto;
+        display: flex;
+    }
+
+    .vela-circles>div {
+        height: 100px;
+        width: 100px;
+        border-radius: 50%;
+        margin-left: -55px;
+    }
+
+    .vela-circles>div:first-child {
+        background: linear-gradient(145deg, var(--laranja-boopt) 25%, var(--amarelo-vela) 84%);
+    }
+
+    .vela-circles>div:nth-child(2) {
+        background-image: url('../imgs/vela/barco.png');
+        background-position: 0;
+    }
+
+    .vela-circles>div:last-child {
+        background-color: var(--preto-sv)
+    }
 }
 
-.vela-circles>div {
-    height: 100px;
-    width: 100px;
-    border-radius: 50%;
-    margin-left: -55px;
-}
-
-.vela-circles>div:first-child {
-    background: linear-gradient(145deg, var(--laranja-boopt) 25%, var(--amarelo-vela) 84%);
-}
-
-.vela-circles>div:nth-child(2) {
-    background-image: url('../imgs/vela/barco.png');
-    background-position: 0;
-}
-
-.vela-circles>div:last-child {
-    background-color: var(--preto-sv)
-}
 
 /* TELA DO TESTE */
 #text-frase-vela {
