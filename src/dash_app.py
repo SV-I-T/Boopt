@@ -63,9 +63,8 @@ def layout():
                 dcc.Location(id="url", refresh="callback-nav"),
                 dcc.Location(id="url-no-refresh", refresh=False),
                 html.Div(
-                    id="page-container",
+                    id="app",
                     children=[
-                        layout_navbar(),
                         html.Div(
                             id="wrapper",
                             children=[
@@ -74,7 +73,8 @@ def layout():
                                 html.Div(id="navbar-backdrop"),
                             ],
                         ),
-                        html.Div(
+                        layout_navbar(),
+                        html.Header(
                             id="burger-header",
                             children=[
                                 dmc.Anchor(

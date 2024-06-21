@@ -7,15 +7,6 @@
     left: 0px;
     background-color: transparent;
     border: none;
-    background-color: var(--off-white);
-    background-image:
-        url('../imgs/boopt/logo_borda_gradiente.svg');
-    background-repeat:
-        no-repeat;
-    background-position:
-        bottom left;
-    background-size:
-        150%;
     padding: 3rem 70px 1rem 1rem;
     z-index: -1;
     transition: transform 100ms ease-in;
@@ -120,6 +111,7 @@
         border-radius: 0 20px 20px 0;
         z-index: 10000000000;
         transform: translateX(-100%);
+        background-color: var(--off-white);
     }
 
     #navbar[visible=true] {
@@ -145,6 +137,7 @@
 @media only screen and (min-width: 1000px) {
     #navbar {
         width: var(--navbar-width);
+        z-index: 100;
     }
 
     #burger-header {
