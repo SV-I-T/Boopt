@@ -27,14 +27,16 @@ from utils.vela import VelaAssessment
 
 register_page(
     __name__,
-    path="/app/admin/vela/edit",
+    path_template="/app/admin/vela/<id_aplicacao>",
     title="Editar Vela Assessment",
 )
 
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
-def layout(empresa: str = None, id: str = None):
+def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
     usr = Usuario.atual()
+
+    id_aplicacao = None if id_aplicacao == "new" else id_aplicacao
 
     data_empresas = (
         [
@@ -45,8 +47,8 @@ def layout(empresa: str = None, id: str = None):
         else [str(usr.empresa)]
     )
 
-    if id:
-        assessment = carregar_assessment(id_aplicacao=id)
+    if id_aplicacao:
+        assessment = carregar_assessment(id_aplicacao=id_aplicacao)
         texto_titulo = [assessment["descricao"]]
     else:
         texto_titulo = [
@@ -68,13 +70,13 @@ def layout(empresa: str = None, id: str = None):
                     nothingFound="Não encontrei nada",
                     placeholder="Selecione uma empresa",
                     value=str(assessment["empresa"])
-                    if id
+                    if id_aplicacao
                     else empresa
                     if empresa
                     else str(usr.empresa),
                     w=250,
                     mb="1rem",
-                    disabled=bool(id),
+                    disabled=bool(id_aplicacao),
                     display="none" if usr.role == Role.ADM else "block",
                 ),
                 dmc.TextInput(
@@ -82,7 +84,7 @@ def layout(empresa: str = None, id: str = None):
                     id="desc-edit-vela",
                     required=True,
                     value=assessment["descricao"]
-                    if id
+                    if id_aplicacao
                     else f'Vela - {datetime.now().strftime("%d/%m/%Y")}',
                     mb="1rem",
                 ),
@@ -104,14 +106,14 @@ def layout(empresa: str = None, id: str = None):
                     ],
                     getRowId="params.data.id",
                     rowData=assessment["usuarios"]
-                    if id
+                    if id_aplicacao
                     else carregar_usuarios_empresa(empresa=empresa or usr.empresa),
                     selectedRows=[
                         {"id": usuario["id"]}
                         for usuario in assessment["usuarios"]
                         if usuario["ok"]
                     ]
-                    if id
+                    if id_aplicacao
                     else [],
                     dashGridOptions={
                         "rowSelection": "multiple",
@@ -140,8 +142,8 @@ def layout(empresa: str = None, id: str = None):
                     mt="1rem",
                     children=[
                         dmc.Button(
-                            id="btn-save-vela" if id else "btn-new-vela",
-                            children="Salvar" if id else "Criar",
+                            id="btn-save-vela" if id_aplicacao else "btn-new-vela",
+                            children="Salvar" if id_aplicacao else "Criar",
                             ml="auto",
                             leftIcon=DashIconify(
                                 icon="fluent:save-20-regular", width=20
@@ -155,7 +157,7 @@ def layout(empresa: str = None, id: str = None):
                                 icon="fluent:delete-20-regular", width=20
                             ),
                         )
-                        if id
+                        if id_aplicacao
                         else None,
                         dcc.ConfirmDialog(
                             id="confirm-delete-av",

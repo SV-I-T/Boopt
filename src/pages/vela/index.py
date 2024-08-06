@@ -50,7 +50,7 @@ def layout():
                             ),
                             classNames={"root": "btn-vela"},
                         ),
-                        href=f"/app/vela/teste/?id={ultima_aplicacao['id']}"
+                        href=f"/app/vela/teste/{ultima_aplicacao['id']}"
                         if ultima_aplicacao and not ultima_aplicacao.get("resposta")
                         else None,
                     ),
@@ -60,7 +60,7 @@ def layout():
                             disabled=not ultima_resposta_id,
                             color="BooptLaranja",
                         ),
-                        href=f"/app/vela/resultado/?usr={usr_atual.id}&resposta={ultima_resposta_id}"
+                        href=f"/app/vela/report/{usr_atual.id}/{ultima_resposta_id}"
                         if ultima_resposta_id
                         else None,
                     ),

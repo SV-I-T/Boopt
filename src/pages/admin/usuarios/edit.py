@@ -26,7 +26,9 @@ from utils.role import Role
 from utils.usuario import CARGOS_PADROES, Usuario
 from werkzeug.security import generate_password_hash
 
-register_page(__name__, path="/app/admin/usuarios/edit", title="Editar usuário")
+register_page(
+    __name__, path_template="/app/admin/usuarios/<id_usuario>", title="Editar usuário"
+)
 
 
 def autorizado(usr_atual: Usuario, usr: Usuario) -> bool:
@@ -41,16 +43,18 @@ def autorizado(usr_atual: Usuario, usr: Usuario) -> bool:
 
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
-def layout(id: str = None):
+def layout(id_usuario: str = None):
+    id_usuario = None if id_usuario == "new" else id_usuario
+
     usr_atual = Usuario.atual()
 
-    if not id:
+    if not id_usuario:
         return [
             html.H1("Novo usuário", className="titulo-pagina"),
             layout_edicao_usr(usr_atual),
         ]
 
-    usr = Usuario.buscar("_id", ObjectId(id))
+    usr = Usuario.buscar("_id", ObjectId(id_usuario))
 
     if not autorizado(usr_atual, usr):
         return layout_nao_autorizado()
@@ -279,7 +283,7 @@ def atualizar_data_unidades(_id_empresa: str):
     State("cargo-edit-usr", "value"),
     State("role-edit-usr", "value"),
     State("unidades-edit-usr", "value"),
-    State("url", "search"),
+    State("url", "href"),
     prevent_initial_call=True,
 )
 def salvar_usr(
@@ -292,7 +296,7 @@ def salvar_usr(
     cargo: str,
     role: str,
     unidades: list[int] | None,
-    search: str,
+    href: str,
 ):
     if not n:
         raise PreventUpdate
@@ -305,8 +309,7 @@ def salvar_usr(
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    params = parse_qs(search[1:])
-    id_usr = ObjectId(params["id"][0])
+    id_usr = href.split("/")[-1]
     data = datetime.strptime(_data, "%Y-%m-%d")
     empresa = ObjectId(_empresa)
 

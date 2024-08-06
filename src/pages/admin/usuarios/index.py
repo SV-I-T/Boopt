@@ -20,7 +20,7 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, "/app/admin/usuarios", name="ADM - Usuários")
+register_page(__name__, "/app/admin/usuarios", name="Usuários")
 
 
 MAX_PAGINA = 15
@@ -31,71 +31,77 @@ def layout(q: str = "", page: str = "1"):
     page = int(page)
 
     return [
-        html.H1("Administração de usuários", className="titulo-pagina"),
-        dmc.Group(
-            mb="1rem",
-            spacing="sm",
-            children=[
-                dmc.TextInput(
-                    id="usuario-filtro-input",
-                    placeholder="Pesquisar por nome, empresa, cargo...",
-                    w=300,
-                    value=q,
+        html.H1("Usuários", className="titulo-pagina"),
+        dmc.Stack(
+            [
+                dmc.Group(
+                    spacing="sm",
+                    children=[
+                        dmc.TextInput(
+                            id="usuario-filtro-input",
+                            placeholder="Pesquisar por nome, empresa, cargo...",
+                            w=300,
+                            value=q,
+                        ),
+                        dmc.ActionIcon(
+                            id="usuario-filtro-btn",
+                            children=DashIconify(
+                                icon="fluent:search-20-regular", width=24
+                            ),
+                            color="theme.primaryColor",
+                            variant="subtle",
+                            mr="auto",
+                        ),
+                        dmc.Anchor(
+                            href="/app/admin/usuarios/new",
+                            children=dmc.Button(
+                                id="btn-novo-usr",
+                                children="Novo Usuário",
+                                leftIcon=DashIconify(
+                                    icon="fluent:add-24-regular", width=24
+                                ),
+                                variant="gradient",
+                            ),
+                        ),
+                        dmc.Anchor(
+                            href="/app/admin/usuarios/new-batch",
+                            children=dmc.Button(
+                                id="btn-modal-usr-massa",
+                                children="Cadastro em massa",
+                            ),
+                        ),
+                    ],
                 ),
-                dmc.ActionIcon(
-                    id="usuario-filtro-btn",
-                    children=DashIconify(icon="fluent:search-20-regular", width=24),
-                    color="theme.primaryColor",
-                    variant="subtle",
-                    mr="auto",
+                dcc.Store(id="store-request-update-table-users"),
+                dmc.Table(
+                    striped=True,
+                    withColumnBorders=True,
+                    withBorder=True,
+                    highlightOnHover=True,
+                    style={"width": "100%"},
+                    children=[
+                        html.Thead(
+                            html.Tr(
+                                [
+                                    html.Th("Nome completo", style={"width": 350}),
+                                    html.Th("Empresa", style={"width": 200}),
+                                    html.Th("Cargo", style={"width": 200}),
+                                    html.Th("Perfil", style={"width": 100}),
+                                ]
+                            )
+                        ),
+                        html.Tbody(
+                            id="tabela-usuarios-body",
+                        ),
+                    ],
                 ),
-                dmc.Anchor(
-                    href="/app/admin/usuarios/edit",
-                    children=dmc.Button(
-                        id="btn-novo-usr",
-                        children="Novo Usuário",
-                        leftIcon=DashIconify(icon="fluent:add-24-regular", width=24),
-                        variant="gradient",
-                    ),
+                dmc.Pagination(
+                    id="tabela-usuarios-nav",
+                    total=1,
+                    page=page,
+                    radius="xl",
                 ),
-                dmc.Anchor(
-                    href="/app/admin/usuarios/cadastro-massa",
-                    children=dmc.Button(
-                        id="btn-modal-usr-massa",
-                        children="Cadastro em massa",
-                    ),
-                ),
-            ],
-        ),
-        dcc.Store(id="store-request-update-table-users"),
-        dmc.Table(
-            striped=True,
-            withColumnBorders=True,
-            withBorder=True,
-            highlightOnHover=True,
-            style={"width": "100%"},
-            children=[
-                html.Thead(
-                    html.Tr(
-                        [
-                            html.Th("Nome completo", style={"width": 350}),
-                            html.Th("Empresa", style={"width": 200}),
-                            html.Th("Cargo", style={"width": 200}),
-                            html.Th("Perfil", style={"width": 100}),
-                        ]
-                    )
-                ),
-                html.Tbody(
-                    id="tabela-usuarios-body",
-                ),
-            ],
-        ),
-        dmc.Pagination(
-            id="tabela-usuarios-nav",
-            total=1,
-            page=page,
-            mt="1rem",
-            radius="xl",
+            ]
         ),
     ]
 
@@ -194,7 +200,7 @@ def construir_linha_usuario(usr_atual: Usuario, usuario: Usuario) -> html.Tr:
         col_usr = usuario.nome
     else:
         col_usr = dmc.Anchor(
-            href=f"/app/admin/usuarios/edit?id={usuario.id}",
+            href=f"/app/admin/usuarios/{usuario.id}",
             children=usuario.nome,
         )
     return html.Tr(

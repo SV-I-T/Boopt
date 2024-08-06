@@ -7,3 +7,17 @@
 .vela-card-metricas label {
     font-size: 12px !important;
 }
+
+.vela-filtro {
+    flex-wrap: nowrap;
+}
+
+.vela-filtro div:has(input) {
+    flex-grow: 1;
+}
+
+.mantine-Accordion-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}

@@ -1,5 +1,13 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        selecionar_todos: function (n, data) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            }
+            const values = []
+            data.forEach((e) => values.push(e['value']))
+            return values
+        },
         abrir_barra_lateral: function (opened) {
             const navbar = document.getElementById('navbar');
             const navbar_backdrop = document.getElementById('navbar-backdrop');
@@ -10,27 +18,19 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 navbar.removeAttribute('visible')
                 navbar_backdrop.setAttribute('visible', 'false')
             }
-            throw window.dash_clientside.PreventUpdate;
+            throw window.dash_clientside.PreventUpdate
         },
         alterar_nav_link: function (_) {
-            changeActiveNavLink();
-            throw dash_clientside.PreventUpdate;
+            changeActiveNavLink()
+            throw dash_clientside.PreventUpdate
         },
         upload_arquivo_usr_batelada: function (x) {
-            if (x) {
-                document.getElementById('div-usr-massa-arquivo').style.display = 'block';
-            } else {
-                document.getElementById('div-usr-massa-arquivo').style.display = 'none';
-            }
-            return x;
+            document.getElementById('div-usr-massa-arquivo').style.display = x ? 'block' : 'none'
+            return x
         },
         upload_arquivo_empresa_unidades: function (x) {
-            if (x) {
-                document.getElementById('div-empresa-unidades-arquivo').style.display = 'block';
-            } else {
-                document.getElementById('div-empresa-unidades-arquivo').style.display = 'none';
-            }
-            return x;
+            document.getElementById('div-empresa-unidades-arquivo').style.display = x ? 'block' : 'none'
+            return x
         },
         ativar: function (x) {
             if (!x) {

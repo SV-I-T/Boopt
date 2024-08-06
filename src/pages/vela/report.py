@@ -3,6 +3,7 @@ import polars as pl
 from bson import ObjectId
 from dash import dcc, register_page
 from dash_iconify import DashIconify
+from utils.banco_dados import db
 from utils.cache import cache
 from utils.login import checar_perfil, layout_nao_autorizado
 from utils.role import Role
@@ -18,16 +19,16 @@ from .funcoes.graficos import (
 
 register_page(
     __name__,
-    path="/app/vela/resultado",
-    title="Resultados - Vela Assessment",
+    path_template="/app/vela/report/<id_user>/<id_resposta>",
+    title="Relatório Vela Assessment",
 )
 
 
 @checar_perfil
-def layout(usr: str = None, resposta: str = None):
+def layout(id_resposta: str = None, id_user: str = None, **kwargs):
     usr_atual = Usuario.atual()
 
-    if usr == usr_atual.id:
+    if id_user == usr_atual.id:
         # O usuário que está tentando acessar é o dono da resposta
         pass
     elif usr_atual.perfil in [Role.DEV]:
@@ -35,7 +36,7 @@ def layout(usr: str = None, resposta: str = None):
         pass
     elif (
         usr_atual.perfil == Role.ADM
-        and usr_atual.empresa == Usuario.buscar("_id", usr).empresa
+        and usr_atual.empresa == Usuario.buscar("_id", id_user).empresa
     ):
         # O usuário que está tentando acessar é gestor da empresa do dono da resposta
         pass
@@ -43,7 +44,7 @@ def layout(usr: str = None, resposta: str = None):
         # O usuário que está tentando acessar não tem permissão
         return layout_nao_autorizado()
 
-    respostas = VelaAssessment.buscar_respostas(ObjectId(usr))
+    respostas = VelaAssessment.buscar_respostas(ObjectId(id_user))
 
     return dmc.Container(
         [
@@ -57,10 +58,10 @@ def layout(usr: str = None, resposta: str = None):
                             rightIcon=DashIconify(
                                 icon="fluent:chevron-down-20-filled", width=20
                             ),
-                            children=ObjectId(resposta)
+                            children=ObjectId(id_resposta)
                             .generation_time.date()
                             .strftime(
-                                "%d de %B de %Y",
+                                "%d de %b. de %Y",
                             ),
                         )
                     ),
@@ -68,11 +69,11 @@ def layout(usr: str = None, resposta: str = None):
                         [
                             dmc.MenuItem(
                                 children=resposta_.generation_time.date().strftime(
-                                    "%d de %B de %Y",
+                                    "%d de %b. de %Y",
                                 ),
-                                href=f"/app/vela/resultado/?usr={usr}&resposta={resposta_}",
+                                href=f"/app/vela/report/{id_user}/{resposta_}",
                             )
-                            if str(resposta_) != resposta
+                            if str(resposta_) != id_resposta
                             else None
                             for resposta_ in respostas
                         ]
@@ -81,7 +82,7 @@ def layout(usr: str = None, resposta: str = None):
             ),
             dmc.Grid(
                 id="resultados-assessment",
-                children=construir_resultados(resposta),
+                children=construir_resultados(id_resposta),
             ),
         ]
     )
@@ -177,62 +178,85 @@ def construir_resultados(id_resposta: str):
     ]
 
 
+def buscar_resposta(id_resposta: ObjectId):
+    r = db("Boopt", "VelaRespostas").aggregate(
+        [
+            {"$match": {"_id": id_resposta}},
+            {
+                "$lookup": {
+                    "from": "VelaAplicações",
+                    "localField": "id_aplicacao",
+                    "foreignField": "_id",
+                    "as": "aplicacao",
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$aplicacao",
+                    "includeArrayIndex": "string",
+                    "preserveNullAndEmptyArrays": True,
+                }
+            },
+            {"$project": {"_id": 0, "frases": 1}},
+        ]
+    )
+
+    if r.alive:
+        return r.next()
+    return None
+
+
 @cache.memoize(timeout=6000)
 def dfs_resultado(id_resposta: str):
-    resposta = VelaAssessment.resultado(ObjectId(id_resposta))
+    resposta = buscar_resposta(ObjectId(id_resposta))
 
     if resposta is None:
         return None
 
     else:
-        df_notas_etapas = pl.DataFrame()
-        df_notas_competencias = pl.DataFrame()
-
-        form = resposta["form"]
-
-        df_notas = pl.DataFrame(resposta["notas"])
-        df_competencias = (
-            pl.DataFrame(form["competencias"]).explode("frases").unnest("frases")
+        df_notas = pl.DataFrame(
+            [{"id": int(k), "nota": v} for k, v in resposta["frases"].items()]
         )
-        df_etapas = pl.DataFrame(form["etapas"]).explode("competencias")
-
-        _df_notas_competencias = (
-            df_competencias.join(df_notas, on="id", how="left")
+        dfs = VelaAssessment.carregar_formulario()
+        df_notas_competencias = (
+            dfs.competencias.join(df_notas, on="id")
+            .with_columns(
+                pl.col("notas").list.get(pl.col("nota").sub(1)).alias("pontos")
+            )
+            .drop("notas", "nota")
             .group_by("nome")
-            .agg(pl.col("notas").list.get(pl.col("nota").sub(1)).mean())
-        ).with_columns(
-            pl.when(pl.col("notas").lt(5))
-            .then(pl.lit("Baixa"))
-            .when(pl.col("notas").lt(8))
-            .then(pl.lit("Média"))
-            .otherwise(pl.lit("Alta"))
-            .alias("grupo")
+            .agg(pl.col("pontos").mean())
+            .with_columns(
+                pl.when(pl.col("pontos").lt(5))
+                .then(pl.lit("Baixa"))
+                .when(pl.col("pontos").lt(8))
+                .then(pl.lit("Média"))
+                .otherwise(pl.lit("Alta"))
+                .alias("grupo")
+            )
         )
-        _df_notas_etapas = (
-            df_etapas.join(
-                _df_notas_competencias,
-                left_on="competencias",
-                right_on="nome",
-                how="left",
+        df_notas_etapas = (
+            dfs.etapas.join(
+                df_notas_competencias, left_on="competencias", right_on="nome"
             )
             .group_by("nome")
             .agg(
                 [
                     pl.col("peso")
-                    .mul(pl.col("notas"))
+                    .mul(pl.col("pontos"))
                     .sum()
                     .truediv(pl.col("peso").sum())
-                    .alias("nota"),
+                    .alias("pontos"),
                     pl.col("id").max(),
                 ]
             )
         )
 
-        df_notas_competencias = pl.concat(
-            [df_notas_competencias, _df_notas_competencias], how="diagonal_relaxed"
-        ).drop_nulls("nome")
-        df_notas_etapas = pl.concat(
-            [df_notas_etapas, _df_notas_etapas], how="diagonal_relaxed"
-        ).drop_nulls("nome")
+        # df_notas_competencias = pl.concat(
+        #     [df_notas_competencias, _df_notas_competencias], how="diagonal_relaxed"
+        # ).drop_nulls("nome")
+        # df_notas_etapas = pl.concat(
+        #     [df_notas_etapas, _df_notas_etapas], how="diagonal_relaxed"
+        # ).drop_nulls("nome")
 
     return df_notas_etapas, df_notas_competencias

@@ -1,8 +1,9 @@
-import plotly.graph_objects as go
-import polars as pl
+from locale import format_string
+
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
-from locale import format_string
+import plotly.graph_objects as go
+import polars as pl
 
 
 def cartao_nota_total_etapas(df: pl.DataFrame) -> dmc.Card:
@@ -11,7 +12,7 @@ def cartao_nota_total_etapas(df: pl.DataFrame) -> dmc.Card:
             dmc.Text(
                 format_string(
                     "%.1f",
-                    df["nota"].sum(),
+                    df["pontos"].sum(),
                 ),
                 size=48,
                 weight=700,
@@ -75,7 +76,7 @@ def radar(df: pl.DataFrame, theta: str, r: str) -> go.Figure:
 
 
 def radar_etapas(df: pl.DataFrame) -> go.Figure:
-    fig = radar(df.sort("id").drop("id"), "nome", "nota")
+    fig = radar(df.sort("id").drop("id"), "nome", "pontos")
     fig.update_traces(
         go.Scatterpolar(hovertemplate="Etapa %{theta}: <b>%{r:.1f}</b><extra></extra>")
     )
@@ -85,7 +86,7 @@ def radar_etapas(df: pl.DataFrame) -> go.Figure:
 
 
 def radar_comp(df: pl.DataFrame) -> go.Figure:
-    fig = radar(df.sort("nome"), "nome", "notas")
+    fig = radar(df.sort("nome"), "nome", "pontos")
     fig.update_traces(
         go.Scatterpolar(
             hovertemplate="%{theta}: <b>%{r:.1f}</b><extra></extra>",
@@ -146,7 +147,7 @@ def tabela_competencias(df: pl.DataFrame):
         columnDefs=[
             {"field": "nome", "headerName": "Competência"},
             {
-                "field": "notas",
+                "field": "pontos",
                 "headerName": "Nota",
                 "valueFormatter": {
                     "function": 'd3.format(".1f")(params.value).replaceAll(".", ",")'

@@ -1,3 +1,4 @@
+import locale
 from math import ceil
 
 import dash_mantine_components as dmc
@@ -10,7 +11,7 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, "/app/admin/vela", title="ADM - Vela Assessment")
+register_page(__name__, "/app/admin/vela", title="Vela Assessment")
 
 MAX_PAGINA = 10
 
@@ -30,72 +31,79 @@ def layout():
     corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa))
 
     return [
-        html.H1("Administração - Vela Assessment", className="titulo-pagina"),
-        dmc.Group(
-            mb="1rem",
-            position="right",
-            children=[
-                dmc.Select(
-                    id="empresa-vela",
-                    icon=DashIconify(icon="fluent:building-24-regular", width=24),
-                    name="empresa",
-                    data=data_empresas,
-                    required=True,
-                    searchable=True,
-                    nothingFound="Não encontrei nada",
-                    placeholder="Selecione uma empresa",
-                    w=250,
-                    mr="auto",
-                    value=str(usr.empresa),
-                    display="none" if usr.role == Role.ADM else "block",
-                ),
-                dmc.Anchor(
-                    href="/app/admin/vela/results",
-                    children=dmc.Button(
-                        children="Resultados",
-                        leftIcon=DashIconify(
-                            icon="fluent:chart-multiple-24-regular", width=24
+        html.H1("Vela Assessment", className="titulo-pagina"),
+        dmc.Stack(
+            [
+                dmc.Group(
+                    position="right",
+                    children=[
+                        dmc.Select(
+                            id="empresa-vela",
+                            icon=DashIconify(
+                                icon="fluent:building-24-regular", width=24
+                            ),
+                            name="empresa",
+                            data=data_empresas,
+                            required=True,
+                            searchable=True,
+                            nothingFound="Não encontrei nada",
+                            placeholder="Selecione uma empresa",
+                            w=250,
+                            mr="auto",
+                            value=str(usr.empresa),
+                            display="none" if usr.role == Role.ADM else "block",
                         ),
-                        classNames={"root": "btn-vela"},
-                    ),
+                        dmc.Anchor(
+                            href="/app/admin/vela/dashboard",
+                            children=dmc.Button(
+                                children="Resultados",
+                                leftIcon=DashIconify(
+                                    icon="fluent:chart-multiple-24-regular", width=24
+                                ),
+                                classNames={"root": "btn-vela"},
+                            ),
+                        ),
+                        dmc.Anchor(
+                            id="a-nova-aplicacao",
+                            href="/app/admin/vela/new",
+                            children=dmc.Button(
+                                children="Nova aplicação",
+                                leftIcon=DashIconify(
+                                    icon="fluent:add-24-regular", width=24
+                                ),
+                                variant="gradient",
+                            ),
+                        ),
+                    ],
                 ),
-                dmc.Anchor(
-                    id="a-nova-aplicacao",
-                    href="/app/admin/vela/edit",
-                    children=dmc.Button(
-                        children="Nova aplicação",
-                        leftIcon=DashIconify(icon="fluent:add-24-regular", width=24),
-                        variant="gradient",
-                    ),
+                dmc.Table(
+                    striped=True,
+                    highlightOnHover=True,
+                    withBorder=True,
+                    withColumnBorders=True,
+                    style={"width": "100%"},
+                    children=[
+                        html.Thead(
+                            html.Tr(
+                                [
+                                    html.Th("Descrição"),
+                                    html.Th("Criado em", style={"width": 100}),
+                                    html.Th("Adesão", style={"width": 100}),
+                                    html.Th("Nota média", style={"width": 120}),
+                                    html.Th("Ações", style={"width": 150}),
+                                ]
+                            )
+                        ),
+                        html.Tbody(
+                            id="table-vela-body",
+                            children=corpo_tabela,
+                        ),
+                    ],
                 ),
-            ],
-        ),
-        dmc.Table(
-            striped=True,
-            highlightOnHover=True,
-            withBorder=True,
-            withColumnBorders=True,
-            style={"width": "100%"},
-            children=[
-                html.Thead(
-                    html.Tr(
-                        [
-                            html.Th("Descrição"),
-                            html.Th("Criado em", style={"width": 100}),
-                            html.Th("Adesão", style={"width": 100}),
-                            html.Th("Nota média", style={"width": 120}),
-                            html.Th("Ações", style={"width": 150}),
-                        ]
-                    )
+                dmc.Pagination(
+                    id="table-vela-nav", total=n_paginas, page=1, radius="xl"
                 ),
-                html.Tbody(
-                    id="table-vela-body",
-                    children=corpo_tabela,
-                ),
-            ],
-        ),
-        dmc.Pagination(
-            id="table-vela-nav", total=n_paginas, page=1, mt="1rem", radius="xl"
+            ]
         ),
     ]
 
@@ -179,7 +187,7 @@ def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr
                     f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
                 ),
                 html.Td(
-                    f'{assessment["nota_media"]:.1f}/70'
+                    f'{locale.format_string("%.1f",assessment["nota_media"])}/70'
                     if assessment["nota_media"]
                     else "--"
                 ),
@@ -187,12 +195,12 @@ def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr
                     [
                         dmc.Anchor(
                             "Editar",
-                            href=f'/app/admin/vela/edit?id={assessment["_id"]}',
+                            href=f'/app/admin/vela/{assessment["_id"]}',
                             mr="0.5rem",
                         ),
                         dmc.Anchor(
-                            "Resultados",
-                            href=f'/app/admin/vela/view?id={assessment["_id"]}',
+                            "Respostas",
+                            href=f'/app/admin/vela/{assessment["_id"]}/view',
                         ),
                     ]
                 ),

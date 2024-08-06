@@ -25,7 +25,7 @@ from utils.usuario import Usuario
 
 register_page(
     __name__,
-    path="/app/admin/usuarios/cadastro-massa",
+    path="/app/admin/usuarios/new-batch",
     title="ADM - Cadastrar usuários em massa",
 )
 

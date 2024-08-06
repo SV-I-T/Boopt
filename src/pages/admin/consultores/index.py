@@ -9,23 +9,14 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, path="/app/admin/consultores", title="Gestão de consultores")
+register_page(__name__, path="/app/admin/consultores", title="Consultores")
 
 
 @checar_perfil(permitir=(Role.DEV,))
 def layout():
     usr_atual = Usuario.atual()
 
-    data_consultores = [
-        {"value": consultor["_id"], "label": consultor["nome"]}
-        for consultor in db("Boopt", "Usuários").find(
-            {"role": Role.CONS},
-            {
-                "_id": {"$toString": "$_id"},
-                "nome": 1,
-            },
-        )
-    ]
+    data_consultores = list(db("Boopt", "ViewUsuáriosConsultores").find())
 
     data_row_empresas = [
         {
@@ -38,59 +29,66 @@ def layout():
         )
     ]
     return [
-        html.H1("Gestão de consultores", className="titulo-pagina"),
-        dmc.Select(
-            id="select-consultor-cliente",
-            label="Consultor",
-            data=data_consultores,
-        ),
-        dmc.Text(id="text-consultor-qtde-clientes", children="Selecione um consultor"),
-        dag.AgGrid(
-            id="table-consultores-clientes",
-            className="ag-theme-quartz compact",
-            columnDefs=[
-                {"field": "id", "hide": True},
-                {
-                    "field": "nome",
-                    "headerName": "Empresa",
-                    "checkboxSelection": True,
-                    "headerCheckboxSelection": True,
-                    "headerCheckboxSelectionFilteredOnly": True,
-                },
-                {"field": "segmento", "headerName": "Segmento"},
-            ],
-            getRowId="params.data.id",
-            rowData=data_row_empresas,
-            selectedRows=[],
-            dashGridOptions={
-                "rowSelection": "multiple",
-                "suppressRowClickSelection": True,
-                "overlayLoadingTemplate": {
-                    "function": "'<span>Selecione uma empresa primeiro</span>'"
-                },
-                "overlayNoRowsTemplate": {
-                    "function": "'<span>Não há registros</span>'"
-                },
-            },
-            defaultColDef={
-                "resizable": False,
-                "filter": True,
-                "floatingFilter": True,
-                "floatingFilterComponentParams": {
-                    "suppressFilterButton": True,
-                },
-                "suppressMenu": True,
-                "suppressMovable": True,
-                "flex": 1,
-            },
-        ),
-        dmc.Group(
+        html.H1("Consultores", className="titulo-pagina"),
+        dmc.Stack(
             children=[
-                dmc.Button(
-                    id="btn-salvar-clientes-consultor",
-                    children="Salvar",
-                    ml="auto",
-                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                dmc.Select(
+                    id="select-consultor-cliente",
+                    label="Consultor",
+                    data=data_consultores,
+                    placeholder="Selecione",
+                ),
+                dmc.Text(id="text-consultor-qtde-clientes"),
+                dag.AgGrid(
+                    id="table-consultores-clientes",
+                    className="ag-theme-quartz compact",
+                    columnDefs=[
+                        {"field": "id", "hide": True},
+                        {
+                            "field": "nome",
+                            "headerName": "Empresa",
+                            "checkboxSelection": True,
+                            "headerCheckboxSelection": True,
+                            "headerCheckboxSelectionFilteredOnly": True,
+                        },
+                        {"field": "segmento", "headerName": "Segmento"},
+                    ],
+                    getRowId="params.data.id",
+                    rowData=data_row_empresas,
+                    selectedRows=[],
+                    dashGridOptions={
+                        "rowSelection": "multiple",
+                        "suppressRowClickSelection": True,
+                        "overlayLoadingTemplate": {
+                            "function": "'<span>Selecione uma empresa primeiro</span>'"
+                        },
+                        "overlayNoRowsTemplate": {
+                            "function": "'<span>Não há registros</span>'"
+                        },
+                    },
+                    defaultColDef={
+                        "resizable": False,
+                        "filter": True,
+                        "floatingFilter": True,
+                        "floatingFilterComponentParams": {
+                            "suppressFilterButton": True,
+                        },
+                        "suppressMenu": True,
+                        "suppressMovable": True,
+                        "flex": 1,
+                    },
+                ),
+                dmc.Group(
+                    children=[
+                        dmc.Button(
+                            id="btn-salvar-clientes-consultor",
+                            children="Salvar",
+                            ml="auto",
+                            leftIcon=DashIconify(
+                                icon="fluent:save-20-regular", width=20
+                            ),
+                        ),
+                    ]
                 ),
             ]
         ),

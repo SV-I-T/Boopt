@@ -2,7 +2,17 @@ import dash_ag_grid as dag
 import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
-from dash import Input, Output, State, callback, html, no_update, register_page
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_chartjs import ChartJs
 from dash_iconify import DashIconify
@@ -14,7 +24,7 @@ from utils.usuario import Usuario
 from utils.vela import VelaAssessment
 
 register_page(
-    __name__, path="/app/admin/vela/results", title="ADM - Resultados Vela Assessment"
+    __name__, path="/app/admin/vela/dashboard", title="Dashboard Vela Assessment"
 )
 
 
@@ -26,25 +36,92 @@ def layout():
         {"value": str(empresa["_id"]), "label": empresa["nome"]}
         for empresa in usr_atual.buscar_empresas()
     ]
+    valor_empresa = usr_atual.empresa
 
-    data_aplicacao = consultar_assessments_disponiveis(usr_atual, usr_atual.empresa)
+    data_gestores = consultar_gestores(valor_empresa)
+
+    painel_filtros = [
+        dmc.Select(
+            id="adm-results-vela-empresa",
+            label="Empresa",
+            data=data_empresas,
+            value=str(valor_empresa),
+            icon=DashIconify(icon="fluent:building-24-regular", width=24),
+            searchable=True,
+            nothingFound="Não encontramos nada",
+            display="block" and (usr_atual.role in (Role.DEV, Role.CONS)) or "none",
+        ),
+        dmc.MultiSelect(
+            id="adm-results-vela-gestores",
+            label=[
+                "Gestores",
+                dmc.Button(
+                    id="adm-results-vela-gestores-all",
+                    children="Todos",
+                    compact=True,
+                    variant="subtle",
+                    size="xs",
+                    ml="0.5rem",
+                ),
+            ],
+            placeholder="Selecionar",
+            data=data_gestores,
+            clearable=True,
+        ),
+        dmc.MultiSelect(
+            id="adm-results-vela-unidades",
+            label=[
+                "Unidades",
+                dmc.Button(
+                    id="adm-results-vela-unidades-all",
+                    children="Todos",
+                    compact=True,
+                    variant="subtle",
+                    size="xs",
+                    ml="0.5rem",
+                ),
+            ],
+            placeholder="Selecionar",
+            clearable=True,
+        ),
+        dmc.MultiSelect(
+            id="adm-results-vela-aplicacao",
+            label=[
+                "Aplicação",
+                dmc.Button(
+                    id="adm-results-vela-aplicacao-all",
+                    children="Todos",
+                    compact=True,
+                    variant="subtle",
+                    size="xs",
+                    ml="0.5rem",
+                ),
+            ],
+            placeholder="Selecionar",
+            clearable=True,
+        ),
+        dmc.Button(
+            id="adm-results-vela-ok-btn",
+            children="Aplicar filtros",
+            rightIcon=DashIconify(icon="fluent:arrow-right-24-regular", width=24),
+        ),
+    ]
 
     return [
-        dmc.Group(
-            children=[
-                dmc.Select(
-                    id="adm-results-vela-empresa",
-                    data=data_empresas,
-                    value=str(usr_atual.empresa),
-                    icon=DashIconify(icon="fluent:building-24-regular", width=24),
-                    searchable=True,
-                    nothingFound="Não encontramos nada",
-                    display="block"
-                    and (usr_atual.role in (Role.DEV, Role.CONS))
-                    or "none",
-                ),
-                dmc.MultiSelect(id="adm-results-vela-aplicacao", data=data_aplicacao),
-            ]
+        dmc.Accordion(
+            children=dmc.AccordionItem(
+                value="filtros",
+                children=[
+                    dmc.AccordionControl(
+                        "Filtros",
+                        icon=DashIconify(icon="fluent:filter-24-regular", width=24),
+                    ),
+                    dmc.AccordionPanel(painel_filtros),
+                ],
+            ),
+            variant="separated",
+            radius="xl",
+            value="filtros",
         ),
         html.Div(
             className="vela-card-metricas",
@@ -62,6 +139,13 @@ def layout():
                     children=[
                         html.Span(id="adm-results-vela-qtd-respostas"),
                         html.Label("respostas"),
+                    ],
+                ),
+                html.Div(
+                    className="qtd-aplicacoes",
+                    children=[
+                        html.Span(id="adm-results-vela-qtd-aplicacoes"),
+                        html.Label("aplicações"),
                     ],
                 ),
             ],
@@ -82,7 +166,6 @@ def layout():
                     },
                 },
             },
-            style={"display": "none"},
         ),
         ChartJs(
             id="adm-results-vela-competencias",
@@ -104,12 +187,9 @@ def layout():
                         "anchor": "end",
                         "color": "#fff",
                         "borderRadius": 4,
-                        "formatter": "function(value, context) {return context.dataIndex;}",
                     },
                     "legend": {"display": False},
                 },
-                "responsive": True,
-                "aspectRatio": 1,
             },
         ),
         dag.AgGrid(
@@ -123,10 +203,6 @@ def layout():
                 },
             },
             defaultColDef={
-                "filter": True,
-                "floatingFilterComponentParams": {
-                    "suppressFilterButton": True,
-                },
                 "suppressMenu": True,
                 "suppressMovable": True,
                 "cellStyle": {
@@ -138,18 +214,169 @@ def layout():
     ]
 
 
+clientside_callback(
+    ClientsideFunction("clientside", "selecionar_todos"),
+    Output("adm-results-vela-gestores", "value"),
+    Input("adm-results-vela-gestores-all", "n_clicks"),
+    State("adm-results-vela-gestores", "data"),
+    prevent_initial_call=True,
+)
+
+clientside_callback(
+    ClientsideFunction("clientside", "selecionar_todos"),
+    Output("adm-results-vela-unidades", "value"),
+    Input("adm-results-vela-unidades-all", "n_clicks"),
+    State("adm-results-vela-unidades", "data"),
+    prevent_initial_call=True,
+)
+
+clientside_callback(
+    ClientsideFunction("clientside", "selecionar_todos"),
+    Output("adm-results-vela-aplicacao", "value"),
+    Input("adm-results-vela-aplicacao-all", "n_clicks"),
+    State("adm-results-vela-aplicacao", "data"),
+    prevent_initial_call=True,
+)
+
+
+def consultar_gestores(id_empresa: ObjectId) -> list[dict[str, str]]:
+    return list(
+        db("Boopt", "Usuários").find(
+            {"empresa": id_empresa, "role": "Gestor"},
+            {"_id": 0, "value": {"$toString": "$_id"}, "label": "$nome"},
+        )
+    )
+
+
+@callback(
+    Output("adm-results-vela-gestores", "data"),
+    Input("adm-results-vela-empresa", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_gestores(id_empresa: str):
+    return consultar_gestores(ObjectId(id_empresa))
+
+
+def consultar_unidades(gestores: list[str]) -> list[dict[str, str | int]]:
+    return list(
+        db("Boopt", "Usuários").aggregate(
+            [
+                {"$match": {"_id": {"$in": [ObjectId(gestor) for gestor in gestores]}}},
+                {"$unwind": "$unidades"},
+                {
+                    "$group": {
+                        "_id": "$empresa",
+                        "cod": {"$addToSet": "$unidades"},
+                    }
+                },
+                {"$unwind": "$cod"},
+                {
+                    "$lookup": {
+                        "from": "Empresas",
+                        "let": {"empresa": "$_id", "cod": "$cod"},
+                        "pipeline": [
+                            {"$match": {"$expr": {"$eq": ["$_id", "$$empresa"]}}},
+                            {"$unwind": "$unidades"},
+                            {"$match": {"$expr": {"$eq": ["$unidades.cod", "$$cod"]}}},
+                            {"$project": {"_id": 0, "nome": "$unidades.nome"}},
+                        ],
+                        "as": "nome",
+                    },
+                },
+                {
+                    "$project": {
+                        "_id": 0,
+                        "value": "$cod",
+                        "label": {
+                            "$getField": {
+                                "field": "nome",
+                                "input": {"$first": "$nome"},
+                            }
+                        },
+                    }
+                },
+            ]
+        )
+    )
+
+
+@callback(
+    Output("adm-results-vela-unidades", "data"),
+    Input("adm-results-vela-gestores", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_unidades(gestores: list[str]):
+    return consultar_unidades(gestores)
+
+
+def consultar_aplicacoes(id_unidades: list[int], id_empresa: ObjectId):
+    r = db("Boopt", "Usuários").aggregate(
+        [
+            {
+                "$match": {
+                    "unidades": {"$in": id_unidades},
+                    "empresa": id_empresa,
+                }
+            },
+            {"$group": {"_id": None, "data": {"$push": "$_id"}}},
+            {
+                "$lookup": {
+                    "from": "VelaAplicações",
+                    "let": {"usuarios": "$data"},
+                    "pipeline": [
+                        {
+                            "$set": {
+                                "inter": {
+                                    "$setIntersection": ["$participantes", "$$usuarios"]
+                                },
+                                "_id": {"$toString": "$_id"},
+                            }
+                        },
+                        {"$match": {"inter.0": {"$exists": 1}}},
+                    ],
+                    "as": "aplicacoes",
+                }
+            },
+            {"$project": {"aplicacoes": {"_id": 1, "descricao": 1}, "_id": 0}},
+        ]
+    )
+    if not r.alive:
+        return []
+    aplicacoes = r.next()["aplicacoes"]
+    return [
+        {"label": aplicacao["descricao"], "value": aplicacao["_id"]}
+        for aplicacao in aplicacoes
+    ]
+
+
+@callback(
+    Output("adm-results-vela-aplicacao", "data"),
+    Input("adm-results-vela-unidades", "value"),
+    State("adm-results-vela-empresa", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_aplicacoes(id_unidades: list[str], id_empresa: str):
+    return consultar_aplicacoes(id_unidades, ObjectId(id_empresa))
+
+
 @callback(
     Output("adm-results-vela-nota-media", "children"),
     Output("adm-results-vela-qtd-respostas", "children"),
+    Output("adm-results-vela-qtd-aplicacoes", "children"),
     Output("adm-results-vela-etapas", "data"),
     Output("adm-results-vela-competencias", "data"),
     Output("adm-results-vela-table", "columnDefs"),
     Output("adm-results-vela-table", "rowData"),
-    Input("adm-results-vela-aplicacao", "value"),
+    Input("adm-results-vela-ok-btn", "n_clicks"),
+    State("adm-results-vela-aplicacao", "value"),
+    prevent_initial_call=True,
 )
-def atualizar_dashboard_adm_vela_resultados(ids_aplicacao: list[str]):
+def atualizar_dashboard_adm_vela_resultados(n: int, ids_aplicacao: list[str]):
+    if not n:
+        raise PreventUpdate
     if not ids_aplicacao:
         return (
+            None,
             None,
             None,
             {"datasets": [], "labels": []},
@@ -244,7 +471,9 @@ def atualizar_dashboard_adm_vela_resultados(ids_aplicacao: list[str]):
                         "cor"
                     ).to_list(),
                 },
-                "labels": df_notas_competencias.get_column("nota").round(0).to_list(),
+                "labels": df_notas_competencias.get_column("nota")
+                .map_elements(lambda x: f"{x:.1f}", return_dtype=str)
+                .to_list(),
             }
         ],
     }
@@ -257,7 +486,10 @@ def atualizar_dashboard_adm_vela_resultados(ids_aplicacao: list[str]):
         .with_columns(pl.col(pl.NUMERIC_DTYPES).round(1))
     )
 
-    GRID_COLUNAS = [{"field": col} for col in df_notas_competencias_usuarios.columns]
+    GRID_COLUNAS = [
+        {"field": col, "valueFormatter": {"function": "FMT(params.value)"}}
+        for col in df_notas_competencias_usuarios.columns
+    ]
     GRID_DATA = df_notas_competencias_usuarios.to_dicts()
 
     NOTA_MEDIA = (
@@ -269,9 +501,12 @@ def atualizar_dashboard_adm_vela_resultados(ids_aplicacao: list[str]):
 
     QTD_RESPOSTAS = df_respostas.get_column("_id_resposta").n_unique()
 
+    QTD_APLICACOES = df_respostas.get_column("_id_aplicacao").n_unique()
+
     return (
         f"{NOTA_MEDIA:.1f}",
         QTD_RESPOSTAS,
+        QTD_APLICACOES,
         DATA_NOTAS_ETAPAS,
         DATA_NOTAS_COMPETENCIAS,
         GRID_COLUNAS,
@@ -332,30 +567,3 @@ def consultar_df_respostas_aplicacoes(ids_aplicacao: list[ObjectId]):
     )
 
     return aplicacoes
-
-
-def consultar_assessments_disponiveis(usr: Usuario, id_empresa: str):
-    return list(
-        db("Boopt", "VelaAplicações").aggregate(
-            [
-                {"$match": {"empresa": ObjectId(id_empresa)}},
-                {
-                    "$project": {
-                        "_id": 0,
-                        "value": {"$toString": "$_id"},
-                        "label": {
-                            "$concat": [
-                                {
-                                    "$dateToString": {
-                                        "date": {"$toDate": "$_id"},
-                                        "format": "(%d/%m/%Y) - ",
-                                    }
-                                },
-                                "$descricao",
-                            ]
-                        },
-                    }
-                },
-            ]
-        )
-    )

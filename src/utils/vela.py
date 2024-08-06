@@ -34,7 +34,7 @@ class VelaAssessment(BaseModel):
     def resultado(cls, id_resposta: ObjectId) -> dict | None:
         r = db("Boopt", "VelaRespostas").aggregate(
             [
-                {"$match": {"_id": ObjectId(id_resposta)}},
+                {"$match": {"_id": id_resposta}},
                 {
                     "$lookup": {
                         "from": "VelaAplicações",

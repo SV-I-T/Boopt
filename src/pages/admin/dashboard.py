@@ -44,7 +44,7 @@ def layout():
     )
 
     return [
-        html.H1("Painel de administração", className="titulo-pagina"),
+        html.H1("Administração", className="titulo-pagina"),
         html.H1("Sistema", className="secao-pagina"),
         html.Div(
             className="grid grid-3-col",

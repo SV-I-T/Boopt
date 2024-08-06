@@ -23,18 +23,22 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, path="/app/admin/empresas/edit", title="Editar empresa")
+register_page(
+    __name__, path_template="/app/admin/empresas/<id_empresa>", title="Editar empresa"
+)
 
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS))
-def layout(id: str = None):
-    if not id:
+def layout(id_empresa: str = None, **kwargs):
+    id_empresa = None if id_empresa == "new" else id_empresa
+
+    if not id_empresa:
         texto_titulo = [
             "Nova Empresa",
         ]
         layout_edicao = layout_nova_empresa()
     else:
-        empresa = Empresa.buscar("_id", id)
+        empresa = Empresa.buscar("_id", id_empresa)
         texto_titulo = [
             DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
             empresa.nome,

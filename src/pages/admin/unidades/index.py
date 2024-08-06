@@ -25,7 +25,7 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, path="/app/admin/unidades", title="ADM - Unidades")
+register_page(__name__, path="/app/admin/unidades", title="Unidades")
 
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
@@ -40,103 +40,111 @@ def layout():
     data_unidades = buscar_unidades(usr_atual.empresa)
 
     return [
-        html.H1("Administração de Unidades", className="titulo-pagina"),
-        dmc.Select(
-            id="select-empresa-unidades",
-            label="Empresa",
-            data=data_empresas,
-            value=str(usr_atual.empresa),
-            display=usr_atual.role != Role.ADM and "block" or "none",
-        ),
-        dag.AgGrid(
-            id="table-empresa-unidades",
-            className="ag-theme-quartz compact",
-            columnDefs=[
-                {"field": "cod", "headerName": "Código"},
-                {"field": "nome", "headerName": "Unidade"},
-            ],
-            getRowId="params.data.cod",
-            rowData=data_unidades,
-            selectedRows=[],
-            dashGridOptions={
-                "rowSelection": "multiple",
-                "suppressRowClickSelection": True,
-                "overlayLoadingTemplate": {"function": "'<span>Carregando...</span>'"},
-                "overlayNoRowsTemplate": {
-                    "function": "'<span>Não há unidades cadastradas</span>'"
-                },
-            },
-            defaultColDef={
-                "resizable": False,
-                "filter": True,
-                "floatingFilter": True,
-                "floatingFilterComponentParams": {
-                    "suppressFilterButton": True,
-                },
-                "suppressMenu": True,
-                "suppressMovable": True,
-                "flex": 1,
-            },
-            columnSize="autoSize",
-            columnSizeOptions={"keys": ["cod"]},
-            style={"width": 500},
-        ),
-        dmc.Button(
-            id="btn-download-empresa-unidades",
-            children="Baixar unidades (.xlsx)",
-            leftIcon=DashIconify(icon="fluent:arrow-download-16-filled", width=16),
-        ),
-        html.H1("Importar unidades", className="secao-pagina"),
-        dcc.Markdown("""
+        html.H1("Unidades", className="titulo-pagina"),
+        dmc.Stack(
+            [
+                dmc.Select(
+                    id="select-empresa-unidades",
+                    label="Empresa",
+                    data=data_empresas,
+                    value=str(usr_atual.empresa),
+                    display=usr_atual.role != Role.ADM and "block" or "none",
+                ),
+                dag.AgGrid(
+                    id="table-empresa-unidades",
+                    className="ag-theme-quartz compact",
+                    columnDefs=[
+                        {"field": "cod", "headerName": "Código"},
+                        {"field": "nome", "headerName": "Unidade"},
+                    ],
+                    getRowId="params.data.cod",
+                    rowData=data_unidades,
+                    selectedRows=[],
+                    dashGridOptions={
+                        "rowSelection": "multiple",
+                        "suppressRowClickSelection": True,
+                        "overlayLoadingTemplate": {
+                            "function": "'<span>Carregando...</span>'"
+                        },
+                        "overlayNoRowsTemplate": {
+                            "function": "'<span>Não há unidades cadastradas</span>'"
+                        },
+                    },
+                    defaultColDef={
+                        "resizable": False,
+                        "filter": True,
+                        "floatingFilter": True,
+                        "floatingFilterComponentParams": {
+                            "suppressFilterButton": True,
+                        },
+                        "suppressMenu": True,
+                        "suppressMovable": True,
+                        "flex": 1,
+                    },
+                    columnSize="autoSize",
+                    columnSizeOptions={"keys": ["cod"]},
+                    style={"width": 500},
+                ),
+                dmc.Button(
+                    id="btn-download-empresa-unidades",
+                    children="Baixar unidades (.xlsx)",
+                    leftIcon=DashIconify(
+                        icon="fluent:arrow-download-16-filled", width=16
+                    ),
+                ),
+                html.H1("Importar unidades", className="secao-pagina"),
+                dcc.Markdown("""
 Você pode adicionar novas unidades ou editar unidades já existentes por meio da importação de uma planilha excel (.xlsx). Para facilitar o processo, recomendamos que baixe a planilha pelo botão acima, edite a mesma e depois faça a importação. É importante que não haja nenhuma mudança nas colunas, caso contrário você receberá um erro.
 
 Cada unidade deve sempre conter um código único e numérico de identificação e um nome descritivo.
 
 Para a edição de unidades já existentes, você pode alterar o nome a vontade, porém recomendamos que o código sempre permaneca o mesmo, pois é a ele que vendedores e gerentes/supervisores estarão associados.
 """),
-        dcc.Upload(
-            id="upload-empresa-unidades",
-            className="container-upload",
-            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            style_active={},
-            style_reject={},
-            className_active="upload-ativo",
-            className_reject="upload-negado",
-            max_size=2e6,
-            children=[
-                "Arraste aqui ou ",
-                html.A("selecione um arquivo"),
-                "(.xlsx)",
-                # DashIconify(
-                #     icon="fluent:document-add-48-regular",
-                #     width=48,
-                #     color="#1717FF",
-                # ),
-                dmc.Text(
-                    "Tamanho máximo: 2MB",
-                    size=14,
-                    opacity=0.5,
-                ),
-                html.Div(
-                    id="div-empresa-unidades-arquivo",
+                dcc.Upload(
+                    id="upload-empresa-unidades",
+                    className="container-upload",
+                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    style_active={},
+                    style_reject={},
+                    className_active="upload-ativo",
+                    className_reject="upload-negado",
+                    max_size=2e6,
                     children=[
-                        dmc.Divider(w="100%"),
-                        dmc.Group(
+                        "Arraste aqui ou ",
+                        html.A("selecione um arquivo"),
+                        "(.xlsx)",
+                        # DashIconify(
+                        #     icon="fluent:document-add-48-regular",
+                        #     width=48,
+                        #     color="#1717FF",
+                        # ),
+                        dmc.Text(
+                            "Tamanho máximo: 2MB",
+                            size=14,
+                            opacity=0.5,
+                        ),
+                        html.Div(
+                            id="div-empresa-unidades-arquivo",
                             children=[
-                                DashIconify(
-                                    icon="vscode-icons:file-type-excel",
-                                    width=24,
+                                dmc.Divider(w="100%"),
+                                dmc.Group(
+                                    children=[
+                                        DashIconify(
+                                            icon="vscode-icons:file-type-excel",
+                                            width=24,
+                                        ),
+                                        dmc.Text(id="empresa-unidades-arquivo"),
+                                    ],
                                 ),
-                                dmc.Text(id="empresa-unidades-arquivo"),
                             ],
+                            style={"display": "none"},
                         ),
                     ],
-                    style={"display": "none"},
                 ),
-            ],
+                dmc.Button("Importar", id="btn-salvar-empresa-unidades"),
+                html.Div(id="feedback-empresa-unidades"),
+            ]
         ),
-        dmc.Button("Importar", id="btn-salvar-empresa-unidades"),
-        html.Div(id="feedback-empresa-unidades"),
     ]
 
 

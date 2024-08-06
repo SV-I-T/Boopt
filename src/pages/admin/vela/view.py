@@ -1,3 +1,5 @@
+import locale
+
 import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
@@ -10,18 +12,18 @@ from utils.vela import VelaAssessment
 
 register_page(
     __name__,
-    path="/app/admin/vela/view",
+    path_template="/app/admin/vela/<id_aplicacao>/view",
     title="Visualizar Vela Assessment",
 )
 
 
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
-def layout(id: str = None):
+def layout(id_aplicacao: str = None, **kwargs):
     usr = Usuario.atual()
 
     assessment = VelaAssessment(
         **db("Boopt", "VelaAplicações").find_one(
-            {"_id": ObjectId(id), "empresa": usr.empresa}
+            {"_id": ObjectId(id_aplicacao), "empresa": usr.empresa}
         )
     )
 
@@ -30,12 +32,15 @@ def layout(id: str = None):
             dmc.Title("Assessment inexistente", className="titulo-pagina"),
         ]
 
-    respostas_aplicacao: pl.DataFrame = baixar_respostas_aplicacao(id)
+    respostas_aplicacao: pl.DataFrame = baixar_respostas_aplicacao(id_aplicacao)
 
     return [
-        dmc.Title("Visualizar Vela Assessment", className="titulo-pagina"),
-        dmc.Title(
-            f'{assessment.descricao} ({assessment.id_.generation_time.strftime("%d/%m/%Y")})',
+        html.H1(
+            f"{assessment.descricao}",
+            className="titulo-pagina",
+        ),
+        html.H1(
+            f'Criado em {assessment.id_.generation_time.strftime("%d de %b. de %Y")}',
             className="secao-pagina",
         ),
         dmc.Table(
@@ -49,8 +54,8 @@ def layout(id: str = None):
                     html.Tr(
                         [
                             html.Th("Nome"),
-                            html.Th("Data de envio"),
-                            html.Th("Pontos"),
+                            html.Th("Respondido em"),
+                            html.Th("Pontuação"),
                         ]
                     )
                 ),
@@ -61,15 +66,15 @@ def layout(id: str = None):
                                 html.Td(row["nome"]),
                                 html.Td(
                                     ObjectId(row["_id"]).generation_time.strftime(
-                                        "%d/%m/%Y %H:%M"
+                                        "%d de %b. de %Y às %H:%M"
                                     )
                                     if row["_id"]
                                     else "--"
                                 ),
                                 html.Td(
                                     dmc.Anchor(
-                                        children=f'{row["nota"]:.1f}/70',
-                                        href=f'/app/vela/resultado/?usr={usr.id}&resposta={row["_id"]}',
+                                        children=f'{locale.format_string("%.1f", row["nota"])}/70',
+                                        href=f'/app/vela/report/{usr.id}/{row["_id"]}',
                                     )
                                     if row["nota"]
                                     else "--"

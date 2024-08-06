@@ -39,12 +39,16 @@ EXPLICACAO_MD = """
 """
 
 
-register_page(__name__, path="/app/vela/teste", title="Vela Assessment - Teste")
+register_page(
+    __name__,
+    path_template="/app/vela/teste/<id_aplicacao>/",
+    title="Vela Assessment - Teste",
+)
 
 
 @checar_perfil
-def layout(id: str = None, secao: str = "instrucoes"):
-    if id is None or len(id) != 24:
+def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
+    if id_aplicacao is None or len(id_aplicacao) != 24:
         return dmc.Alert(
             "Este formulário não existe. Verifique o link", title="Erro", color="red"
         )
@@ -107,7 +111,7 @@ def layout(id: str = None, secao: str = "instrucoes"):
                             ],
                         ),
                         dmc.Anchor(
-                            href=f"/app/vela/teste/?id={id}&secao=frases",
+                            href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
                             children=dmc.Button(
                                 "Iniciar o teste",
                                 classNames={"root": "btn-vela"},
@@ -121,31 +125,30 @@ def layout(id: str = None, secao: str = "instrucoes"):
 
     elif secao == "frases":
         aplicacao = db("Boopt", "VelaAplicações").find_one(
-            {"participantes": usr.id_, "_id": ObjectId(id)}
+            {"participantes": usr.id_, "_id": ObjectId(id_aplicacao)}
         )
 
-        formulario_frases = db("Boopt", "VelaFormulários").find_one(
-            {"_id": aplicacao["id_form"]},
-            {
-                "_id": 0,
-                "competencias.frases.desc": 1,
-                "competencias.frases.id": 1,
-            },
-        )
+        df_competencias = VelaAssessment.carregar_formulario(
+            v_form=aplicacao["v_form"]
+        ).competencias
 
         frases = {
             str(frase["id"]): {"frase": frase["desc"], "valor": None}
-            for competencia in formulario_frases["competencias"]
-            for frase in competencia["frases"]
+            for frase in df_competencias.iter_rows(named=True)
         }
 
-        ordem = sample(range(1, 63 + 1), 63)
+        ordem = sample(range(1, len(frases) + 1), len(frases))
 
         frase_atual = frases[str(ordem[0])]
 
         return html.Div(
             className="center-container test-vela",
             children=[
+                dcc.Store(
+                    id="store-id-aplicacao-vela",
+                    data=id_aplicacao,
+                    storage_type="memory",
+                ),
                 dcc.Store(id="store-frases-vela", data=frases, storage_type="memory"),
                 dcc.Store(id="store-status-vela", data=False, storage_type="memory"),
                 dcc.Store(id="store-ordem-vela", data=ordem, storage_type="memory"),
@@ -278,15 +281,13 @@ clientside_callback(
 @callback(
     Output("send-container-vela", "children"),
     Input("store-status-vela", "data"),
-    State("url", "search"),
+    State("store-id-aplicacao-vela", "data"),
     prevent_initial_call=True,
 )
-def habilitar_envio(status_pronto, search):
+def habilitar_envio(status_pronto, id_aplicacao):
     if not status_pronto:
         raise PreventUpdate
     else:
-        params = parse_qs(search[1:])
-        id_aplicacao = params["id"][0]
         return (
             dmc.Group(
                 style={"margin-top": "auto", "flex-wrap": "nowrap"},
@@ -302,7 +303,7 @@ def habilitar_envio(status_pronto, search):
                         ],
                     ),
                     dmc.Anchor(
-                        href=f"/app/vela/teste/?id={id_aplicacao}&secao=frases",
+                        href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
                         children=dmc.Button(
                             id="btn-enviar",
                             children="Enviar",
@@ -320,29 +321,27 @@ def habilitar_envio(status_pronto, search):
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
     State("store-frases-vela", "data"),
-    State("url", "search"),
+    State("store-id-aplicacao-vela", "data"),
     prevent_initial_call=True,
 )
-def salvar_resposta(n, frases, search):
+def salvar_resposta(n, frases, id_aplicacao):
     if not n or callback_context.triggered_id != "btn-enviar":
         raise PreventUpdate
 
     else:
         usr_atual = Usuario.atual()
-        params = parse_qs(search[1:])
-        id_aplicacao = params["id"][0]
         dados_resposta = {
             "frases": {k: int(v["valor"]) for k, v in frases.items()},
             "id_aplicacao": ObjectId(id_aplicacao),
             "id_usuario": usr_atual.id_,
         }
-        ic(dados_resposta)
 
         dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["frases"])
 
         resposta = db("Boopt", "VelaRespostas").insert_one(dados_resposta)
+
         if resposta.inserted_id:
-            return f"?id={id_aplicacao}&secao=enviado", no_update
+            return "?secao=enviado", no_update
         else:
             return no_update, dmc.Notification(
                 id="erro-envio-teste",

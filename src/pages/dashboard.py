@@ -3,7 +3,7 @@ from dash import register_page
 from utils.login import checar_perfil
 
 register_page(
-    __name__, path="/app/dashboard", title="Dashboard", redirect_from=["/app"]
+    __name__, path="/app/dashboard", title="Minha Boopt", redirect_from=["/app"]
 )
 
 

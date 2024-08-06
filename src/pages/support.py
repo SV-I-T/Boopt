@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import dcc, html, register_page
 
-register_page(__name__, path="/app/support", title="Boopt - Suporte")
+register_page(__name__, path="/app/support", title="Suporte")
 
 
 def layout():
