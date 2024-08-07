@@ -3,7 +3,7 @@
     border-width: 1px;
     border-style: solid;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.1);
-    border-radius: 30px;
+    border-radius: 20px;
     padding: 1rem;
 }
 
@@ -35,7 +35,12 @@
     color: #000;
 }
 
-.card-painel:hover {
+.card-painel:hover,
+.card-painel:active {
     transform: scale(1.05);
     border-color: var(--azul-sv);
+}
+
+.card-painel img {
+    padding: 0.5rem;
 }
