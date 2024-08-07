@@ -134,7 +134,7 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
 
 def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr], int]:
     r = (
-        db("Boopt", "VelaAplicações")
+        db("VelaAplicações")
         .aggregate(
             [
                 {"$match": {"empresa": ObjectId(empresa)}},

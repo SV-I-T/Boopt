@@ -16,7 +16,7 @@ register_page(__name__, path="/app/admin/consultores", title="Consultores")
 def layout():
     usr_atual = Usuario.atual()
 
-    data_consultores = list(db("Boopt", "ViewUsuáriosConsultores").find())
+    data_consultores = list(db("ViewUsuáriosConsultores").find())
 
     data_row_empresas = [
         {
@@ -106,9 +106,7 @@ def atualizar_clientes_selecionados(_id_consultor: str):
     if usr_atual.role != Role.DEV:
         raise PreventUpdate
     id_consultor = ObjectId(_id_consultor)
-    usr = db("Boopt", "Usuários").find_one(
-        {"_id": id_consultor}, {"_id": 0, "clientes": 1}
-    )
+    usr = db("Usuários").find_one({"_id": id_consultor}, {"_id": 0, "clientes": 1})
     if "clientes" not in usr:
         return [], "0 clientes"
     return [
@@ -150,7 +148,7 @@ def salvar_clientes_consultor(
     else:
         update = {"$unset": {"clientes": 1}}
 
-    r = db("Boopt", "Usuários").update_one({"_id": id_consultor}, update=update)
+    r = db("Usuários").update_one({"_id": id_consultor}, update=update)
 
     if not r.acknowledged:
         return dmc.Notification(

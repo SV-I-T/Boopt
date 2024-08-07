@@ -99,7 +99,7 @@ def atualizar_tabela_empresas(n: int, busca: str):
 
 def consultar_dados_tabela_empresas(busca: str):
     busca_regex = {"$regex": busca, "$options": "i"}
-    empresas = db("Boopt", "Empresas").aggregate(
+    empresas = db("Empresas").aggregate(
         [
             {
                 "$match": {

@@ -492,7 +492,7 @@ def excluir_usr(n: int, search: str):
     params = parse_qs(search[1:])
     id_usr = params["id"][0]
 
-    r = db("Boopt", "Usuários").delete_one(
+    r = db("Usuários").delete_one(
         {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa}
     )
 
@@ -550,7 +550,7 @@ def redefinir_senha(n: int, search: str):
 
         nova_senha = usr.data.strftime("%d%m%Y")
 
-        r = db("Boopt", "Usuários").update_one(
+        r = db("Usuários").update_one(
             {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa},
             update={"$set": {"senha_hash": generate_password_hash(nova_senha)}},
         )

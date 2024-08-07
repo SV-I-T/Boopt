@@ -179,7 +179,7 @@ def construir_resultados(id_resposta: str):
 
 
 def buscar_resposta(id_resposta: ObjectId):
-    r = db("Boopt", "VelaRespostas").aggregate(
+    r = db("VelaRespostas").aggregate(
         [
             {"$match": {"_id": id_resposta}},
             {

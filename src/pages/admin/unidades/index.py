@@ -297,7 +297,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
             unidades = df_unidades.rename(
                 {"Código": "cod", "Unidade": "nome"}
             ).to_dicts()
-            r = db("Boopt", "Empresas").update_one(
+            r = db("Empresas").update_one(
                 {"_id": id_empresa}, update={"$set": {"unidades": unidades}}
             )
             assert r.acknowledged, "Ocorreu algum erro ao atualizar as unidades. Tente novamente mais tarde."

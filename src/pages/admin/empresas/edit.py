@@ -52,9 +52,7 @@ def layout(id_empresa: str = None, **kwargs):
 
 
 def layout_nova_empresa(nome: str = None, segmento: str = None):
-    segmentos = db("Boopt", "Empresas").distinct(
-        "segmento", {"segmento": {"$ne": None}}
-    )
+    segmentos = db("Empresas").distinct("segmento", {"segmento": {"$ne": None}})
     return html.Div(
         className="editar-empresa",
         children=[
@@ -229,7 +227,7 @@ def excluir_empresa(n: int, search: str):
     params = parse_qs(search[1:])
     id_empresa = params["id"][0]
 
-    r = db("Boopt", "Empresas").delete_one({"_id": ObjectId(id_empresa)})
+    r = db("Empresas").delete_one({"_id": ObjectId(id_empresa)})
 
     if not r.acknowledged:
         return dmc.Notification(

@@ -124,7 +124,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
         )
 
     elif secao == "frases":
-        aplicacao = db("Boopt", "VelaAplicações").find_one(
+        aplicacao = db("VelaAplicações").find_one(
             {"participantes": usr.id_, "_id": ObjectId(id_aplicacao)}
         )
 
@@ -338,7 +338,7 @@ def salvar_resposta(n, frases, id_aplicacao):
 
         dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["frases"])
 
-        resposta = db("Boopt", "VelaRespostas").insert_one(dados_resposta)
+        resposta = db("VelaRespostas").insert_one(dados_resposta)
 
         if resposta.inserted_id:
             return "?secao=enviado", no_update

@@ -59,7 +59,7 @@ class Usuario(BaseModel, UserMixin):
     ):
         if identificador == "_id" and not isinstance(valor, ObjectId):
             valor = ObjectId(valor)
-        usr = db("Boopt", "Usuários").find_one({identificador: valor})
+        usr = db("Usuários").find_one({identificador: valor})
         assert usr, "Este usuário não foi encontrado."
 
         return cls(**usr)
@@ -69,7 +69,7 @@ class Usuario(BaseModel, UserMixin):
     def buscar_login(cls, _id: str) -> dict | None:
         if _id == "None":
             return None
-        usr = db("Boopt", "Usuários").find_one(
+        usr = db("Usuários").find_one(
             {"_id": ObjectId(_id)},
         )
         print(f"Carregando usuário {usr['nome']}")
@@ -81,7 +81,7 @@ class Usuario(BaseModel, UserMixin):
         ), "A senha digitada está incorreta."
 
     def atualizar(self, novos_dados: dict[str, Any]) -> None:
-        r = db("Boopt", "Usuários").update_one(
+        r = db("Usuários").update_one(
             {"_id": self.id_},
             {
                 "$set": {campo: valor for campo, valor in novos_dados.items() if valor},
@@ -108,6 +108,6 @@ class Usuario(BaseModel, UserMixin):
         else:
             return []
 
-        return db("Boopt", "Empresas").find(
+        return db("Empresas").find(
             query, projection={field: 1 for field in project_fields}, sort={"nome": 1}
         )

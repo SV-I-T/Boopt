@@ -171,7 +171,7 @@ def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
 
 
 def carregar_assessment(id_aplicacao: str):
-    r = db("Boopt", "VelaAplicações").aggregate(
+    r = db("VelaAplicações").aggregate(
         [
             {"$match": {"_id": ObjectId(id_aplicacao)}},
             {
@@ -220,7 +220,7 @@ def carregar_assessment(id_aplicacao: str):
 
 def carregar_usuarios_empresa(empresa: str):
     usuarios = list(
-        db("Boopt", "Usuários").find(
+        db("Usuários").find(
             {"empresa": ObjectId(empresa)},
             {
                 "_id": 0,
@@ -363,7 +363,7 @@ def atualizar_assessment(
     id_aplicacao = ObjectId(params["id"][0])
     participantes = [ObjectId(linha["id"]) for linha in linhas]
 
-    r = db("Boopt", "VelaAplicações").update_one(
+    r = db("VelaAplicações").update_one(
         {"_id": id_aplicacao},
         update={
             "$set": {
@@ -418,7 +418,7 @@ def excluir_av(n: int, search: str):
     params = parse_qs(search[1:])
     id_aplicacao = ObjectId(params["id"][0])
 
-    aplicacao = db("Boopt", "VelaAplicações").find_one(
+    aplicacao = db("VelaAplicações").find_one(
         {"_id": id_aplicacao}, {"_id": 0, "empresa": 1}
     )
 
@@ -431,7 +431,7 @@ def excluir_av(n: int, search: str):
             color="red",
         ), no_update
 
-    r = db("Boopt", "VelaAplicações").delete_one({"_id": id_aplicacao})
+    r = db("VelaAplicações").delete_one({"_id": id_aplicacao})
 
     if not r.acknowledged:
         return dmc.Notification(

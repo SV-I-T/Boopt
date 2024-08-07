@@ -12,7 +12,7 @@ class MultipleErrors(ValueError): ...
 # @cache.memoize(timeout=5)
 def buscar_unidades_empresa(id_empresa: ObjectId) -> list[int]:
     unidades: list[int] = (
-        db("Boopt", "Empresas")
+        db("Empresas")
         .aggregate(
             [
                 {"$match": {"_id": id_empresa}},
@@ -55,7 +55,7 @@ class NovosUsuariosBatelada(BaseModel):
         verificar_unidades_cadastradas(self.usuarios)
 
         # return
-        r = db("Boopt", "Usuários").insert_many(
+        r = db("Usuários").insert_many(
             [usuario.model_dump() for usuario in self.usuarios]
         )
         assert (

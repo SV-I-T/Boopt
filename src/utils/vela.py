@@ -27,12 +27,12 @@ class VelaAssessment(BaseModel):
         arbitrary_types_allowed = True
 
     def registrar(self) -> None:
-        r = db("Boopt", "VelaAplicações").insert_one(self.model_dump(exclude={"id_"}))
+        r = db("VelaAplicações").insert_one(self.model_dump(exclude={"id_"}))
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
 
     @classmethod
     def resultado(cls, id_resposta: ObjectId) -> dict | None:
-        r = db("Boopt", "VelaRespostas").aggregate(
+        r = db("VelaRespostas").aggregate(
             [
                 {"$match": {"_id": id_resposta}},
                 {
@@ -76,7 +76,7 @@ class VelaAssessment(BaseModel):
 
     @classmethod
     def testes_disponiveis(cls, id_usr: ObjectId) -> dict | None:
-        r = db("Boopt", "VelaAplicações").aggregate(
+        r = db("VelaAplicações").aggregate(
             [
                 {"$match": {"participantes": id_usr}},
                 # # Buscar somente a última aplicação para o usuário
@@ -120,12 +120,12 @@ class VelaAssessment(BaseModel):
 
     @classmethod
     def buscar_respostas(cls, id_usr: ObjectId) -> list[ObjectId]:
-        r = db("Boopt", "VelaRespostas").find({"id_usuario": id_usr}, {"_id": 1})
+        r = db("VelaRespostas").find({"id_usuario": id_usr}, {"_id": 1})
         return [i["_id"] for i in r]
 
     @classmethod
     def buscar_aplicacoes(cls, id_empresa: ObjectId):
-        r = db("Boopt", "VelaAplicações")
+        r = db("VelaAplicações")
 
     @classmethod
     def carregar_formulario(cls, v_form: int = 1) -> VelaAssessmentDataFrames:

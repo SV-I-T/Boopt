@@ -55,7 +55,7 @@ class NovoUsuario(BaseModel):
             resto2 >= 2 and cpf_d[-1] == 11 - resto2
         )
         assert regra1 and regra2, f"O CPF {cpf} é inválido."
-        assert not db("Boopt", "Usuários").count_documents(
+        assert not db("Usuários").count_documents(
             {"cpf": cpf}
         ), f"O CPF {cpf!r} já foi cadastrado."
         return cpf
@@ -77,7 +77,7 @@ class NovoUsuario(BaseModel):
         return generate_password_hash(self.data.strftime("%d%m%Y"))
 
     def registrar(self) -> None:
-        r = db("Boopt", "Usuários").insert_one(self.model_dump(exclude_none=True))
+        r = db("Usuários").insert_one(self.model_dump(exclude_none=True))
         assert (
             r.acknowledged
         ), "Não conseguimos criar o usuário. Tente novamente mais tarde."

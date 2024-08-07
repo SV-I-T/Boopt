@@ -181,7 +181,7 @@ def consultar_dados_tabela_usuarios(
     if usr_atual.role not in [Role.DEV]:
         pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
 
-    r = db("Boopt", "Usuários").aggregate(pipeline).next()
+    r = db("Usuários").aggregate(pipeline).next()
     usuarios = [Usuario(**usuario) for usuario in r["usuarios"]]
     total = r["cont"][0]["total"] if r["cont"] else 0
 

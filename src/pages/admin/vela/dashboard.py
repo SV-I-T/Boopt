@@ -241,7 +241,7 @@ clientside_callback(
 
 def consultar_gestores(id_empresa: ObjectId) -> list[dict[str, str]]:
     return list(
-        db("Boopt", "Usuários").find(
+        db("Usuários").find(
             {"empresa": id_empresa, "role": "Gestor"},
             {"_id": 0, "value": {"$toString": "$_id"}, "label": "$nome"},
         )
@@ -259,7 +259,7 @@ def atualizar_gestores(id_empresa: str):
 
 def consultar_unidades(gestores: list[str]) -> list[dict[str, str | int]]:
     return list(
-        db("Boopt", "Usuários").aggregate(
+        db("Usuários").aggregate(
             [
                 {"$match": {"_id": {"$in": [ObjectId(gestor) for gestor in gestores]}}},
                 {"$unwind": "$unidades"},
@@ -310,7 +310,7 @@ def atualizar_unidades(gestores: list[str]):
 
 
 def consultar_aplicacoes(id_unidades: list[int], id_empresa: ObjectId):
-    r = db("Boopt", "Usuários").aggregate(
+    r = db("Usuários").aggregate(
         [
             {
                 "$match": {
@@ -516,7 +516,7 @@ def atualizar_dashboard_adm_vela_resultados(n: int, ids_aplicacao: list[str]):
 
 def consultar_df_respostas_aplicacoes(ids_aplicacao: list[ObjectId]):
     aplicacoes = list(
-        db("Boopt", "VelaAplicações").aggregate(
+        db("VelaAplicações").aggregate(
             [
                 {"$match": {"_id": {"$in": ids_aplicacao}}},
                 {

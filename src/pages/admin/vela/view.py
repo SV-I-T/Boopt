@@ -22,7 +22,7 @@ def layout(id_aplicacao: str = None, **kwargs):
     usr = Usuario.atual()
 
     assessment = VelaAssessment(
-        **db("Boopt", "VelaAplicações").find_one(
+        **db("VelaAplicações").find_one(
             {"_id": ObjectId(id_aplicacao), "empresa": usr.empresa}
         )
     )
@@ -91,7 +91,7 @@ def layout(id_aplicacao: str = None, **kwargs):
 
 def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
     r = (
-        db("Boopt", "VelaAplicações").aggregate(
+        db("VelaAplicações").aggregate(
             [
                 {"$match": {"_id": ObjectId(id_aplicacao)}},
                 {
@@ -132,7 +132,7 @@ def baixar_respostas_aplicacao(id_aplicacao: str) -> pl.DataFrame:
         )
     ).next()
 
-    usuarios = db("Boopt", "Usuários").find(
+    usuarios = db("Usuários").find(
         {"_id": {"$in": r["participantes"]}},
         {
             "_id": {"$toString": "$_id"},

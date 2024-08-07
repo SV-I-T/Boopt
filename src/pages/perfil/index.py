@@ -21,7 +21,7 @@ def layout():
     usr = Usuario.atual()
 
     unidades: dict[str, list[str]] = (
-        db("Boopt", "Empresas")
+        db("Empresas")
         .aggregate(
             [
                 {"$match": {"_id": usr.empresa}},
@@ -99,7 +99,7 @@ def layout():
                     children=[
                         dmc.TextInput(
                             label="Empresa",
-                            value=db("Boopt", "Empresas").find_one(
+                            value=db("Empresas").find_one(
                                 {"_id": usr.empresa}, {"nome": 1, "_id": 0}
                             )["nome"],
                             disabled=True,
