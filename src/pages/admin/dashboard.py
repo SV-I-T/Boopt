@@ -5,7 +5,7 @@ from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
 
-register_page(__name__, path="/app/admin", title="Painel de administração")
+register_page(__name__, path="/app/admin", title="Painel de gestão")
 
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
@@ -44,7 +44,7 @@ def layout():
     )
 
     return [
-        html.H1("Administração", className="titulo-pagina"),
+        html.H1("Gestão", className="titulo-pagina"),
         html.H1("Sistema", className="secao-pagina"),
         html.Div(
             className="grid grid-3-col",
@@ -80,15 +80,7 @@ def layout():
                     underline=False,
                     children=html.Div(
                         className="card card-painel",
-                        children=[
-                            dmc.Group(
-                                children=[
-                                    dmc.Image(src=get_asset_url(module["logo"])),
-                                    dmc.Text(module["label"], weight=500),
-                                ],
-                                align="center",
-                            ),
-                        ],
+                        children=dmc.Image(src=get_asset_url(module["logo"])),
                     ),
                 )
                 for module in modules_products
