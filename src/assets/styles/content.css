@@ -5,13 +5,13 @@
     bottom: 0;
     background-color: var(--off-white);
     background-image:
-        url('../imgs/boopt/logo_borda_gradiente.svg');
+        url('../imgs/boopt/logo_borda_cinza.svg');
     background-repeat:
         no-repeat;
     background-position:
         bottom left;
     background-size:
-        500px;
+        400px;
     background-attachment: fixed;
 }
 
@@ -80,7 +80,7 @@ div:has(>#_pages_content) {
 
 @media only screen and (min-width: 1000px) {
     #wrapper {
-        padding-left: calc(var(--navbar-width) - 30px);
+        padding-left: calc(var(--navbar-width));
         z-index: 1;
     }
 

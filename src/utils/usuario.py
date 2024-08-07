@@ -53,6 +53,12 @@ class Usuario(BaseModel, UserMixin):
     def primeiro_nome(self) -> str:
         return self.nome.split(" ")[0]
 
+    @computed_field
+    @property
+    def sigla_nome(self) -> str:
+        nomes = self.nome.split(" ")
+        return f"{nomes[0][0]}{nomes[-1][0]}".upper()
+
     @classmethod
     def buscar(
         cls, identificador: Literal["_id", "email", "cpf"], valor: str | ObjectId

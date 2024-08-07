@@ -17,10 +17,7 @@ def layout_navbar():
     return html.Nav(
         children=[
             dmc.Anchor(
-                children=html.Img(
-                    src=get_asset_url("imgs/boopt/horizontal_azul.svg"),
-                    height=30,
-                ),
+                children=html.Img(src=get_asset_url("imgs/boopt/horizontal_azul.svg")),
                 href="/app/vela",
             ),
             html.Div(id="menu-usr", children=menu_usuario(usr)),
@@ -32,40 +29,53 @@ def layout_navbar():
 def menu_usuario(usr: Usuario):
     if usr.is_authenticated:
         return [
-            dmc.NavLink(
-                label=[
-                    dmc.Text(
-                        className="nome-usr-navbar",
-                        children=usr.primeiro_nome,
-                    ),
-                    dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
-                ],
-                icon=DashIconify(icon="fluent:person-20-regular", width=20),
+            dmc.Anchor(
                 href="/app/perfil",
+                className="usr-card",
+                underline=False,
+                mb="1rem",
+                children=[
+                    html.Div(children=usr.sigla_nome, className="avatar"),
+                    html.Div(
+                        children=[
+                            dmc.Text(
+                                className="nome-usr-navbar",
+                                children=usr.primeiro_nome,
+                            ),
+                            dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
+                        ]
+                    ),
+                ],
             ),
+            # dmc.NavLink(
+            #     label="Início",
+            #     href="/app/vela",
+            #     icon=DashIconify(icon="fluent:home-24-regular", width=24),
+            # ),
             dmc.NavLink(
                 label="Início",
                 href="/app/vela",
-                icon=DashIconify(icon="fluent:home-20-regular", width=20),
+                icon=DashIconify(icon="fluent:home-24-regular", width=24),
             ),
             dmc.NavLink(
-                label="Administração",
+                label="Gestão",
                 href="/app/admin",
-                icon=DashIconify(icon="fluent:shield-person-20-regular", width=20),
+                icon=DashIconify(icon="fluent:shield-person-20-regular", width=24),
             )
             if usr.role in (Role.DEV, Role.ADM)
             else None,
+            dmc.Divider(),
             dmc.NavLink(
                 label="Suporte",
                 href="/app/support",
-                icon=DashIconify(icon="fluent:chat-help-20-regular", width=20),
+                icon=DashIconify(icon="fluent:chat-help-24-regular", width=24),
             ),
             # if usr.role in (Role.DEV, Role.CONST, Role.ADM, Role.GEST)
             # else None,
             dmc.NavLink(
                 label="Sair",
                 href="/logout",
-                icon=DashIconify(icon="fluent:arrow-exit-20-regular", width=20),
+                icon=DashIconify(icon="fluent:arrow-exit-20-regular", width=24),
                 refresh=True,
             ),
         ]

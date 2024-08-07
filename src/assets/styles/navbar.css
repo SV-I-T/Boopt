@@ -7,46 +7,67 @@
     left: 0px;
     background-color: transparent;
     border: none;
-    padding: 3rem 70px 1rem 1rem;
+    padding: 3rem 1rem;
     z-index: -1;
     transition: transform 100ms ease-in;
 }
 
-#navbar #menu-usr {
-    margin-top: 0rem;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    padding-bottom: 1rem;
-}
-
 #navbar img {
     width: auto;
-    height: 50px;
+    height: 70px;
     margin-bottom: 2rem;
 }
 
+#navbar #menu-usr {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#navbar .usr-card {
+    display: flex;
+    gap: 1rem;
+}
+
+#navbar .avatar {
+    padding: 0.7rem;
+    background-color: var(--azul-sv);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    width: fit-content;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+#navbar div:has(>.nome-usr-navbar) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
 #navbar .nome-usr-navbar {
-    text-transform: uppercase;
-    font-weight: 600;
-    line-height: 1;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: normal;
+    color: #000;
 }
 
 #navbar .cargo-usr-navbar {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 400;
-    line-height: 1;
+    line-height: normal;
+    color: #000;
 }
 
-#navbar .mantine-NavLink-root:nth-last-of-type(2) {
+#navbar .mantine-Divider-root {
     margin-top: auto;
 }
 
 #navbar .mantine-NavLink-root {
-    border-radius: 0 30px 30px 0;
-    margin-left: -1rem;
-    padding-left: 1rem;
-    margin-top: 0.25rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
 }
 
 #navbar .mantine-NavLink-root:not([data-active=true]) * {
@@ -63,7 +84,7 @@
 }
 
 #navbar .mantine-NavLink-label {
-    font-weight: 700;
+    font-weight: 500;
 }
 
 
