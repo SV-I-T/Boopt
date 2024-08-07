@@ -139,6 +139,10 @@
         transform: translateX(0);
     }
 
+    body:has(#navbar[visible=true]) {
+        overflow: hidden;
+    }
+
     #navbar-backdrop[visible=false] {
         transition: visibility 0s 100ms, opacity 100ms linear;
     }
