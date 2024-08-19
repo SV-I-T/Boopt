@@ -34,8 +34,8 @@ def radar(df: pl.DataFrame, theta: str, r: str) -> go.Figure:
     df = pl.concat([df, df.head(1)])
     fig = go.Figure(
         data=go.Scatterpolar(
-            theta=df[theta],
-            r=df[r],
+            theta=df.get_column(theta).to_list(),
+            r=df.get_column(r).to_list(),
             mode="lines+markers+text",
             fill="toself",
             marker=go.scatterpolar.Marker(color="#ff7730"),
@@ -111,9 +111,9 @@ def rosca_grupo(df: pl.DataFrame) -> go.Figure:
     )
     fig = go.Figure(
         data=go.Pie(
-            values=df["competencias"],
-            labels=df["grupo"],
-            marker=go.pie.Marker(colors=df["cor"]),
+            values=df.get_column("competencias").to_list(),
+            labels=df.get_column("grupo").to_list(),
+            marker=go.pie.Marker(colors=df.get_column("cor").to_list()),
             texttemplate="<b>%{label}</b><br>%{value} (%{percent})",
             direction="clockwise",
             hole=0,
