@@ -8,7 +8,7 @@ from utils.usuario import Usuario
 register_page(__name__, path="/app/admin", title="Painel de gestão")
 
 
-@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
+@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM, Role.GEST))
 def layout():
     usr = Usuario.atual()
     modules_system = (
@@ -35,16 +35,8 @@ def layout():
             "role": (Role.DEV),
         },
     )
-    modules_products = (
-        {
-            "label": "Vela Assessment",
-            "href": "/app/admin/vela",
-            "logo": "imgs/vela/tag_ass.svg",
-        },
-    )
 
-    return [
-        html.H1("Gestão", className="titulo-pagina"),
+    menu_system = [
         html.H1("Sistema", className="secao-pagina"),
         html.Div(
             className="grid grid-3-col",
@@ -70,6 +62,17 @@ def layout():
                 if (usr.role in module.get("role", [usr.role]))
             ],
         ),
+    ]
+    modules_products = (
+        {
+            "label": "Vela Assessment",
+            "href": "/app/admin/vela",
+            "logo": "imgs/vela/tag_ass.svg",
+        },
+        {"label": "Raio-X", "href": "/app/admin/raiox", "logo": ""},
+    )
+
+    menu_products = [
         html.H1("Produtos", className="secao-pagina"),
         html.Div(
             className="grid grid-3-col",
@@ -87,3 +90,12 @@ def layout():
             ],
         ),
     ]
+
+    if usr.role in (Role.DEV, Role.CONS, Role.ADM):
+        return [
+            html.H1("Gestão", className="titulo-pagina"),
+            *menu_system,
+            *menu_products,
+        ]
+
+    return [html.H1("Gestão", className="titulo-pagina"), *menu_products]

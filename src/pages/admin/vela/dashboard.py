@@ -28,7 +28,7 @@ register_page(
 )
 
 
-@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
+@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM, Role.GEST))
 def layout():
     usr_atual = Usuario.atual()
 

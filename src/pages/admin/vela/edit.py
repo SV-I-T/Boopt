@@ -27,16 +27,15 @@ from utils.vela import VelaAssessment
 
 register_page(
     __name__,
-    path_template="/app/admin/vela/<id_aplicacao>",
+    path="/app/admin/vela/new",
+    path_template="/app/admin/vela/<id_aplicacao>/edit",
     title="Editar Vela Assessment",
 )
 
 
-@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM])
+@checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM, Role.GEST])
 def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
     usr = Usuario.atual()
-
-    id_aplicacao = None if id_aplicacao == "new" else id_aplicacao
 
     data_empresas = (
         [

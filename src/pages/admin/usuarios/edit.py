@@ -474,10 +474,10 @@ clientside_callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Output("url", "href", allow_duplicate=True),
     Input("confirm-delete-usr", "submit_n_clicks"),
-    State("url", "search"),
+    State("url", "href"),
     prevent_initial_call=True,
 )
-def excluir_usr(n: int, search: str):
+def excluir_usr(n: int, href: str):
     if not n:
         raise PreventUpdate
 
@@ -486,15 +486,20 @@ def excluir_usr(n: int, search: str):
     if not usr_atual.is_authenticated:
         raise PreventUpdate
 
-    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
+    id_usr = href.split("/")[-1]
+
+    if usr_atual.role == Role.ADM:
+        r = db("Usuários").delete_one(
+            {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa}
+        )
+    elif usr_atual.role == Role.CONS:
+        r = db("Usuários").delete_one(
+            {"_id": ObjectId(id_usr), "empresa": {"$in": usr_atual.clientes}}
+        )
+    elif usr_atual.role == Role.DEV:
+        r = db("Usuários").delete_one({"_id": ObjectId(id_usr)})
+    else:
         raise PreventUpdate
-
-    params = parse_qs(search[1:])
-    id_usr = params["id"][0]
-
-    r = db("Usuários").delete_one(
-        {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa}
-    )
 
     if not r.acknowledged:
         return dmc.Notification(

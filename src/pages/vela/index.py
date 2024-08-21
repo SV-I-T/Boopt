@@ -22,19 +22,14 @@ def layout():
     ultima_resposta_id = r["ultima_resposta_id"] if r else None
 
     return html.Div(
-        className="center-container",
+        className="center-container index-vela",
         children=[
+            dmc.Text("Seja bem-vindo ao", weight=300),
+            dmc.Text("Assessment Vendedor Boopt.", weight=700),
             dmc.Image(
-                src=get_asset_url("imgs/vela/tag_ass.svg"),
+                src=get_asset_url("imgs/vela/promo-vela.png"),
                 mb="1rem",
-                width=250,
                 alt="Logo Vela Assessment",
-            ),
-            dmc.Text(
-                "Te damos as boas-vindas ao Vela Assessment.",
-                weight=500,
-                align="center",
-                mb="4rem",
             ),
             dmc.Group(
                 mb="4rem",

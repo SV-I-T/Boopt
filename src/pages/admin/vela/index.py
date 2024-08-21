@@ -16,7 +16,7 @@ register_page(__name__, "/app/admin/vela", title="Vela Assessment")
 MAX_PAGINA = 10
 
 
-@checar_perfil(permitir=(Role.DEV, Role.ADM))
+@checar_perfil(permitir=(Role.DEV, Role.ADM, Role.CONS, Role.GEST))
 def layout():
     usr = Usuario.atual()
 
@@ -28,7 +28,7 @@ def layout():
             for empresa in usr.buscar_empresas()
         ]
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa))
+    corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa), usr)
 
     return [
         html.H1("Vela Assessment", className="titulo-pagina"),
@@ -51,7 +51,9 @@ def layout():
                             w=250,
                             mr="auto",
                             value=str(usr.empresa),
-                            display="none" if usr.role == Role.ADM else "block",
+                            display="none"
+                            if usr.role in (Role.ADM, Role.GEST)
+                            else "block",
                         ),
                         dmc.Anchor(
                             href="/app/admin/vela/dashboard",
@@ -73,7 +75,9 @@ def layout():
                                 ),
                                 variant="gradient",
                             ),
-                        ),
+                        )
+                        if usr.role != Role.GEST
+                        else None,
                     ],
                 ),
                 dmc.Table(
@@ -123,7 +127,7 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
     if usr_atual.role == Role.ADM and str(usr_atual.empresa) != empresa:
         raise PreventUpdate
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_vela(pagina, empresa)
+    corpo_tabela, n_paginas = consultar_dados_tabela_vela(pagina, empresa, usr_atual)
 
     return (
         corpo_tabela,
@@ -132,7 +136,9 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
     )
 
 
-def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr], int]:
+def consultar_dados_tabela_vela(
+    pagina: int, empresa: str, usr_atual: Usuario
+) -> tuple[list[html.Tr], int]:
     r = (
         db("VelaAplicações")
         .aggregate(
@@ -195,9 +201,11 @@ def consultar_dados_tabela_vela(pagina: int, empresa: str) -> tuple[list[html.Tr
                     [
                         dmc.Anchor(
                             "Editar",
-                            href=f'/app/admin/vela/{assessment["_id"]}',
+                            href=f'/app/admin/vela/{assessment["_id"]}/edit',
                             mr="0.5rem",
-                        ),
+                        )
+                        if usr_atual.role != Role.GEST
+                        else None,
                         dmc.Anchor(
                             "Respostas",
                             href=f'/app/admin/vela/{assessment["_id"]}/view',
