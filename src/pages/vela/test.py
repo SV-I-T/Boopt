@@ -31,7 +31,7 @@ EXPLICACAO_MD = """
 
     Antes de começar, procure um lugar tranquilo onde você não será interrompido. Isso ajuda a garantir que você se concentre totalmente e responda da forma mais precisa.
 
-    A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-los a crescer.
+    A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-lo a crescer.
 
     **Não se preocupe, todo o processo será rápido - cerca de 20 minutos do seu tempo.**
 
