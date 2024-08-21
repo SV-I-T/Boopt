@@ -1,0 +1,23 @@
+.form-raiox .mantine-SegmentedControl-control:has(.mantine-SegmentedControl-input[value="Sim"]) label {
+    color: green;
+}
+
+.form-raiox .mantine-SegmentedControl-control:has(.mantine-SegmentedControl-input[value="Não"]) label {
+    color: red;
+}
+
+.form-raiox .mantine-Accordion-content>div[data-hidden="true"] {
+    display: none
+}
+
+.form-raiox .mantine-Accordion-content>div[data-hidden="false"] {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+
+.form-raiox .mantine-Accordion-content>div>div {
+    overflow: visible;
+}

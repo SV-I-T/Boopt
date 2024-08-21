@@ -1,0 +1,173 @@
+{
+    "1": {
+        "id_comprou": 5,
+        "etapas": [
+            {
+                "id": 1,
+                "nome": "Aborde Positivamente",
+                "sigla": "A",
+                "passos": [
+                    {
+                        "id": 1,
+                        "desc": "Olhou nos olhos do cliente e demonstrou disposição?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 2,
+                        "desc": "Desejou as boas-vindas e se apresentou?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 3,
+                        "desc": "Sorriu durante todo o atendimento?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 4,
+                        "desc": "Perguntou e usou o nome do cliente durante todo o atendimento?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 5,
+                        "desc": "Entendeu o que trouxe o cliente até a loja?",
+                        "peso": 2
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "nome": "Pesquisa o Cliente",
+                "sigla": "P",
+                "passos": [
+                    {
+                        "id": 6,
+                        "desc": "Pesquisou as necessidades do cliente?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 7,
+                        "desc": "Pesquisou para quem é o produto?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 8,
+                        "desc": "Pesquisou as preferências do cliente?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 9,
+                        "desc": "Pesquisou oportunidades de vendas adicionais?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 10,
+                        "desc": "Pesquisou o nível de relacionamento com a Daju?",
+                        "peso": 2
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "nome": "Ofereça uma demonstração envolvente",
+                "sigla": "O",
+                "passos": [
+                    {
+                        "id": 11,
+                        "desc": "Citou benefícios dos produtos apresentados?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 12,
+                        "desc": "Reforçou os benefícios da marca do produto?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 13,
+                        "desc": "Ofereceu produtos adicionais?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 14,
+                        "desc": "Ofereceu o Clube Daju?",
+                        "peso": 2
+                    }
+                ]
+            },
+            {
+                "id": 4,
+                "nome": "Negocie e Neutralize Objeções",
+                "sigla": "N",
+                "passos": [
+                    {
+                        "id": 16,
+                        "desc": "Devolveu as objeções com perguntas?",
+                        "peso": 4
+                    },
+                    {
+                        "id": 17,
+                        "desc": "Ouviu o cliente com atenção?",
+                        "peso": 2
+                    },
+                    {
+                        "id": 18,
+                        "desc": "Utilizou argumentos citando vantagens ou benefícios?",
+                        "peso": 4
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "nome": "Tome a Iniciative e feche a venda",
+                "sigla": "T",
+                "passos": [
+                    {
+                        "id": 19,
+                        "desc": "Observou os sinais de compra do cliente e teve iniciativa para colocar o produto no carrinho?",
+                        "peso": 3
+                    },
+                    {
+                        "id": 20,
+                        "desc": "Utilizou técnicas de fechamento de forma apropriada?",
+                        "peso": 4
+                    },
+                    {
+                        "id": 21,
+                        "desc": "Foi persistente em convencer o cliente a levar o produto?",
+                        "peso": 3
+                    }
+                ]
+            },
+            {
+                "id": 6,
+                "nome": "Estenda o Relacionamento",
+                "sigla": "E",
+                "passos": [
+                    {
+                        "id": 22,
+                        "desc": "Colou a etiqueta no produto justificando sua ação?",
+                        "peso": 5,
+                        "comprou": true
+                    },
+                    {
+                        "id": 23,
+                        "desc": "Agradeceu com sinceridade a escolha do cliente?",
+                        "peso": 5,
+                        "comprou": true
+                    },
+                    {
+                        "id": 24,
+                        "desc": "Procurou entender o motivo do cliente sair sem comprar?",
+                        "peso": 5,
+                        "comprou": false
+                    },
+                    {
+                        "id": 25,
+                        "desc": "Agradeceu e se colocou à disposição o cliente retornar a loja?",
+                        "peso": 5,
+                        "comprou": false
+                    }
+                ]
+            }
+        ]
+    }
+}
