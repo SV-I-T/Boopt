@@ -29,23 +29,20 @@ def layout_navbar():
 def menu_usuario(usr: Usuario):
     if usr.is_authenticated:
         return [
-            dmc.Anchor(
+            dmc.NavLink(
                 href="/app/perfil",
                 className="usr-card",
-                underline=False,
                 mb="1rem",
-                children=[
-                    html.Div(children=usr.sigla_nome, className="avatar"),
-                    html.Div(
-                        children=[
-                            dmc.Text(
-                                className="nome-usr-navbar",
-                                children=usr.primeiro_nome,
-                            ),
-                            dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
-                        ]
-                    ),
-                ],
+                icon=html.Div(children=usr.sigla_nome, className="avatar"),
+                label=html.Div(
+                    children=[
+                        dmc.Text(
+                            className="nome-usr-navbar",
+                            children=usr.primeiro_nome,
+                        ),
+                        dmc.Text(className="cargo-usr-navbar", children=usr.cargo),
+                    ]
+                ),
             ),
             # dmc.NavLink(
             #     label="Início",
@@ -58,11 +55,16 @@ def menu_usuario(usr: Usuario):
                 icon=DashIconify(icon="fluent:home-24-regular", width=24),
             ),
             dmc.NavLink(
+                label="Raio-X",
+                href="/app/raiox/form",
+                icon=DashIconify(icon="fluent:home-24-regular", width=24),
+            ),
+            dmc.NavLink(
                 label="Gestão",
                 href="/app/admin",
                 icon=DashIconify(icon="fluent:shield-person-20-regular", width=24),
             )
-            if usr.role in (Role.DEV, Role.ADM)
+            if usr.role in (Role.DEV, Role.ADM, Role.CONS, Role.GEST)
             else None,
             dmc.Divider(),
             dmc.NavLink(
