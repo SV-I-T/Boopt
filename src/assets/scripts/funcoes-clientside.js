@@ -1,37 +1,5 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
-        selecionar_todos: async function (n, data) {
-            if (!n) {
-                throw window.dash_clientside.PreventUpdate;
-            }
-            const values = []
-            data.forEach((e) => values.push(e['value']))
-            return values
-        },
-        abrir_barra_lateral: async function (opened) {
-            const navbar = document.getElementById('navbar');
-            const navbar_backdrop = document.getElementById('navbar-backdrop');
-            if (opened) {
-                navbar.setAttribute('visible', 'true')
-                navbar_backdrop.setAttribute('visible', 'true')
-            } else {
-                navbar.removeAttribute('visible')
-                navbar_backdrop.setAttribute('visible', 'false')
-            }
-            throw window.dash_clientside.PreventUpdate
-        },
-        alterar_nav_link: async function (_) {
-            changeActiveNavLink()
-            throw dash_clientside.PreventUpdate
-        },
-        upload_arquivo_usr_batelada: async function (x) {
-            document.getElementById('div-usr-massa-arquivo').style.display = x ? 'block' : 'none'
-            return x
-        },
-        upload_arquivo_empresa_unidades: async function (x) {
-            document.getElementById('div-empresa-unidades-arquivo').style.display = x ? 'block' : 'none'
-            return x
-        },
         ativar: async function (x) {
             if (!x) {
                 throw window.dash_clientside.PreventUpdate;
@@ -96,16 +64,18 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 throw window.dash_clientside.PreventUpdate;
             }
         },
-        atualizar_infos_player: async function (currentTime, duration) {
-            return "Progresso: " + (currentTime ? `${(currentTime * 100 / duration).toFixed(0)}%` : "0%")
+        selecionar_todos: async function (n, data) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            }
+            return data
         },
-        alterar_passos_raiox_comprou: function (comprou, passos_comprou, passos_ncomprou) {
-            const comprou_bool = Boolean(Number(comprou))
-            const r_comprou = []
-            const r_ncomprou = []
-            passos_comprou.forEach((_) => r_comprou.push(!comprou_bool))
-            passos_ncomprou.forEach((_) => r_ncomprou.push(comprou_bool))
-            return [r_comprou, r_ncomprou]
+        comecar_vela: async function (n, nome, empresa, cargo, telefone, email) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate
+            }
+            const user_data = { nome: nome, empresa: empresa, cargo: cargo, telefone: telefone, email: email }
+            return ['/test', user_data]
         }
     }
 });

@@ -1,9 +1,7 @@
 from random import choice, sample
-from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 import polars as pl
-from bson import ObjectId
 from dash import (
     ClientsideFunction,
     Input,
@@ -20,11 +18,10 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from icecream import ic
+
 from utils.banco_dados import db
-from utils.login import checar_perfil
-from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.query import QParams
+from utils.vela import Vela
 
 EXPLICACAO_MD = """
     Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
@@ -41,20 +38,17 @@ EXPLICACAO_MD = """
 
 register_page(
     __name__,
-    path_template="/app/vela/teste/<id_aplicacao>/",
-    title="Vela Assessment - Teste",
+    path_template="/test/",
+    title="DEMO | Teste | Vela Assessment",
 )
 
 
-@checar_perfil
-def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
-    if id_aplicacao is None or len(id_aplicacao) != 24:
-        return dmc.Alert(
-            "Este formulário não existe. Verifique o link", title="Erro", color="red"
-        )
-
-    usr = Usuario.atual()
-
+def layout(
+    secao: str = "instrucoes",
+    nome: str = "Vendedor",
+    empresa: str = "Empresa",
+    **kwargs,
+):
     if secao == "instrucoes":
         return html.Div(
             style={"display": "flex", "flex-direction": "column", "height": "100%"},
@@ -66,9 +60,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                             height=90,
                             alt="Logo Vela",
                         ),
-                        dcc.Markdown(
-                            f"Olá **{usr.primeiro_nome}**,", className="vela-saudacao"
-                        ),
+                        dcc.Markdown(f"Olá **{nome}**,", className="vela-saudacao"),
                         html.Div(
                             children=[html.Div()] * 3,
                             className="vela-circles",
@@ -76,7 +68,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                     ]
                 ),
                 dcc.Markdown(
-                    EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
+                    EXPLICACAO_MD,
                 ),
                 html.Div(
                     style={"width": 350, "align-self": "center", "margin": "2rem"},
@@ -111,7 +103,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                             ],
                         ),
                         dmc.Anchor(
-                            href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
+                            href=f"/test/?nome={nome}&empresa={empresa}&secao=frases",
                             children=dmc.Button(
                                 "Iniciar o teste",
                                 classNames={"root": "btn-vela"},
@@ -124,13 +116,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
         )
 
     elif secao == "frases":
-        aplicacao = db("VelaAplicações").find_one(
-            {"participantes": usr.id_, "_id": ObjectId(id_aplicacao)}
-        )
-
-        df_competencias = VelaAssessment.carregar_formulario(
-            v_form=aplicacao["v_form"]
-        ).competencias
+        df_competencias = Vela.carregar_formulario(v_form=1).competencias
 
         frases = {
             str(frase["id"]): {"frase": frase["desc"], "valor": None}
@@ -144,11 +130,6 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
         return html.Div(
             className="center-container test-vela",
             children=[
-                dcc.Store(
-                    id="store-id-aplicacao-vela",
-                    data=id_aplicacao,
-                    storage_type="memory",
-                ),
                 dcc.Store(id="store-frases-vela", data=frases, storage_type="memory"),
                 dcc.Store(id="store-status-vela", data=False, storage_type="memory"),
                 dcc.Store(id="store-ordem-vela", data=ordem, storage_type="memory"),
@@ -222,7 +203,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
         return [
             html.H1("Obrigado!", className="titulo-pagina"),
             dcc.Markdown(
-                "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/vela)"
+                "Você pode conferir seu resultado agora mesmo clicando [aqui](/dashboard)"
             ),
         ]
 
@@ -281,13 +262,16 @@ clientside_callback(
 @callback(
     Output("send-container-vela", "children"),
     Input("store-status-vela", "data"),
-    State("store-id-aplicacao-vela", "data"),
+    State("url", "search"),
     prevent_initial_call=True,
 )
-def habilitar_envio(status_pronto, id_aplicacao):
+def habilitar_envio(status_pronto, search: str):
     if not status_pronto:
         raise PreventUpdate
     else:
+        params = QParams.extrair_params(search)
+        nome = params["nome"]
+        empresa = params["empresa"]
         return (
             dmc.Group(
                 style={"margin-top": "auto", "flex-wrap": "nowrap"},
@@ -303,7 +287,7 @@ def habilitar_envio(status_pronto, id_aplicacao):
                         ],
                     ),
                     dmc.Anchor(
-                        href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
+                        href=f"/test/?nome={nome}&empresa={empresa}&secao=frases",
                         children=dmc.Button(
                             id="btn-enviar",
                             children="Enviar",
@@ -321,27 +305,29 @@ def habilitar_envio(status_pronto, id_aplicacao):
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
     State("store-frases-vela", "data"),
-    State("store-id-aplicacao-vela", "data"),
+    State("url", "search"),
     prevent_initial_call=True,
 )
-def salvar_resposta(n, frases, id_aplicacao):
+def salvar_resposta(n: int | None, frases: dict, search: str):
     if not n or callback_context.triggered_id != "btn-enviar":
         raise PreventUpdate
 
     else:
-        usr_atual = Usuario.atual()
+        params = QParams.extrair_params(search)
+        nome = params.get("nome")
+        empresa = params.get("empresa")
         dados_resposta = {
             "frases": {k: int(v["valor"]) for k, v in frases.items()},
-            "id_aplicacao": ObjectId(id_aplicacao),
-            "id_usuario": usr_atual.id_,
+            "usuario": nome,
+            "empresa": empresa,
         }
 
-        dados_resposta["nota"] = calcular_nota(id_aplicacao, dados_resposta["frases"])
+        dados_resposta["nota"] = calcular_nota(dados_resposta["frases"])
 
-        resposta = db("VelaRespostas").insert_one(dados_resposta)
+        resposta = db("Respostas").insert_one(dados_resposta)
 
         if resposta.inserted_id:
-            return "?secao=enviado", no_update
+            return f"?nome={nome}&empresa={empresa}&secao=enviado", no_update
         else:
             return no_update, dmc.Notification(
                 id="erro-envio-teste",
@@ -352,8 +338,8 @@ def salvar_resposta(n, frases, id_aplicacao):
             )
 
 
-def calcular_nota(id_aplicacao: str, frases: dict[str, int]):
-    dfs = VelaAssessment.carregar_formulario()
+def calcular_nota(frases: dict[str, int]):
+    dfs = Vela.carregar_formulario()
     df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
     nota = (

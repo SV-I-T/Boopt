@@ -1,5 +1,4 @@
 import dash_mantine_components as dmc
-from components.navbar import layout_navbar
 from dash import (
     ClientsideFunction,
     Input,
@@ -10,6 +9,7 @@ from dash import (
     html,
     page_container,
 )
+from dash_iconify import DashIconify
 
 TEMA_PADRAO = {
     "colors": {
@@ -59,7 +59,7 @@ def layout():
             children=[
                 html.Div(id="notificacoes"),
                 dcc.Store(id="refresh"),
-                dcc.Download(id="download"),
+                dcc.Store(id="user-data"),
                 dcc.Location(id="url", refresh="callback-nav"),
                 dcc.Location(id="url-no-refresh", refresh=False),
                 html.Div(
@@ -68,27 +68,31 @@ def layout():
                         html.Div(
                             id="wrapper",
                             children=[
-                                html.Div(id="frame"),
-                                page_container,
-                                html.Div(id="navbar-backdrop"),
-                            ],
-                        ),
-                        layout_navbar(),
-                        html.Header(
-                            id="burger-header",
-                            children=[
-                                dmc.Anchor(
-                                    children=html.Img(
-                                        src=get_asset_url(
-                                            "imgs/boopt/horizontal_branco.svg"
+                                html.Header(
+                                    children=[
+                                        dmc.Anchor(
+                                            html.Img(
+                                                src=get_asset_url(
+                                                    "imgs/vela/tag_ass.svg"
+                                                ),
+                                                alt="Logo Vela Assessment",
+                                            ),
+                                            href="/",
                                         ),
-                                        alt="Logo Boopt",
-                                    ),
-                                    href="/app/vela",
+                                        dmc.Anchor(
+                                            href="/dashboard",
+                                            children=dmc.Button(
+                                                children="Resultados",
+                                                leftIcon=DashIconify(
+                                                    icon="fluent:chart-multiple-24-regular",
+                                                    width=24,
+                                                ),
+                                                classNames={"root": "btn-vela"},
+                                            ),
+                                        ),
+                                    ]
                                 ),
-                                dmc.Burger(
-                                    id="burger-btn", opened=False, color="white"
-                                ),
+                                page_container,
                             ],
                         ),
                     ],
@@ -96,14 +100,6 @@ def layout():
             ],
         ),
     )
-
-
-clientside_callback(
-    ClientsideFunction("clientside", "abrir_barra_lateral"),
-    Output("navbar", "children"),
-    Input("burger-btn", "opened"),
-    prevent_initial_call=True,
-)
 
 
 clientside_callback(

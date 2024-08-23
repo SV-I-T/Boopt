@@ -1,8 +1,0 @@
-div.editar-empresa {
-    max-width: 800px;
-    width: 100%;
-}
-
-div.editar-empresa>* {
-    margin-bottom: 1rem;
-}

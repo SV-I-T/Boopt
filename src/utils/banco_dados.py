@@ -7,4 +7,4 @@ mongo = PyMongo()
 
 
 def db(colecao: str) -> Collection:
-    return mongo.cx["Boopt"][colecao]
+    return mongo.cx["Vela"][colecao]
