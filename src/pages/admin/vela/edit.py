@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import parse_qs
 
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
@@ -19,11 +18,13 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
+from utils.url import UrlUtils
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 register_page(
     __name__,
@@ -38,16 +39,11 @@ def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
     usr = Usuario.atual()
 
     data_empresas = (
-        [
-            {"value": str(_empresa["_id"]), "label": _empresa["nome"]}
-            for _empresa in usr.buscar_empresas()
-        ]
-        if usr.role != Role.ADM
-        else [str(usr.empresa)]
+        usr.consultar_empresas() if usr.role != Role.ADM else [str(usr.empresa)]
     )
 
     if id_aplicacao:
-        assessment = carregar_assessment(id_aplicacao=id_aplicacao)
+        assessment = consultar_assessment(id_aplicacao=id_aplicacao)
         texto_titulo = [assessment["descricao"]]
     else:
         texto_titulo = [
@@ -66,7 +62,7 @@ def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
                     data=data_empresas,
                     required=True,
                     searchable=True,
-                    nothingFound="Não encontrei nada",
+                    nothingFound="Não encontramos nada",
                     placeholder="Selecione uma empresa",
                     value=str(assessment["empresa"])
                     if id_aplicacao
@@ -169,7 +165,7 @@ def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
     ]
 
 
-def carregar_assessment(id_aplicacao: str):
+def consultar_assessment(id_aplicacao: str):
     r = db("VelaAplicações").aggregate(
         [
             {"$match": {"_id": ObjectId(id_aplicacao)}},
@@ -268,7 +264,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
     if not empresa:
         return dmc.Notification(
             id="notif-new-vela",
-            title="Atenção",
+            title="Ops!",
             message="Selecione uma empresa",
             action="show",
             color="red",
@@ -276,7 +272,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
     if not descricao:
         return dmc.Notification(
             id="notif-new-vela",
-            title="Atenção",
+            title="Ops!",
             message="Preencha a descrição da aplicação",
             action="show",
             color="red",
@@ -284,7 +280,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
     if not linhas:
         return dmc.Notification(
             id="notif-new-vela",
-            title="Atenção",
+            title="Ops!",
             message="Selecione pelo menos um usuário",
             action="show",
             color="red",
@@ -295,7 +291,7 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
 
     try:
         participantes = [ObjectId(linha["id"]) for linha in linhas]
-        nova_aplicacao = VelaAssessment(
+        nova_aplicacao = Vela(
             empresa=ObjectId(empresa), participantes=participantes, descricao=descricao
         )
         nova_aplicacao.registrar()
@@ -325,11 +321,11 @@ def criar_assessment(n, empresa: str, descricao: str, linhas: list[dict[str, str
     State("empresa-edit-vela", "value"),
     State("desc-edit-vela", "value"),
     State("grid-usrs-vela", "selectedRows"),
-    State("url", "search"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
 def atualizar_assessment(
-    n: int, empresa: str, descricao: str, linhas: list[dict[str, str]], search: str
+    n: int, empresa: str, descricao: str, linhas: list[dict[str, str]], endpoint: str
 ):
     if not n:
         raise PreventUpdate
@@ -344,7 +340,7 @@ def atualizar_assessment(
     if not descricao:
         return dmc.Notification(
             id="notif-edit-vela",
-            title="Atenção",
+            title="Ops!",
             message="Preencha a descrição da aplicação",
             action="show",
             color="red",
@@ -352,18 +348,17 @@ def atualizar_assessment(
     if not linhas:
         return dmc.Notification(
             id="notif-edit-vela",
-            title="Atenção",
+            title="Ops!",
             message="Selecione pelo menos um usuário",
             action="show",
             color="red",
         )
 
-    params = parse_qs(search[1:])
-    id_aplicacao = ObjectId(params["id"][0])
+    id_aplicacao = UrlUtils.parse_pparams(endpoint, "vela")
     participantes = [ObjectId(linha["id"]) for linha in linhas]
 
     r = db("VelaAplicações").update_one(
-        {"_id": id_aplicacao},
+        {"_id": ObjectId(id_aplicacao)},
         update={
             "$set": {
                 "participantes": participantes,
@@ -402,10 +397,10 @@ clientside_callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Output("url", "href", allow_duplicate=True),
     Input("confirm-delete-av", "submit_n_clicks"),
-    State("url", "search"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def excluir_av(n: int, search: str):
+def excluir_assessment(n: int, endpoint: str):
     if not n:
         raise PreventUpdate
 
@@ -414,29 +409,36 @@ def excluir_av(n: int, search: str):
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    params = parse_qs(search[1:])
-    id_aplicacao = ObjectId(params["id"][0])
+    id_aplicacao = UrlUtils.parse_pparams(endpoint, "vela")
 
     aplicacao = db("VelaAplicações").find_one(
-        {"_id": id_aplicacao}, {"_id": 0, "empresa": 1}
+        {"_id": ObjectId(id_aplicacao)}, {"_id": 0, "empresa": 1}
     )
 
     if usr_atual.role == Role.ADM and usr_atual.empresa != aplicacao["empresa"]:
         return dmc.Notification(
             id="notif-delete-vela",
-            title="Atenção",
+            title="Ops!",
             message="Você não tem permissão para excluir essa aplicação.",
             action="show",
             color="red",
         ), no_update
 
-    r = db("VelaAplicações").delete_one({"_id": id_aplicacao})
+    r = db("VelaAplicações").delete_one({"_id": ObjectId(id_aplicacao)})
 
     if not r.acknowledged:
         return dmc.Notification(
             id="notif-delete-vela",
-            title="Atenção",
-            message="Ocorreu um erro ao tentat excluir a aplicação. Tente novamente mais tarde",
+            title="Ops!",
+            message="Ocorreu um erro ao tentar excluir a aplicação. Tente novamente mais tarde",
+            action="show",
+            color="red",
+        ), no_update
+    elif r.deleted_count == 0:
+        return dmc.Notification(
+            id="notif-delete-vela",
+            title="Ops!",
+            message="Essa aplicação não existe mais ou você não tem permissão para excluí-la.",
             action="show",
             color="red",
         ), no_update

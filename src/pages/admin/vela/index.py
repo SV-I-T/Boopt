@@ -6,6 +6,7 @@ from bson import ObjectId
 from dash import Input, Output, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
@@ -23,10 +24,7 @@ def layout():
     if usr.role == Role.ADM:
         data_empresas = [str(usr.empresa)]
     else:
-        data_empresas = [
-            {"value": str(empresa["_id"]), "label": empresa["nome"]}
-            for empresa in usr.buscar_empresas()
-        ]
+        data_empresas = usr.consultar_empresas()
 
     corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa), usr)
 
@@ -46,7 +44,7 @@ def layout():
                             data=data_empresas,
                             required=True,
                             searchable=True,
-                            nothingFound="Não encontrei nada",
+                            nothingFound="Não encontramos nada",
                             placeholder="Selecione uma empresa",
                             w=250,
                             mr="auto",

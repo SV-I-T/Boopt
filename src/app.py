@@ -4,7 +4,6 @@ import re
 from datetime import datetime, timedelta
 
 from dash import Dash
-from dash_app import layout
 from dotenv import load_dotenv
 from flask import Flask, Response, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
@@ -12,12 +11,14 @@ from flask_mail import Message
 from icecream import ic
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError
+from werkzeug.security import generate_password_hash
+
+from dash_app import layout
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import attach_logo, mail
 from utils.login import login_manager
 from utils.usuario import Usuario
-from werkzeug.security import generate_password_hash
 
 locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
@@ -49,7 +50,7 @@ def login_post():
 
     try:
         identificador = "email" if "@" in login else "cpf"
-        usr = Usuario.buscar(identificador=identificador, valor=login)
+        usr = Usuario.consultar(identificador=identificador, valor=login)
         usr.validar_senha(senha)
     except AssertionError as e:
         return render_template(
@@ -68,7 +69,7 @@ def login_post():
 def logout_post():
     usr_atual = Usuario.atual()
     if usr_atual and usr_atual.is_authenticated:
-        cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr_atual.id)
+        cache_simple.delete_memoized(Usuario.consultar_pelo_id, Usuario, usr_atual.id)
         logout_user()
     return redirect("/")
 
@@ -90,7 +91,7 @@ def forgot_password_get_token(token: str):
         )
     try:
         usr_id: str = payload["id"]
-        usr = Usuario.buscar("_id", usr_id)
+        usr = Usuario.consultar("_id", usr_id)
         nova_senha = usr.data.strftime("%d%m%Y")
         usr.atualizar({"senha_hash": generate_password_hash(nova_senha)})
     except Exception:
@@ -109,7 +110,7 @@ def forgot_password_post():
     identificador = "email" if "@" in login else "cpf"
 
     try:
-        usr = Usuario.buscar(identificador=identificador, valor=login)
+        usr = Usuario.consultar(identificador=identificador, valor=login)
     except AssertionError:
         if identificador == "email":
             return render_template(

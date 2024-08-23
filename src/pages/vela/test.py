@@ -21,10 +21,11 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from icecream import ic
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 EXPLICACAO_MD = """
     Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
@@ -128,7 +129,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
             {"participantes": usr.id_, "_id": ObjectId(id_aplicacao)}
         )
 
-        df_competencias = VelaAssessment.carregar_formulario(
+        df_competencias = Vela.carregar_formulario(
             v_form=aplicacao["v_form"]
         ).competencias
 
@@ -346,14 +347,14 @@ def salvar_resposta(n, frases, id_aplicacao):
             return no_update, dmc.Notification(
                 id="erro-envio-teste",
                 color="red",
-                title="Atenção",
+                title="Ops!",
                 message="Erro ao salvar resposta. Tente novamente",
                 action="show",
             )
 
 
 def calcular_nota(id_aplicacao: str, frases: dict[str, int]):
-    dfs = VelaAssessment.carregar_formulario()
+    dfs = Vela.carregar_formulario()
     df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
     nota = (

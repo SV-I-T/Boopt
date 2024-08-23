@@ -4,6 +4,7 @@ from typing import Optional
 import polars as pl
 from bson import ObjectId
 from pydantic import BaseModel, Field
+
 from utils.banco_dados import db
 
 
@@ -15,7 +16,7 @@ class VelaAssessmentDataFrames(BaseModel):
         arbitrary_types_allowed = True
 
 
-class VelaAssessment(BaseModel):
+class Vela(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
     descricao: str = ""
     v_form: Optional[int] = 1

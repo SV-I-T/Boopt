@@ -9,6 +9,7 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
@@ -66,6 +67,7 @@ def layout():
                                 [
                                     html.Th("Nome", style={"width": 200}),
                                     html.Th("Segmento", style={"width": 200}),
+                                    html.Th("Unidades", style={"width": 100}),
                                     html.Th("Usuários", style={"width": 100}),
                                 ]
                             )
@@ -99,23 +101,13 @@ def atualizar_tabela_empresas(n: int, busca: str):
 
 def consultar_dados_tabela_empresas(busca: str):
     busca_regex = {"$regex": busca, "$options": "i"}
-    empresas = db("Empresas").aggregate(
+    empresas = db("ViewTabelaEmpresas").aggregate(
         [
             {
                 "$match": {
                     "$or": [{campo: busca_regex} for campo in ("nome", "segmento")]
                 }
             },
-            {"$sort": {"nome": 1}},
-            {
-                "$lookup": {
-                    "from": "Usuários",
-                    "foreignField": "empresa",
-                    "localField": "_id",
-                    "as": "usuarios",
-                }
-            },
-            {"$set": {"usuarios": {"$size": "$usuarios"}}},
         ]
     )
     return [
@@ -129,6 +121,7 @@ def consultar_dados_tabela_empresas(busca: str):
                         )
                     ),
                     html.Td(empresa["segmento"]),
+                    html.Td(empresa["unidades"]),
                     html.Td(empresa["usuarios"]),
                 ]
             )

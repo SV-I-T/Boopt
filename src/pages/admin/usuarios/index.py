@@ -7,14 +7,13 @@ from dash import (
     State,
     callback,
     callback_context,
-    clientside_callback,
     dcc,
     html,
-    no_update,
     register_page,
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
@@ -136,23 +135,9 @@ def consultar_dados_tabela_usuarios(
     busca_regex = {"$regex": busca, "$options": "i"}
 
     pipeline = [
-        {"$sort": {"nome": 1}},
-        {
-            "$lookup": {
-                "from": "Empresas",
-                "localField": "empresa",
-                "foreignField": "_id",
-                "as": "empresa",
-            }
-        },
-        {"$set": {"empresa_nome": {"$first": "$empresa.nome"}}},
-        {"$unset": "empresa"},
         {
             "$match": {
-                "$or": [
-                    {campo: busca_regex}
-                    for campo in ("nome", "sobrenome", "cargo", "empresa_nome")
-                ]
+                "$or": [{campo: busca_regex} for campo in ("nome", "cargo", "empresa")]
             }
         },
         {
@@ -161,27 +146,16 @@ def consultar_dados_tabela_usuarios(
                 "usuarios": [
                     {"$skip": (pagina - 1) * MAX_PAGINA},
                     {"$limit": MAX_PAGINA},
-                    {
-                        "$project": {
-                            campo: 1
-                            for campo in (
-                                "nome",
-                                "sobrenome",
-                                "cargo",
-                                "empresa_nome",
-                                "role",
-                            )
-                        }
-                    },
+                    {"$project": {"id_empresa": 0}},
                 ],
             }
         },
     ]
 
-    if usr_atual.role not in [Role.DEV]:
-        pipeline.insert(0, {"$match": {"empresa": usr_atual.empresa}})
+    if usr_atual.role != Role.DEV:
+        pipeline.insert(0, {"$match": {"id_empresa": usr_atual.empresa}})
 
-    r = db("Usuários").aggregate(pipeline).next()
+    r = db("ViewTabelaUsuarios").aggregate(pipeline).next()
     usuarios = [Usuario(**usuario) for usuario in r["usuarios"]]
     total = r["cont"][0]["total"] if r["cont"] else 0
 

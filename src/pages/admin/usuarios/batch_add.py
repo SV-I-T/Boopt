@@ -18,6 +18,7 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
+
 from utils.login import checar_perfil
 from utils.novos_usuarios_batch import MultipleErrors, NovosUsuariosBatelada
 from utils.role import Role
@@ -34,10 +35,7 @@ register_page(
 def layout():
     usr_atual = Usuario.atual()
 
-    data_empresas = [
-        {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in usr_atual.buscar_empresas()
-    ]
+    data_empresas = usr_atual.consultar_empresas()
 
     if usr_atual.role == Role.DEV:
         roles_edit = [r for r in Role]
@@ -90,7 +88,7 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
                     value=str(usr_atual.empresa),
                     placeholder="Selecione uma empresa",
                     searchable=True,
-                    nothingFound="Não encontrei nada",
+                    nothingFound="Não encontramos nada",
                     w=300,
                     display="none" if usr_atual.role == Role.ADM else "block",
                 ),
@@ -188,7 +186,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
         raise PreventUpdate
     if not empresa:
         ALERTA = dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children="Selecione uma empresa para cadastrar os usuários.",
             color="BooptLaranja",
         )
@@ -196,7 +194,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
         URL = no_update
     elif not role:
         ALERTA = dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children="Selecione um perfil para cadastrar os usuários.",
             color="BooptLaranja",
         )
@@ -204,7 +202,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
         URL = no_update
     elif not contents:
         ALERTA = dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children="Selecione um arquivo com os dados dos usuários.",
             color="BooptLaranja",
         )
@@ -212,7 +210,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
         URL = no_update
     elif not nome.endswith(".xlsx"):
         ALERTA = dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children='O arquivo precisa ter a extensão ".xlsx".',
             color="BooptLaranja",
         )
@@ -256,7 +254,7 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
             URL = no_update
         except Exception as e:
             ALERTA = dmc.Alert(
-                title="Atenção",
+                title="Ops!",
                 children=str(e),
                 color="BooptLaranja",
             )

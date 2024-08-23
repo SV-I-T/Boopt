@@ -6,12 +6,13 @@ from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from pydantic import ValidationError
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from utils.banco_dados import db
 from utils.cache import cache_simple
 from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
-from werkzeug.security import check_password_hash, generate_password_hash
 
 register_page(__name__, path="/app/perfil", title="Meu perfil")
 
@@ -202,7 +203,7 @@ def editar_email(n: int, acao: str, email: str):
                     id="notificacao-email-alterado",
                     message="E-mail inválido. Verifique e tente novamente",
                     color="red",
-                    title="Atenção",
+                    title="Ops!",
                     action="show",
                 ),
                 no_update,
@@ -223,7 +224,7 @@ def editar_email(n: int, acao: str, email: str):
                     id="notificacao-email-alterado",
                     message="Não conseguimos alterar seu e-mail. Tente novamente mais tarde.",
                     color="red",
-                    title="Atenção",
+                    title="Ops!",
                     action="show",
                 ),
                 no_update,
@@ -234,7 +235,7 @@ def editar_email(n: int, acao: str, email: str):
                 no_update,
             )
 
-        cache_simple.delete_memoized(Usuario.buscar_login, Usuario, usr.id)
+        cache_simple.delete_memoized(Usuario.consultar_pelo_id, Usuario, usr.id)
 
         return (
             dmc.Notification(
@@ -270,7 +271,7 @@ def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
             id="notificacao-senha-alterada",
             message="Preencha todos os campos. Tente novamente.",
             color="red",
-            title="Atenção",
+            title="Ops!",
             action="show",
         )
 
@@ -279,7 +280,7 @@ def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
             id="notificacao-senha-alterada",
             message="As senhas digitadas devem ser iguais. Tente novamente.",
             color="red",
-            title="Atenção",
+            title="Ops!",
             action="show",
         )
 
@@ -288,7 +289,7 @@ def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
             id="notificacao-senha-alterada",
             message="Senha atual inválida. Tente novamente.",
             color="red",
-            title="Atenção",
+            title="Ops!",
             action="show",
         )
 
@@ -299,7 +300,7 @@ def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
             id="notificacao-senha-alterada",
             message=str(e),
             color="red",
-            title="Atenção",
+            title="Ops!",
             action="show",
         )
 

@@ -1,5 +1,3 @@
-from urllib.parse import parse_qs
-
 import dash_mantine_components as dmc
 from bson import ObjectId
 from dash import (
@@ -17,10 +15,12 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
+
 from utils.banco_dados import db
 from utils.empresa import Empresa
 from utils.login import checar_perfil
 from utils.role import Role
+from utils.url import UrlUtils
 from utils.usuario import Usuario
 
 register_page(
@@ -30,15 +30,13 @@ register_page(
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS))
 def layout(id_empresa: str = None, **kwargs):
-    id_empresa = None if id_empresa == "new" else id_empresa
-
-    if not id_empresa:
+    if id_empresa == "new":
         texto_titulo = [
             "Nova Empresa",
         ]
         layout_edicao = layout_nova_empresa()
     else:
-        empresa = Empresa.buscar("_id", id_empresa)
+        empresa = Empresa.consultar("_id", id_empresa)
         texto_titulo = [
             DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
             empresa.nome,
@@ -47,56 +45,52 @@ def layout(id_empresa: str = None, **kwargs):
 
     return [
         html.H1(texto_titulo, className="titulo-pagina"),
-        layout_edicao,
+        *layout_edicao,
     ]
 
 
 def layout_nova_empresa(nome: str = None, segmento: str = None):
     segmentos = db("Empresas").distinct("segmento", {"segmento": {"$ne": None}})
-    return html.Div(
-        className="editar-empresa",
-        children=[
-            dmc.TextInput(
-                id="nome-nova-empresa", label="Nome", required=True, value=nome
-            ),
-            dmc.Select(
-                id="segmento-nova-empresa",
-                label="Segmento",
-                description="Escolha um dos segmentos existentes ou digite um novo.",
-                data=segmentos,
-                creatable=True,
-                searchable=True,
-                clearable=True,
-                value=segmento,
-            ),
-            dmc.Group(
-                [
-                    dmc.Button(
-                        id="btn-criar-empresa"
-                        if nome is None
-                        else "btn-salvar-empresa",
-                        children="Criar" if nome is None else "Salvar",
-                        ml="auto",
-                        leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
-                    ),
-                    dmc.Button(
-                        id="btn-delete-empresa",
-                        children="Excluir",
-                        color="red",
-                        leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
-                    )
-                    if nome
-                    else None,
-                    dcc.ConfirmDialog(
-                        id="confirm-delete-empresa",
-                        message=f"Tem certeza que deseja excluir a empresa {nome!r}? Essa ação não pode ser revertida.",
-                    )
-                    if nome
-                    else None,
-                ]
-            ),
-        ],
-    )
+    return [
+        dmc.TextInput(
+            id="nome-nova-empresa", label="Nome", required=True, value=nome, mb="1rem"
+        ),
+        dmc.Select(
+            id="segmento-nova-empresa",
+            label="Segmento",
+            description="Escolha um dos segmentos existentes ou digite um novo.",
+            data=segmentos,
+            creatable=True,
+            searchable=True,
+            clearable=True,
+            value=segmento,
+            mb="1rem",
+        ),
+        dmc.Group(
+            children=[
+                dmc.Button(
+                    id="btn-criar-empresa" if nome is None else "btn-salvar-empresa",
+                    children="Criar" if nome is None else "Salvar",
+                    ml="auto",
+                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                ),
+                dmc.Button(
+                    id="btn-delete-empresa",
+                    children="Excluir",
+                    color="red",
+                    leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
+                )
+                if nome
+                else None,
+                dcc.ConfirmDialog(
+                    id="confirm-delete-empresa",
+                    message=f"Tem certeza que deseja excluir a empresa {nome!r}? Essa ação não pode ser revertida.",
+                )
+                if nome
+                else None,
+            ],
+        ),
+    ]
 
 
 @callback(
@@ -127,7 +121,7 @@ def criar_empresa(n, nome: str, segmento: str):
                 erro = e
         return dmc.Notification(
             id="notificacao-erro-criar-empresa",
-            title="Atenção",
+            title="Ops!",
             message=str(erro),
             color="red",
             action="show",
@@ -153,10 +147,10 @@ def criar_empresa(n, nome: str, segmento: str):
     Input("btn-salvar-empresa", "n_clicks"),
     State("nome-nova-empresa", "value"),
     State("segmento-nova-empresa", "value"),
-    State("url", "search"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def salvar_empresa(n, nome: str, segmento: str, search: str):
+def salvar_empresa(n, nome: str, segmento: str, endpoint: str):
     if not n:
         raise PreventUpdate
 
@@ -164,9 +158,9 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
     if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
-    params = parse_qs(search[1:])
+    id_empresa = UrlUtils.parse_pparams(endpoint, "empresas")
     try:
-        empresa = Empresa.buscar("_id", params["id"][0])
+        empresa = Empresa.consultar("_id", id_empresa)
         empresa.atualizar({"nome": nome, "segmento": segmento})
 
     except (ValidationError, AssertionError) as e:
@@ -177,7 +171,7 @@ def salvar_empresa(n, nome: str, segmento: str, search: str):
                 erro = e
         return dmc.Notification(
             id="notificacao-erro-criar-empresa",
-            title="Atenção",
+            title="Ops!",
             message=str(erro),
             color="red",
             action="show",
@@ -209,10 +203,10 @@ clientside_callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Output("url", "href", allow_duplicate=True),
     Input("confirm-delete-empresa", "submit_n_clicks"),
-    State("url", "search"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def excluir_empresa(n: int, search: str):
+def excluir_empresa(n: int, endpoint: str):
     if not n:
         raise PreventUpdate
 
@@ -224,15 +218,14 @@ def excluir_empresa(n: int, search: str):
     if usr_atual.role not in (Role.DEV, Role.CONS):
         raise PreventUpdate
 
-    params = parse_qs(search[1:])
-    id_empresa = params["id"][0]
+    id_empresa = UrlUtils.parse_pparams(endpoint, "empresas")
 
     r = db("Empresas").delete_one({"_id": ObjectId(id_empresa)})
 
     if not r.acknowledged:
         return dmc.Notification(
             id="notificacao-excluir-usr",
-            title="Atenção",
+            title="Ops!",
             message="Houve um erro ao excluir a empresa. Tente novamente mais tarde.",
             color="red",
             action="show",

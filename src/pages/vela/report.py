@@ -3,12 +3,13 @@ import polars as pl
 from bson import ObjectId
 from dash import dcc, register_page
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.cache import cache
 from utils.login import checar_perfil, layout_nao_autorizado
 from utils.role import Role
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 from .funcoes.graficos import (
     cartao_nota_total_etapas,
@@ -36,7 +37,7 @@ def layout(id_resposta: str = None, id_user: str = None, **kwargs):
         pass
     elif (
         usr_atual.perfil == Role.ADM
-        and usr_atual.empresa == Usuario.buscar("_id", id_user).empresa
+        and usr_atual.empresa == Usuario.consultar("_id", id_user).empresa
     ):
         # O usuário que está tentando acessar é gestor da empresa do dono da resposta
         pass
@@ -44,7 +45,7 @@ def layout(id_resposta: str = None, id_user: str = None, **kwargs):
         # O usuário que está tentando acessar não tem permissão
         return layout_nao_autorizado()
 
-    respostas = VelaAssessment.buscar_respostas(ObjectId(id_user))
+    respostas = Vela.buscar_respostas(ObjectId(id_user))
 
     return dmc.Container(
         [
@@ -217,7 +218,7 @@ def dfs_resultado(id_resposta: str):
         df_notas = pl.DataFrame(
             [{"id": int(k), "nota": v} for k, v in resposta["frases"].items()]
         )
-        dfs = VelaAssessment.carregar_formulario()
+        dfs = Vela.carregar_formulario()
         df_notas_competencias = (
             dfs.competencias.join(df_notas, on="id")
             .with_columns(

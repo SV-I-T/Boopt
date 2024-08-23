@@ -4,11 +4,11 @@ from typing import Any, Literal, Optional
 from bson import ObjectId
 from flask_login import UserMixin, current_user
 from pydantic import BaseModel, Field, computed_field
-from pymongo.cursor import Cursor
+from werkzeug.security import check_password_hash
+
 from utils.banco_dados import db
 from utils.cache import cache_simple
 from utils.role import Role
-from werkzeug.security import check_password_hash
 
 CARGOS_PADROES = sorted(
     [
@@ -51,7 +51,7 @@ class Usuario(BaseModel, UserMixin):
     @computed_field
     @property
     def primeiro_nome(self) -> str:
-        return self.nome.split(" ")[0]
+        return self.nome.split(" ", 1)[0]
 
     @computed_field
     @property
@@ -60,7 +60,7 @@ class Usuario(BaseModel, UserMixin):
         return f"{nomes[0][0]}{nomes[-1][0]}".upper()
 
     @classmethod
-    def buscar(
+    def consultar(
         cls, identificador: Literal["_id", "email", "cpf"], valor: str | ObjectId
     ):
         if identificador == "_id" and not isinstance(valor, ObjectId):
@@ -72,7 +72,7 @@ class Usuario(BaseModel, UserMixin):
 
     @classmethod
     @cache_simple.memoize(timeout=600)
-    def buscar_login(cls, _id: str) -> dict | None:
+    def consultar_pelo_id(cls, _id: str) -> dict | None:
         if _id == "None":
             return None
         usr = db("Usuários").find_one(
@@ -99,9 +99,7 @@ class Usuario(BaseModel, UserMixin):
 
         assert r.acknowledged, "Ocorreu algum problema. Tente novamente mais tarde."
 
-    def buscar_empresas(
-        self, project_fields: list[str] = ["_id", "nome"]
-    ) -> Cursor | list:
+    def consultar_empresas(self) -> list[dict[str, str]]:
         if self.role == Role.DEV:
             query = {}
         elif self.role == Role.CONS:
@@ -114,6 +112,8 @@ class Usuario(BaseModel, UserMixin):
         else:
             return []
 
-        return db("Empresas").find(
-            query, projection={field: 1 for field in project_fields}, sort={"nome": 1}
+        r = db("Empresas").find(
+            query, {"_id": 0, "value": {"$toString": "$_id"}, "label": "$nome"}
         )
+
+        return list(r)

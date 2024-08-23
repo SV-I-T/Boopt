@@ -17,11 +17,12 @@ from dash.exceptions import PreventUpdate
 from dash_chartjs import ChartJs
 from dash_iconify import DashIconify
 from icecream import ic
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 register_page(
     __name__, path="/app/admin/vela/dashboard", title="Dashboard Vela Assessment"
@@ -32,10 +33,7 @@ register_page(
 def layout():
     usr_atual = Usuario.atual()
 
-    data_empresas = [
-        {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in usr_atual.buscar_empresas()
-    ]
+    data_empresas = usr_atual.consultar_empresas()
     valor_empresa = usr_atual.empresa
 
     data_gestores = consultar_gestores(valor_empresa)
@@ -388,7 +386,7 @@ def atualizar_dashboard_adm_vela_resultados(n: int, ids_aplicacao: list[str]):
         [ObjectId(id) for id in ids_aplicacao]
     )
 
-    dfs = VelaAssessment.carregar_formulario()
+    dfs = Vela.carregar_formulario()
 
     df_respostas = (
         pl.DataFrame(aplicacoes)

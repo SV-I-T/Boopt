@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 from bson import ObjectId
@@ -18,17 +17,46 @@ from dash import (
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
+from werkzeug.security import generate_password_hash
+
 from utils.banco_dados import db
 from utils.empresa import Empresa
 from utils.login import checar_perfil, layout_nao_autorizado
 from utils.novo_usuario import NovoUsuario
 from utils.role import Role
+from utils.url import UrlUtils
 from utils.usuario import CARGOS_PADROES, Usuario
-from werkzeug.security import generate_password_hash
 
 register_page(
     __name__, path_template="/app/admin/usuarios/<id_usuario>", title="Editar usuário"
 )
+
+
+@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
+def layout(id_usuario: str = None):
+    usr_atual = Usuario.atual()
+
+    if id_usuario == "new":
+        return [
+            html.H1("Novo usuário", className="titulo-pagina"),
+            *layout_edicao_usr(usr_atual),
+        ]
+
+    usr = Usuario.consultar("_id", ObjectId(id_usuario))
+
+    if not autorizado(usr_atual, usr):
+        return layout_nao_autorizado()
+
+    return [
+        html.H1(
+            children=[
+                DashIconify(icon="fluent:edit-28-regular", width=28, color="#777"),
+                usr.nome,
+            ],
+            className="titulo-pagina",
+        ),
+        *layout_edicao_usr(usr_atual, usr),
+    ]
 
 
 def autorizado(usr_atual: Usuario, usr: Usuario) -> bool:
@@ -42,211 +70,155 @@ def autorizado(usr_atual: Usuario, usr: Usuario) -> bool:
     return True
 
 
-@checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
-def layout(id_usuario: str = None):
-    id_usuario = None if id_usuario == "new" else id_usuario
+def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
+    roles_acessiveis = usr_atual.role.consultar_roles_acessiveis()
+    desabilitar_edicao = False if usr is None else usr.role not in roles_acessiveis
 
-    usr_atual = Usuario.atual()
-
-    if not id_usuario:
-        return [
-            html.H1("Novo usuário", className="titulo-pagina"),
-            layout_edicao_usr(usr_atual),
-        ]
-
-    usr = Usuario.buscar("_id", ObjectId(id_usuario))
-
-    if not autorizado(usr_atual, usr):
-        return layout_nao_autorizado()
-
-    return [
-        html.H1(
-            children=[
-                DashIconify(icon="fluent:edit-28-regular", width=28, color="#777"),
-                usr.nome,
-            ],
-            className="titulo-pagina",
-        ),
-        layout_edicao_usr(usr_atual, usr),
-    ]
-
-
-def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None):
-    data_empresas = [
-        {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in usr_atual.buscar_empresas()
-    ]
-
-    if usr_atual.role == Role.DEV:
-        roles_edit = [r for r in Role]
-    elif usr_atual.role == Role.CONS:
-        roles_edit = [Role.ADM, Role.GEST, Role.USR, Role.CAND]
-    elif usr_atual.role == Role.ADM:
-        roles_edit = [Role.GEST, Role.USR, Role.CAND]
-
-    if usr:
-        desabilitar = usr.role not in roles_edit
-    else:
-        desabilitar = False
-
-    data_role = [r.value for r in roles_edit]
-
-    data_unidades = buscar_data_unidades(usr.empresa if usr else usr_atual.empresa)
-
-    return html.Div(
-        className="editar-usr",
-        children=[
-            html.H1("Informações Pessoais", className="secao-pagina"),
-            html.Div(
-                className="grid grid-2-col grid-a-end",
-                children=[
-                    dmc.TextInput(
-                        id="nome-edit-usr",
-                        label="Nome completo",
-                        type="text",
-                        icon=DashIconify(icon="fluent:person-20-regular", width=20),
-                        name="nome",
-                        value=usr.nome if usr else None,
-                        disabled=desabilitar,
-                    ),
-                    dmc.TextInput(
-                        id="cpf-edit-usr",
-                        label="CPF",
-                        description="Somente números",
-                        placeholder="12345678910",
-                        icon=DashIconify(
-                            icon="fluent:slide-text-person-20-regular", width=20
-                        ),
-                        name="cpf",
-                        value=usr.cpf if usr else None,
-                        disabled=desabilitar,
-                    ),
-                    dmc.TextInput(
-                        id="email-edit-usr",
-                        label="E-mail (opcional)",
-                        type="email",
-                        placeholder="nome@dominio.com",
-                        icon=DashIconify(icon="fluent:mail-20-regular", width=20),
-                        name="email",
-                        value=usr.email if usr else None,
-                        disabled=desabilitar,
-                    ),
-                    dmc.DatePicker(
-                        id="data-edit-usr",
-                        label="Data de Nascimento",
-                        description="Será a senha do usuário",
-                        locale="pt-br",
-                        inputFormat="DD [de] MMMM [de] YYYY",
-                        firstDayOfWeek="sunday",
-                        initialLevel="year",
-                        clearable=False,
-                        placeholder=datetime.now().strftime(r"%d de %B de %Y"),
-                        icon=DashIconify(icon="fluent:calendar-20-regular", width=20),
-                        name="data",
-                        value=usr.data.date() if usr else None,
-                        disabled=desabilitar,
-                    ),
-                ],
-            ),
-            dmc.Divider(),
-            html.H1("Informações Profissionais", className="secao-pagina"),
-            html.Div(
-                className="grid grid-2-col grid-a-end",
-                children=[
-                    dmc.Select(
-                        id="empresa-edit-usr",
-                        label="Empresa",
-                        icon=DashIconify(icon="fluent:building-20-regular", width=20),
-                        name="empresa",
-                        data=data_empresas,
-                        searchable=True,
-                        nothingFound="Não encontrei nada",
-                        value=str(usr.empresa) if usr else str(usr_atual.empresa),
-                        disabled=desabilitar or usr_atual.role == Role.ADM,
-                    ),
-                    dmc.Select(
-                        id="cargo-edit-usr",
-                        label="Cargo",
-                        description="Selecione a opção que melhor se encaixa",
-                        data=CARGOS_PADROES,
-                        creatable=True,
-                        clearable=False,
-                        searchable=True,
-                        nothingFound="Não encontrei nada",
-                        icon=DashIconify(icon="fluent:briefcase-20-regular", width=20),
-                        name="cargo",
-                        value=usr.cargo if usr else None,
-                        disabled=desabilitar,
-                    ),
-                    dmc.MultiSelect(
-                        id="unidades-edit-usr",
-                        label="Unidade(s)",
-                        data=data_unidades,
-                        value=usr.unidades if usr else None,
-                        disabled=desabilitar,
-                    ),
-                    dmc.Select(
-                        id="role-edit-usr",
-                        label="Perfil",
-                        icon=DashIconify(
-                            icon="fluent:person-passkey-20-regular", width=20
-                        ),
-                        data=data_role,
-                        value=usr.role.value if usr else Role.USR.value,
-                        disabled=desabilitar,
-                    ),
-                ],
-            ),
-            dmc.Divider(),
-            dmc.Group(
-                children=[
-                    dmc.Button(
-                        id="btn-reset-usr-password",
-                        children="Redefinir senha",
-                        disabled=desabilitar,
-                        leftIcon=DashIconify(
-                            icon="fluent:arrow-reset-20-regular", width=20
-                        ),
-                    )
-                    if usr
-                    else None,
-                    dmc.Button(
-                        id="btn-salvar-usr" if usr else "btn-criar-usr",
-                        children="Salvar" if usr else "Criar",
-                        disabled=desabilitar,
-                        leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
-                        ml="auto",
-                    ),
-                    dmc.Button(
-                        id="btn-delete-usr",
-                        children="Excluir",
-                        color="red",
-                        disabled=desabilitar,
-                        leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
-                    )
-                    if usr
-                    else None,
-                ],
-            ),
-            dcc.ConfirmDialog(
-                id="confirm-reset-usr-password",
-                message=f"A senha do usuário {usr.primeiro_nome if usr else None} será redefinida para {usr.data.strftime('%d%m%Y') if usr else None} (Data de aniversário). Tem certeza que deseja redefinir a senha?",
-            ),
-            dcc.ConfirmDialog(
-                id="confirm-delete-usr",
-                message=f"Tem certeza que deseja excluir o usuário {usr.nome if usr else None}? Essa ação não pode ser revertida.",
-            )
-            if usr
-            else None,
-        ],
+    data_perfis = [r.value for r in roles_acessiveis]
+    data_empresas = usr_atual.consultar_empresas()
+    data_unidades = Empresa.consultar_data_unidades(
+        id_empresa=usr.empresa if usr else usr_atual.empresa
     )
 
-
-def buscar_data_unidades(id_empresa: ObjectId) -> list[dict[str, str]]:
-    empresa = Empresa.buscar("_id", id_empresa)
     return [
-        {"value": unidade.cod, "label": f"({unidade.cod}) - {unidade.nome}"}
-        for unidade in empresa.unidades
+        html.H1("Informações Pessoais", className="secao-pagina"),
+        html.Div(
+            className="grid grid-2-col grid-a-end",
+            children=[
+                dmc.TextInput(
+                    id="nome-edit-usr",
+                    label="Nome completo",
+                    type="text",
+                    icon=DashIconify(icon="fluent:person-20-regular", width=20),
+                    name="nome",
+                    value=usr.nome if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+                dmc.TextInput(
+                    id="cpf-edit-usr",
+                    label="CPF",
+                    description="Somente números",
+                    placeholder="12345678910",
+                    icon=DashIconify(
+                        icon="fluent:slide-text-person-20-regular", width=20
+                    ),
+                    name="cpf",
+                    value=usr.cpf if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+                dmc.TextInput(
+                    id="email-edit-usr",
+                    label="E-mail (opcional)",
+                    type="email",
+                    placeholder="nome@dominio.com",
+                    icon=DashIconify(icon="fluent:mail-20-regular", width=20),
+                    name="email",
+                    value=usr.email if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+                dmc.DatePicker(
+                    id="data-edit-usr",
+                    label="Data de Nascimento",
+                    description="É a senha padrão do usuário",
+                    locale="pt-br",
+                    inputFormat="DD [de] MMMM [de] YYYY",
+                    firstDayOfWeek="sunday",
+                    initialLevel="year",
+                    clearable=False,
+                    placeholder=datetime.now().strftime(r"%d de %B de %Y"),
+                    icon=DashIconify(icon="fluent:calendar-20-regular", width=20),
+                    name="data",
+                    value=usr.data.date() if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+            ],
+        ),
+        html.H1("Informações Profissionais", className="secao-pagina"),
+        html.Div(
+            className="grid grid-2-col grid-a-end",
+            children=[
+                dmc.Select(
+                    id="empresa-edit-usr",
+                    label="Empresa",
+                    icon=DashIconify(icon="fluent:building-20-regular", width=20),
+                    name="empresa",
+                    data=data_empresas,
+                    searchable=True,
+                    nothingFound="Não encontramos nada",
+                    value=str(usr.empresa if usr else usr_atual.empresa),
+                    disabled=desabilitar_edicao or usr_atual.role == Role.ADM,
+                ),
+                dmc.Select(
+                    id="cargo-edit-usr",
+                    label="Cargo",
+                    description="Selecione a opção mais próxima ou crie uma",
+                    data=CARGOS_PADROES,
+                    creatable=True,
+                    clearable=False,
+                    searchable=True,
+                    nothingFound="Não encontramos nada",
+                    icon=DashIconify(icon="fluent:briefcase-20-regular", width=20),
+                    name="cargo",
+                    value=usr.cargo if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+                dmc.MultiSelect(
+                    id="unidades-edit-usr",
+                    label="Unidade(s)",
+                    data=data_unidades,
+                    value=usr.unidades if usr else None,
+                    disabled=desabilitar_edicao,
+                ),
+                dmc.Select(
+                    id="role-edit-usr",
+                    label="Perfil",
+                    icon=DashIconify(icon="fluent:person-passkey-20-regular", width=20),
+                    data=data_perfis,
+                    value=usr.role.value if usr else Role.USR.value,
+                    disabled=desabilitar_edicao,
+                ),
+            ],
+        ),
+        dmc.Group(
+            children=[
+                dmc.Button(
+                    id="btn-reset-usr-password",
+                    children="Redefinir senha",
+                    disabled=desabilitar_edicao,
+                    leftIcon=DashIconify(
+                        icon="fluent:arrow-reset-20-regular", width=20
+                    ),
+                )
+                if usr
+                else None,
+                dmc.Button(
+                    id="btn-salvar-usr" if usr else "btn-criar-usr",
+                    children="Salvar" if usr else "Criar",
+                    disabled=desabilitar_edicao,
+                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                    ml="auto",
+                ),
+                dmc.Button(
+                    id="btn-delete-usr",
+                    children="Excluir",
+                    color="red",
+                    disabled=desabilitar_edicao,
+                    leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
+                )
+                if usr
+                else None,
+            ],
+        ),
+        dcc.ConfirmDialog(
+            id="confirm-reset-usr-password",
+            message=f"A senha do usuário {usr.primeiro_nome if usr else None} será redefinida para {usr.data.strftime('%d%m%Y') if usr else None} (Data de aniversário). Tem certeza que deseja redefinir a senha?",
+        ),
+        dcc.ConfirmDialog(
+            id="confirm-delete-usr",
+            message=f"Tem certeza que deseja excluir o usuário {usr.nome if usr else None}? Essa ação não pode ser revertida.",
+        )
+        if usr
+        else None,
     ]
 
 
@@ -268,7 +240,7 @@ def atualizar_data_unidades(_id_empresa: str):
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
         raise PreventUpdate
 
-    return buscar_data_unidades(id_empresa)
+    return Empresa.consultar_data_unidades(id_empresa)
 
 
 @callback(
@@ -283,10 +255,10 @@ def atualizar_data_unidades(_id_empresa: str):
     State("cargo-edit-usr", "value"),
     State("role-edit-usr", "value"),
     State("unidades-edit-usr", "value"),
-    State("url", "href"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def salvar_usr(
+def salvar_usuario(
     n,
     nome: str,
     cpf: str,
@@ -296,25 +268,22 @@ def salvar_usr(
     cargo: str,
     role: str,
     unidades: list[int] | None,
-    href: str,
+    endpoint: str,
 ):
     if not n:
         raise PreventUpdate
 
     usr_atual = Usuario.atual()
 
-    if not usr_atual.is_authenticated:
-        raise PreventUpdate
-
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    id_usr = href.split("/")[-1]
+    id_usr = UrlUtils.parse_pparams(endpoint, "usuarios")
     data = datetime.strptime(_data, "%Y-%m-%d")
     empresa = ObjectId(_empresa)
 
     try:
-        usr = Usuario.buscar("_id", id_usr)
+        usr = Usuario.consultar("_id", id_usr)
 
         if usr_atual.role == Role.ADM:
             if usr_atual.empresa != usr.empresa:
@@ -334,7 +303,7 @@ def salvar_usr(
                     f"Não você não tem permissão para atribuir este perfil: {role.capitalize()}."
                 )
 
-        comps = (
+        campos = (
             ("nome", usr.nome, nome),
             ("cpf", usr.cpf, cpf),
             ("data", usr.data, data),
@@ -345,9 +314,9 @@ def salvar_usr(
             ("unidades", usr.unidades, unidades or None),
         )
 
-        atualizacoes = {k: v_novo for k, v, v_novo in comps if v != v_novo}
+        campos_alterados = {k: v_novo for k, v, v_novo in campos if v != v_novo}
 
-        usr.atualizar(atualizacoes)
+        usr.atualizar(campos_alterados)
 
     except (ValidationError, AssertionError) as e:
         match e:
@@ -357,7 +326,7 @@ def salvar_usr(
                 erro = e
         return dmc.Notification(
             id="notificacao-salvar-usr",
-            title="Atenção",
+            title="Ops!",
             message=str(erro),
             action="show",
             color="red",
@@ -367,11 +336,7 @@ def salvar_usr(
         return dmc.Notification(
             id="notificacao-salvar-usr",
             title="Pronto!",
-            message=[
-                dmc.Text(span=True, children="O usuário "),
-                dmc.Text(span=True, children=nome, weight=700),
-                dmc.Text(span=True, children=" foi modificado com sucesso."),
-            ],
+            message=f"Os dados de {nome} foram atualizados com sucesso.",
             color="green",
             action="show",
         ), "/app/admin/usuarios"
@@ -391,7 +356,7 @@ def salvar_usr(
     State("unidades-edit-usr", "value"),
     prevent_initial_call=True,
 )
-def criar_novo_usr(
+def criar_usuario(
     n: int,
     nome: str,
     cpf: str,
@@ -407,9 +372,6 @@ def criar_novo_usr(
 
     usr_atual = Usuario.atual()
 
-    if not usr_atual.is_authenticated:
-        raise PreventUpdate
-
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
@@ -424,7 +386,7 @@ def criar_novo_usr(
                 )
             if role not in (Role.GEST, Role.USR, Role.CAND):
                 raise AssertionError(
-                    f"Não você não tem permissão para atribuir este perfil: {role.capitalize()}."
+                    f"Não você não tem permissão para atribuir o perfil '{role.capitalize()}' a alguém."
                 )
         usr = NovoUsuario(
             nome=nome,
@@ -446,7 +408,7 @@ def criar_novo_usr(
                 erro = e
         return dmc.Notification(
             id="notificacao-erro-edit-usr",
-            title="Atenção",
+            title="Ops!",
             message=str(erro),
             action="show",
             color="red",
@@ -456,7 +418,7 @@ def criar_novo_usr(
         return dmc.Notification(
             id="notificacao-novo-usr-suc",
             title="Pronto!",
-            message=f"O usuário {usr.nome} foi criado com sucesso",
+            message=f"O usuário {usr.nome} foi criado com sucesso.",
             color="green",
             action="show",
         ), "/app/admin/usuarios"
@@ -474,38 +436,40 @@ clientside_callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Output("url", "href", allow_duplicate=True),
     Input("confirm-delete-usr", "submit_n_clicks"),
-    State("url", "href"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def excluir_usr(n: int, href: str):
+def excluir_usuario(n: int, endpoint: str):
     if not n:
         raise PreventUpdate
 
     usr_atual = Usuario.atual()
-
-    if not usr_atual.is_authenticated:
+    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    id_usr = href.split("/")[-1]
+    id_usr = UrlUtils.parse_pparams(endpoint, "usuarios")
+    filter = {"_id": ObjectId(id_usr)}
 
     if usr_atual.role == Role.ADM:
-        r = db("Usuários").delete_one(
-            {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa}
-        )
+        filter["empresa"] = usr_atual.empresa
     elif usr_atual.role == Role.CONS:
-        r = db("Usuários").delete_one(
-            {"_id": ObjectId(id_usr), "empresa": {"$in": usr_atual.clientes}}
-        )
-    elif usr_atual.role == Role.DEV:
-        r = db("Usuários").delete_one({"_id": ObjectId(id_usr)})
-    else:
-        raise PreventUpdate
+        filter["empresa"] = {"$in": usr_atual.clientes}
+
+    r = db("Usuários").delete_one(filter=filter)
 
     if not r.acknowledged:
         return dmc.Notification(
             id="notificacao-excluir-usr",
-            title="Atenção",
-            message="Houve um erro ao excluir o usuário. Tente novamente mais tarde.",
+            title="Ops!",
+            message="Ocorreu um erro ao tentar excluir o usuário. Tente novamente mais tarde.",
+            color="red",
+            action="show",
+        ), no_update
+    elif r.deleted_count == 0:
+        return dmc.Notification(
+            id="notificacao-excluir-usr",
+            title="Ops!",
+            message="Este usuário não existe ou você não tem permissão para excluí-lo.",
             color="red",
             action="show",
         ), no_update
@@ -530,52 +494,53 @@ clientside_callback(
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
     Input("confirm-reset-usr-password", "submit_n_clicks"),
-    State("url", "search"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def redefinir_senha(n: int, search: str):
-    usr_atual = Usuario.atual()
-
+def redefinir_senha(n: int, endpoint: str):
     if not n:
         raise PreventUpdate
 
     usr_atual = Usuario.atual()
 
-    if not usr_atual.is_authenticated:
-        raise PreventUpdate
-
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    else:
-        params = parse_qs(search[1:])
-        id_usr = params["id"][0]
+    id_usr = UrlUtils.parse_pparams(endpoint, "usuarios")
+    usr = Usuario.consultar("_id", id_usr)
+    nova_senha = usr.data.strftime("%d%m%Y")
 
-        usr = Usuario.buscar("_id", id_usr)
+    filter = {"_id": ObjectId(id_usr)}
+    update = {"$set": {"senha_hash": generate_password_hash(nova_senha)}}
 
-        nova_senha = usr.data.strftime("%d%m%Y")
+    if usr_atual.role == Role.CONS:
+        filter["empresa"] = {"$in": usr_atual.clientes}
+    elif usr_atual.role == Role.ADM:
+        filter["empresa"] = usr_atual.empresa
 
-        r = db("Usuários").update_one(
-            {"_id": ObjectId(id_usr), "empresa": usr_atual.empresa},
-            update={"$set": {"senha_hash": generate_password_hash(nova_senha)}},
+    r = db("Usuários").update_one(filter=filter, update=update)
+
+    if not r.acknowledged:
+        return dmc.Notification(
+            id="notificacao-reset-usr-password",
+            title="Ops!",
+            message="Houve um erro ao tentar redefinir a senha. Tente novamente mais tarde.",
+            color="red",
+            action="show",
+        )
+    elif r.modified_count == 0:
+        return dmc.Notification(
+            id="notificacao-reset-usr-password",
+            title="Ops!",
+            message="Este usuário não existe ou você não tem permissao para alterar a senha dele.",
+            color="red",
+            action="show",
         )
 
-        if not r.acknowledged:
-            NOTIFICACAO = dmc.Notification(
-                id="notificacao-reset-usr-password",
-                title="Atenção",
-                message="Houve um erro ao redefinir a senha. Tente novamente mais tarde.",
-                color="red",
-                action="show",
-            )
-
-        else:
-            NOTIFICACAO = dmc.Notification(
-                id="notificacao-excluir-usr",
-                title="Pronto!",
-                message=f"A senha do usuário {usr.nome} foi redefinida com sucesso",
-                color="green",
-                action="show",
-            )
-
-    return NOTIFICACAO
+    return dmc.Notification(
+        id="notificacao-excluir-usr",
+        title="Pronto!",
+        message=f"A senha do usuário {usr.nome} foi redefinida com sucesso",
+        color="green",
+        action="show",
+    )

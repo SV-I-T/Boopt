@@ -1,9 +1,10 @@
 import dash_mantine_components as dmc
 from dash import dcc, get_asset_url, html, register_page
 from dash_iconify import DashIconify
+
 from utils.login import checar_perfil
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 register_page(
     __name__,
@@ -17,7 +18,7 @@ register_page(
 def layout():
     usr_atual = Usuario.atual()
 
-    r = VelaAssessment.testes_disponiveis(usr_atual.id_)
+    r = Vela.testes_disponiveis(usr_atual.id_)
     ultima_aplicacao = r["ultima_aplicacao"] if r else None
     ultima_resposta_id = r["ultima_resposta_id"] if r else None
 

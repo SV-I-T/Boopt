@@ -4,6 +4,7 @@ from bson import ObjectId
 from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
@@ -14,20 +15,13 @@ register_page(__name__, path="/app/admin/consultores", title="Consultores")
 
 @checar_perfil(permitir=(Role.DEV,))
 def layout():
-    usr_atual = Usuario.atual()
-
     data_consultores = list(db("ViewUsuáriosConsultores").find())
 
-    data_row_empresas = [
-        {
-            "id": str(empresa["_id"]),
-            "nome": empresa["nome"],
-            "segmento": empresa["segmento"],
-        }
-        for empresa in usr_atual.buscar_empresas(
-            project_fields=["_id", "nome", "segmento"]
+    data_row_empresas = list(
+        db("Empresas").find(
+            {}, {"_id": 0, "id": {"$toString": "$_id", "nome": 1, "segmento": 1}}
         )
-    ]
+    )
     return [
         html.H1("Consultores", className="titulo-pagina"),
         dmc.Stack(
@@ -130,7 +124,7 @@ def salvar_clientes_consultor(
     if not _id_consultor:
         return dmc.Notification(
             id="notificacao-edit-clientes-consultor",
-            title="Atenção",
+            title="Ops!",
             message="Selecione um consultor",
             action="show",
             color="red",
@@ -152,7 +146,7 @@ def salvar_clientes_consultor(
 
     if not r.acknowledged:
         return dmc.Notification(
-            title="Atenção",
+            title="Ops!",
             message="Ocorreu algo de errado ao tentar editar os clientes. Tente novamente mais tarde.",
             action="show",
             color="red",

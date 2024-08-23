@@ -19,6 +19,7 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+
 from utils.banco_dados import db
 from utils.empresa import Empresa
 from utils.login import checar_perfil
@@ -32,10 +33,7 @@ register_page(__name__, path="/app/admin/unidades", title="Unidades")
 def layout():
     usr_atual = Usuario.atual()
 
-    data_empresas = [
-        {"value": str(empresa["_id"]), "label": empresa["nome"]}
-        for empresa in usr_atual.buscar_empresas()
-    ]
+    data_empresas = usr_atual.consultar_empresas()
 
     data_unidades = buscar_unidades(usr_atual.empresa)
 
@@ -149,7 +147,7 @@ Para a edição de unidades já existentes, você pode alterar o nome a vontade,
 
 
 def buscar_unidades(id_empresa: ObjectId) -> list[dict[str, str]]:
-    empresa = Empresa.buscar("_id", id_empresa)
+    empresa = Empresa.consultar("_id", id_empresa)
     return [unidade.model_dump() for unidade in empresa.unidades]
 
 
@@ -258,14 +256,14 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
 
     if not contents:
         return dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children="Selecione um arquivo com os dados das unidades.",
             color="BooptLaranja",
         ), no_update
 
     elif not nome.endswith(".xlsx"):
         return dmc.Alert(
-            title="Atenção",
+            title="Ops!",
             children='O arquivo precisa ter a extensão ".xlsx".',
             color="BooptLaranja",
         ), no_update
@@ -304,7 +302,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
 
         except Exception as e:
             return dmc.Alert(
-                title="Atenção",
+                title="Ops!",
                 children=str(e),
                 color="BooptLaranja",
             ), no_update

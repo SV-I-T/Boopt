@@ -4,11 +4,12 @@ import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
 from dash import html, register_page
+
 from utils.banco_dados import db
 from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
-from utils.vela import VelaAssessment
+from utils.vela import Vela
 
 register_page(
     __name__,
@@ -21,7 +22,7 @@ register_page(
 def layout(id_aplicacao: str = None, **kwargs):
     usr = Usuario.atual()
 
-    assessment = VelaAssessment(
+    assessment = Vela(
         **db("VelaAplicações").find_one(
             {"_id": ObjectId(id_aplicacao), "empresa": usr.empresa}
         )

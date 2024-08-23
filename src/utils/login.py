@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 from flask_login import LoginManager
+
 from utils.role import Role
 from utils.usuario import Usuario
 
@@ -10,7 +11,7 @@ login_manager.login_message = "Faça o login para acessar esta página."
 
 @login_manager.user_loader
 def carregar_usuario(_id):
-    usr = Usuario.buscar_login(_id)
+    usr = Usuario.consultar_pelo_id(_id)
     if not usr:
         return None
     return Usuario(**usr)
