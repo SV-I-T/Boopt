@@ -53,58 +53,29 @@ def layout():
         withNormalizeCSS=True,
         withGlobalStyles=True,
         inherit=True,
-        children=dmc.NotificationsProvider(
-            position="top-right",
-            zIndex=10000,
-            children=[
-                html.Div(id="notificacoes"),
-                dcc.Store(id="refresh"),
-                dcc.Store(id="user-data"),
-                dcc.Location(id="url", refresh="callback-nav"),
-                dcc.Location(id="url-no-refresh", refresh=False),
-                html.Div(
-                    id="app",
-                    children=[
-                        html.Div(
-                            id="wrapper",
-                            children=[
-                                html.Header(
-                                    children=[
-                                        dmc.Anchor(
-                                            html.Img(
-                                                src=get_asset_url(
-                                                    "imgs/vela/tag_ass.svg"
-                                                ),
-                                                alt="Logo Vela Assessment",
-                                            ),
-                                            href="/",
+        children=[
+            dcc.Location(id="url", refresh="callback-nav"),
+            html.Div(
+                id="app",
+                children=[
+                    html.Div(
+                        id="wrapper",
+                        children=[
+                            html.Header(
+                                children=[
+                                    dmc.Anchor(
+                                        html.Img(
+                                            src=get_asset_url("imgs/vela/tag_ass.svg"),
+                                            alt="Logo Vela Assessment",
                                         ),
-                                        dmc.Anchor(
-                                            href="/dashboard",
-                                            children=dmc.Button(
-                                                children="Resultados",
-                                                leftIcon=DashIconify(
-                                                    icon="fluent:chart-multiple-24-regular",
-                                                    width=24,
-                                                ),
-                                                classNames={"root": "btn-vela"},
-                                            ),
-                                        ),
-                                    ]
-                                ),
-                                page_container,
-                            ],
-                        ),
-                    ],
-                ),
-            ],
-        ),
+                                        href="/",
+                                    ),
+                                ]
+                            ),
+                            page_container,
+                        ],
+                    ),
+                ],
+            ),
+        ],
     )
-
-
-clientside_callback(
-    ClientsideFunction("clientside", "atualizar_pagina"),
-    Output("refresh", "data"),
-    Input("refresh", "data"),
-    prevent_initial_call=True,
-)
