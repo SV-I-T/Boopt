@@ -35,7 +35,7 @@ app = Dash(
 )
 auth = BasicAuth(
     app=app,
-    username_password_list={"admin": "password"},
+    username_password_list={"admin": "tamojunto"},
     public_routes=["/", "/test/", "/assets/<path:subpath>", "/_dash-update-component"],
 )
 
