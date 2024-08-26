@@ -46,9 +46,9 @@ register_page(
 def layout(
     secao: str = "instrucoes",
     nome: str = "Vendedor",
-    empresa: str = "Empresa",
     **kwargs,
 ):
+    params_string = f"{nome=}" + "&".join([f"{k}={v}" for k, v in kwargs.items()])
     if secao == "instrucoes":
         return html.Div(
             style={"display": "flex", "flex-direction": "column", "height": "100%"},
@@ -60,7 +60,10 @@ def layout(
                             height=90,
                             alt="Logo Vela",
                         ),
-                        dcc.Markdown(f"Olá **{nome}**,", className="vela-saudacao"),
+                        dcc.Markdown(
+                            f"Olá **{nome.split(' ',1)[0]}**,",
+                            className="vela-saudacao",
+                        ),
                         html.Div(
                             children=[html.Div()] * 3,
                             className="vela-circles",
@@ -103,7 +106,7 @@ def layout(
                             ],
                         ),
                         dmc.Anchor(
-                            href=f"/test/?nome={nome}&empresa={empresa}&secao=frases",
+                            href=f"/test/?secao=frases&{params_string}",
                             children=dmc.Button(
                                 "Iniciar o teste",
                                 classNames={"root": "btn-vela"},
@@ -269,9 +272,6 @@ def habilitar_envio(status_pronto, search: str):
     if not status_pronto:
         raise PreventUpdate
     else:
-        params = QParams.extrair_params(search)
-        nome = params["nome"]
-        empresa = params["empresa"]
         return (
             dmc.Group(
                 style={"margin-top": "auto", "flex-wrap": "nowrap"},
@@ -286,13 +286,10 @@ def habilitar_envio(status_pronto, search: str):
                             ),
                         ],
                     ),
-                    dmc.Anchor(
-                        href=f"/test/?nome={nome}&empresa={empresa}&secao=frases",
-                        children=dmc.Button(
-                            id="btn-enviar",
-                            children="Enviar",
-                            classNames={"root": "btn-vela"},
-                        ),
+                    dmc.Button(
+                        id="btn-enviar",
+                        children="Enviar",
+                        classNames={"root": "btn-vela"},
                     ),
                 ],
             ),
