@@ -1,8 +1,9 @@
 import locale
 
 from dash import Dash
+from dash_auth import BasicAuth
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, Response
 
 from dash_app import layout
 from utils.banco_dados import mongo
@@ -12,6 +13,12 @@ load_dotenv()
 
 server = Flask(__name__, static_folder="assets")
 server.config.from_prefixed_env()
+
+
+@server.get("/logout")
+def logout():
+    return Response(status=401)
+
 
 app = Dash(
     __name__,
@@ -25,6 +32,11 @@ app = Dash(
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
     meta_tags=[{"name": "theme-color", "content": "#171C24"}],
+)
+auth = BasicAuth(
+    app=app,
+    username_password_list={"admin": "password"},
+    public_routes=["/", "/test/", "/assets/<path:subpath>", "/_dash-update-component"],
 )
 
 mongo.init_app(server)

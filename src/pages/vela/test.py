@@ -299,7 +299,6 @@ def habilitar_envio(status_pronto, search: str):
 # ENVIAR RESPOSTA
 @callback(
     Output("url", "search", allow_duplicate=True),
-    Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
     State("store-frases-vela", "data"),
     State("url", "search"),

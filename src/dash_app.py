@@ -1,15 +1,5 @@
 import dash_mantine_components as dmc
-from dash import (
-    ClientsideFunction,
-    Input,
-    Output,
-    clientside_callback,
-    dcc,
-    get_asset_url,
-    html,
-    page_container,
-)
-from dash_iconify import DashIconify
+from dash import dcc, get_asset_url, html, page_container
 
 TEMA_PADRAO = {
     "colors": {

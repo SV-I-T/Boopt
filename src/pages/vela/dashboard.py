@@ -66,6 +66,7 @@ def layout():
     ]
 
     return [
+        dmc.Anchor(href="/logout", children="Sair"),
         dmc.Accordion(
             children=dmc.AccordionItem(
                 value="filtros",
