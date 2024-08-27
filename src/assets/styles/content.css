@@ -31,12 +31,12 @@
     position: fixed;
     height: 100px;
     background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
 }
 
 #wrapper header a {
     height: fit-content;
-    padding: 1rem;
+    margin: 1rem;
 }
 
 #wrapper header img {
