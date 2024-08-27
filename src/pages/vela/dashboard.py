@@ -66,7 +66,13 @@ def layout():
     ]
 
     return [
-        dmc.Anchor(href="/logout", children="Sair"),
+        dmc.Anchor(
+            href="/logout",
+            children="Sair",
+            style={"text-align": "right"},
+            color="red",
+            mb="0.5rem",
+        ),
         dmc.Accordion(
             children=dmc.AccordionItem(
                 value="filtros",
