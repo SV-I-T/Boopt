@@ -137,6 +137,7 @@ def layout(
 
         return html.Div(
             className="center-container test-vela",
+            style={"margin-top": "7rem"},
             children=[
                 dcc.Store(id="store-frases-vela", data=frases, storage_type="memory"),
                 dcc.Store(id="store-status-vela", data=False, storage_type="memory"),
@@ -207,13 +208,6 @@ def layout(
                 html.Div(id="send-container-vela"),
             ],
         )
-    elif secao == "enviado":
-        return [
-            html.H1("Obrigado!", className="titulo-pagina"),
-            dcc.Markdown(
-                "Você pode conferir seu resultado agora mesmo clicando [aqui](/dashboard)"
-            ),
-        ]
 
 
 # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
@@ -277,33 +271,31 @@ def habilitar_envio(status_pronto, search: str):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return (
-            dmc.Group(
-                style={"margin-top": "auto", "flex-wrap": "nowrap"},
-                position="apart",
-                children=[
-                    dmc.Stack(
-                        spacing=0,
-                        children=[
-                            dmc.Text("Tudo pronto!", weight=700, size=40),
-                            dmc.Text(
-                                "Você pode revisar suas respostas ou enviá-las agora mesmo.",
-                            ),
-                        ],
-                    ),
-                    dmc.Button(
-                        id="btn-enviar",
-                        children="Enviar",
-                        classNames={"root": "btn-vela"},
-                    ),
-                ],
-            ),
+        return dmc.Group(
+            style={"margin-top": "auto", "flex-wrap": "nowrap"},
+            position="apart",
+            children=[
+                dmc.Stack(
+                    spacing=0,
+                    children=[
+                        dmc.Text("Tudo pronto!", weight=700, size=40),
+                        dmc.Text(
+                            "Você pode revisar suas respostas ou enviá-las agora mesmo.",
+                        ),
+                    ],
+                ),
+                dmc.Button(
+                    id="btn-enviar",
+                    children="Enviar",
+                    classNames={"root": "btn-vela"},
+                ),
+            ],
         )
 
 
 # ENVIAR RESPOSTA
 @callback(
-    Output("url", "search", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
     State("store-frases-vela", "data"),
     State("url", "search"),
@@ -327,16 +319,7 @@ def salvar_resposta(n: int | None, frases: dict, search: str):
 
         resposta = db("Respostas").insert_one(dados_resposta)
 
-        if resposta.inserted_id:
-            return f"?nome={nome}&empresa={empresa}&secao=enviado", no_update
-        else:
-            return no_update, dmc.Notification(
-                id="erro-envio-teste",
-                color="red",
-                title="Atenção",
-                message="Erro ao salvar resposta. Tente novamente",
-                action="show",
-            )
+        return f"/results/{resposta.inserted_id}"
 
 
 def calcular_nota(frases: dict[str, int]):

@@ -36,7 +36,13 @@ app = Dash(
 auth = BasicAuth(
     app=app,
     username_password_list={"admin": "tamojunto"},
-    public_routes=["/", "/test/", "/assets/<path:subpath>", "/_dash-update-component"],
+    public_routes=[
+        "/",
+        "/test/",
+        "/assets/<path:subpath>",
+        "/_dash-update-component",
+        "/result/",
+    ],
 )
 
 mongo.init_app(server)
