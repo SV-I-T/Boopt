@@ -19,28 +19,40 @@
     width: 100%;
     height: 100%;
     min-height: 100vh;
-    background-color: #fff;
+    background-color: var(--off-white);
     z-index: 1;
 }
 
 #wrapper header {
-    padding: 1rem 0;
+    position: fixed;
     z-index: 100000;
     right: 0;
     left: 0;
-    position: fixed;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-}
-
-#wrapper header a {
     height: fit-content;
-    margin: 1rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#wrapper header img {
-    height: 70px;
+#wrapper header .beta-tag {
+    font-weight: 300;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 5px;
+    border-radius: 5px;
+    height: fit-content;
+}
+
+#wrapper header .logo-boopt {
+    color: transparent;
+    background: url('../imgs/boopt/horizontal_azul.svg') no-repeat;
+    height: 50px;
+    width: 150px;
+}
+
+#wrapper a {
+    text-decoration: none;
+    height: 100%;
 }
 
 div:has(>#_pages_content) {
@@ -52,7 +64,7 @@ div:has(>#_pages_content) {
 }
 
 #_pages_content {
-    padding-top: calc(2rem + 100px);
+    /* padding-top: calc(2rem + 70px); */
     padding-bottom: 2rem;
     position: relative;
     width: 100%;
@@ -73,7 +85,27 @@ div:has(>#_pages_content) {
     flex-grow: 1;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 900px) {
+    #wrapper header .beta-tag {
+        font-size: 12px;
+        color: #f3f3f3;
+    }
+
+    #wrapper:not(:has(.form-infos-vela)) header {
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+    }
+
+    #wrapper:has(.form-infos-vela) header .logo-boopt {
+        color: transparent;
+    }
+
+    #wrapper header .logo-boopt {
+        background: url('../imgs/boopt/horizontal_branco.svg') no-repeat;
+        height: 40px;
+        width: 130px;
+    }
+
     #app {
         padding-left: 0px;
         left: 0px;
@@ -85,7 +117,17 @@ div:has(>#_pages_content) {
     }
 }
 
-@media only screen and (min-width: 1000px) {
+@media only screen and (min-width: 900px) {
+    #wrapper header .beta-tag {
+        font-size: 16px;
+        color: #5c5c5c;
+    }
+
+    #wrapper header {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+    }
+
     #app {
         z-index: 1;
     }

@@ -1,8 +1,131 @@
-.index-vela>.mantine-Text-root {
-    font-size: 32px;
-    text-align: center;
+.promo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
-.index-vela>.mantine-Image-root {
-    border-radius: 30px;
+.promo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.promo .barco {
+    filter: brightness(61%);
+}
+
+.promo .logo-vela {
+    position: absolute;
+    bottom: 0;
+
+}
+
+.promo .welcome {
+    position: absolute;
+    color: #fff;
+    font-weight: 300;
+}
+
+.slogan {
+    text-align: center;
+    padding: 2rem 0rem;
+}
+
+.slogan span {
+    font-size: 40px;
+    font-weight: 300;
+}
+
+.slogan span.bold {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.form-infos-vela {
+    display: grid;
+    gap: 1rem;
+    border: 1px solid #FC9D2E;
+    border-radius: 15px;
+    padding: 1rem;
+}
+
+.form-infos-vela>button {
+    transition: all 100ms ease;
+}
+
+.form-infos-vela>button:hover,
+.form-infos-vela>button:active {
+    transform: scale(105%);
+}
+
+@media only screen and (max-width: 900px) {
+    .promo {
+        /* left: -1rem; */
+        width: calc(100vw);
+        margin-left: -1rem;
+        height: 400px;
+    }
+
+    .promo .barco {
+        border-radius: 0px;
+        height: 100%;
+        min-width: 100%;
+        object-fit: cover;
+    }
+
+    .promo .logo-vela {
+        padding: 30px 70px;
+        max-height: 150px;
+    }
+
+    .promo .welcome {
+        font-size: 20px;
+        bottom: 30%;
+    }
+
+    .slogan span {
+        font-size: 20px;
+    }
+
+    .slogan span.bold {
+        font-size: 23px;
+    }
+}
+
+@media only screen and (min-width: 900px) {
+    .promo {
+        margin-top: 7rem;
+        max-width: 100%;
+    }
+
+    .promo .barco {
+        border-radius: 30px;
+    }
+
+    .promo .logo-vela {
+        padding: 40px 140px;
+    }
+
+    .promo .welcome {
+        font-size: 48px;
+        top: 0;
+    }
+
+    .slogan span {
+        font-size: 40px;
+    }
+
+    .slogan span.bold {
+        font-size: 42px;
+    }
+
+    .form-infos-vela {
+
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-infos-vela>.mantine-InputWrapper-root:first-child,
+    .form-infos-vela>button {
+        grid-column: span 2;
+    }
 }

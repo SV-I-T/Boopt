@@ -51,7 +51,12 @@ def layout(
     params_string = f"{nome=}" + "&".join([f"{k}={v}" for k, v in kwargs.items()])
     if secao == "instrucoes":
         return html.Div(
-            style={"display": "flex", "flex-direction": "column", "height": "100%"},
+            style={
+                "display": "flex",
+                "flex-direction": "column",
+                "height": "100%",
+                "margin-top": "7rem",
+            },
             children=[
                 dmc.Group(
                     children=[

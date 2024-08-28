@@ -54,12 +54,13 @@ def layout():
                             html.Header(
                                 children=[
                                     dmc.Anchor(
-                                        html.Img(
-                                            src=get_asset_url("imgs/vela/tag_ass.svg"),
-                                            alt="Logo Vela Assessment",
+                                        html.Div(
+                                            className="logo-boopt",
+                                            children="Logo Boopt",
                                         ),
                                         href="/",
                                     ),
+                                    html.Div("VERSÃO BETA", className="beta-tag"),
                                 ]
                             ),
                             page_container,
