@@ -4,7 +4,7 @@ from dash import html, register_page
 register_page(
     __name__,
     path_template="/results/<id_resposta>",
-    title="DEMO | Resultados | Vela",
+    title="[DEMO] Resultados - Vela Assessment",
 )
 
 

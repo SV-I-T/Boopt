@@ -39,7 +39,7 @@ EXPLICACAO_MD = """
 register_page(
     __name__,
     path_template="/test/",
-    title="DEMO | Teste | Vela Assessment",
+    title="[DEMO] Vela Assessment",
 )
 
 
@@ -307,12 +307,13 @@ def salvar_resposta(n: int | None, frases: dict, search: str):
 
     else:
         params = QParams.extrair_params(search)
-        nome = params.get("nome")
-        empresa = params.get("empresa")
         dados_resposta = {
             "frases": {k: int(v["valor"]) for k, v in frases.items()},
-            "usuario": nome,
-            "empresa": empresa,
+            "usuario": params.get("nome"),
+            "empresa": params.get("empresa"),
+            "cargo": params.get("cargo"),
+            "telefone": params.get("telefone"),
+            "email": params.get("email"),
         }
 
         dados_resposta["nota"] = calcular_nota(dados_resposta["frases"])
