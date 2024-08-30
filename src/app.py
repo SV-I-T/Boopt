@@ -28,6 +28,7 @@ app = Dash(
     use_pages=True,
     title="Boopt - Sucesso em Vendas",
     update_title="Carregando...",
+    external_scripts=["https://cdn.plot.ly/plotly-locale-pt-br-latest.js"],
     external_stylesheets=[
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
