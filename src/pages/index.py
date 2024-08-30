@@ -20,7 +20,7 @@ def layout():
                     alt="Logo Vela",
                     className="logo-vela",
                 ),
-                html.P("Seja bem-vindo ao", className="welcome"),
+                html.Div("Seja bem-vindo ao", className="welcome"),
             ],
         ),
         html.Div(
