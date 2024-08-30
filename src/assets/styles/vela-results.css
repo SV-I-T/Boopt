@@ -1,0 +1,15 @@
+.vela-report {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.vela-report .nota-pct {
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.vela-report svg.main-svg {
+    border-radius: 15px;
+    box-shadow: 0px 2px 3px 0px rgba(37, 36, 35, 0.1);
+}
