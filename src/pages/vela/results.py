@@ -35,16 +35,16 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
         figure=go.Figure(
             data=[
                 go.Bar(
-                    x=df.get_column("nome"),
+                    x=df.get_column("nome").to_list(),
                     y=[10 for _ in range(df.shape[0])],
                     marker=go.bar.Marker(color="#ddd"),
                     name="",
                     hoverinfo="skip",
                 ),
                 go.Bar(
-                    x=df.get_column("nome"),
-                    y=df.get_column("pontos"),
-                    customdata=df.select("desc"),
+                    x=df.get_column("nome").to_list(),
+                    y=df.get_column("pontos").to_list(),
+                    customdata=df.select("desc").to_numpy(),
                     name="",
                     hovertemplate="<b>%{customdata[0]}</b>: %{y:.1f}",
                     textfont=go.bar.Textfont(color="#fff", size=18),
@@ -68,8 +68,8 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
         figure=go.Figure(
             data=[
                 go.Barpolar(
-                    theta=df_categoria.get_column("nome"),
-                    r=df_categoria.get_column("pontos"),
+                    theta=df_categoria.get_column("nome").to_list(),
+                    r=df_categoria.get_column("pontos").to_list(),
                     hovertemplate="<b>%{theta}</b>: %{r:.1f}",
                     name=categoria[0],
                     marker=go.barpolar.Marker(
