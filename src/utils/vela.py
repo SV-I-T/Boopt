@@ -120,6 +120,44 @@ class Vela(BaseModel):
             return None
 
     @classmethod
+    def consultar_dfs_resposta(cls, id_resposta: str | ObjectId) -> list[pl.DataFrame]:
+        r = db("Respostas").find_one(
+            {"_id": ObjectId(id_resposta)},
+            {"nota": 0},
+        )
+
+        df_resposta = (
+            pl.DataFrame(r)
+            .unnest("frases")
+            .unpivot(pl.selectors.digit(), variable_name="id_frase", value_name="nota")
+            .with_columns(pl.col("id_frase").cast(pl.Int64))
+        )
+
+        dfs = Vela.carregar_formulario()
+
+        df_competencias = (
+            df_resposta.join(dfs.competencias, left_on="id_frase", right_on="id")
+            .with_columns(
+                pl.col("notas").list.get(pl.col("nota").sub(1)).alias("pontos")
+            )
+            .drop("id_frase", "nota", "notas", "desc")
+            .group_by("nome")
+            .agg(pl.col("pontos").mean())
+            .sort("nome")
+        )
+
+        df_etapas = (
+            df_competencias.join(
+                dfs.etapas, left_on="nome", right_on="competencias", how="right"
+            )
+            .group_by("id")
+            .agg(pl.col("nome").first(), pl.col("pontos").mean())
+            .sort("id")
+        )
+
+        return df_competencias, df_etapas
+
+    @classmethod
     def buscar_respostas(cls, id_usr: ObjectId) -> list[ObjectId]:
         r = db("VelaRespostas").find({"id_usuario": id_usr}, {"_id": 1})
         return [i["_id"] for i in r]
