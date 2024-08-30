@@ -75,7 +75,7 @@
 
     .promo .logo-vela {
         padding: 30px 70px;
-        max-height: 150px;
+        height: 150px;
     }
 
     .promo .welcome {
@@ -108,7 +108,7 @@
 
     .promo .welcome {
         font-size: 48px;
-        top: 0;
+        top: 1rem;
     }
 
     .slogan span {
