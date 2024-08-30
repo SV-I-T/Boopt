@@ -143,6 +143,19 @@ class Vela(BaseModel):
             .drop("id_frase", "nota", "notas", "desc")
             .group_by("nome")
             .agg(pl.col("pontos").mean())
+            .with_columns(
+                pl.when(pl.col("pontos").ge(8))
+                .then(pl.lit("Bom"))
+                .when(pl.col("pontos").ge(4))
+                .then(pl.lit("Regular"))
+                .otherwise(pl.lit("Ruim"))
+                .alias("Categoria")
+            )
+            .with_columns(
+                pl.col("Categoria")
+                .replace({"Bom": "#57b956", "Regular": "#ffcc00", "Ruim": "#d23535"})
+                .alias("Cor")
+            )
             .sort("nome")
         )
 
@@ -153,6 +166,20 @@ class Vela(BaseModel):
             .group_by("id")
             .agg(pl.col("nome").first(), pl.col("pontos").mean())
             .sort("id")
+            .with_columns(
+                pl.col("nome")
+                .replace(
+                    {
+                        "A": "Aborde positivamente",
+                        "P": "Pesquise o cliente",
+                        "O": "Ofereça soluções",
+                        "N": "Neutralize objeções",
+                        "T": "Tome a iniciativa e feche a venda",
+                        "E": "Estenda o relacionamento",
+                    }
+                )
+                .alias("desc")
+            )
         )
 
         return df_competencias, df_etapas
