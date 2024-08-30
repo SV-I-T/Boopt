@@ -1,4 +1,5 @@
 from random import choice, sample
+from urllib.parse import unquote
 
 import dash_mantine_components as dmc
 import polars as pl
@@ -45,10 +46,10 @@ register_page(
 
 def layout(
     secao: str = "instrucoes",
-    nome: str = "Vendedor",
     **kwargs,
 ):
-    params_string = f"{nome=}" + "&".join([f"{k}={v}" for k, v in kwargs.items()])
+    nome = kwargs.get("nome")
+    params_string = "&".join([f"{k}={v}" for k, v in kwargs.items()])
     if secao == "instrucoes":
         return html.Div(
             style={
@@ -197,12 +198,12 @@ def layout(
                             color="dark",
                             id="btn-next-vela",
                         ),
-                        dmc.ActionIcon(
-                            DashIconify(
-                                icon="fluent:arrow-shuffle-16-filled", width=16
-                            ),
-                            id="btn-last-vela",
-                        ),
+                        # dmc.ActionIcon(
+                        #     DashIconify(
+                        #         icon="fluent:arrow-shuffle-16-filled", width=16
+                        #     ),
+                        #     id="btn-last-vela",
+                        # ),
                     ],
                 ),
                 html.Div(id="send-container-vela"),
@@ -210,20 +211,20 @@ def layout(
         )
 
 
-# CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
-@callback(
-    Output("store-frases-vela", "data", allow_duplicate=True),
-    Input("btn-last-vela", "n_clicks"),
-    State("store-frases-vela", "data"),
-    prevent_initial_call=True,
-)
-def preencher_auto(n, frases):
-    if not n:
-        raise PreventUpdate
-    else:
-        for k in frases:
-            frases[k]["valor"] = choice(["1", "2", "3", "4", "5"])
-        return frases
+# # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
+# @callback(
+#     Output("store-frases-vela", "data", allow_duplicate=True),
+#     Input("btn-last-vela", "n_clicks"),
+#     State("store-frases-vela", "data"),
+#     prevent_initial_call=True,
+# )
+# def preencher_auto(n, frases):
+#     if not n:
+#         raise PreventUpdate
+#     else:
+#         for k in frases:
+#             frases[k]["valor"] = choice(["1", "2", "3", "4", "5"])
+#         return frases
 
 
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
@@ -309,18 +310,18 @@ def salvar_resposta(n: int | None, frases: dict, search: str):
         params = QParams.extrair_params(search)
         dados_resposta = {
             "frases": {k: int(v["valor"]) for k, v in frases.items()},
-            "usuario": params.get("nome"),
-            "empresa": params.get("empresa"),
-            "cargo": params.get("cargo"),
-            "telefone": params.get("telefone"),
-            "email": params.get("email"),
+            "usuario": unquote(params.get("nome")),
+            "empresa": unquote(params.get("empresa")),
+            "cargo": unquote(params.get("cargo")),
+            "telefone": unquote(params.get("telefone")),
+            "email": unquote(params.get("email")),
         }
 
         dados_resposta["nota"] = calcular_nota(dados_resposta["frases"])
 
         resposta = db("Respostas").insert_one(dados_resposta)
 
-        return f"/results/{resposta.inserted_id}"
+        return f"/report/{resposta.inserted_id}"
 
 
 def calcular_nota(frases: dict[str, int]):
@@ -328,7 +329,9 @@ def calcular_nota(frases: dict[str, int]):
     df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
     nota = (
-        pl.DataFrame(list(frases.items()), schema={"id": str, "nota": int})
+        pl.DataFrame(
+            list(frases.items()), schema={"id": str, "nota": int}, orient="row"
+        )
         .with_columns(pl.col("id").cast(pl.Int64))
         .join(df_competencias, on="id", how="left")
         .select(
