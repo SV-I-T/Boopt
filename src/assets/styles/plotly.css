@@ -11,3 +11,10 @@
 .notifier-note p {
     color: #fff !important;
 }
+
+svg.main-svg .hoverlayer .bg {
+    rx: 5;
+    shape-rendering: auto;
+    stroke: #ccc !important;
+    stroke-width: 1px !important;
+}

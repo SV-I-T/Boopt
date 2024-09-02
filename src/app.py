@@ -42,7 +42,7 @@ auth = BasicAuth(
         "/test/",
         "/assets/<path:subpath>",
         "/_dash-update-component",
-        "/result/",
+        "/report/<path:subpath>",
     ],
 )
 

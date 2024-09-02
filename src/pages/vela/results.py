@@ -56,7 +56,7 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
                 yaxis=go.layout.YAxis(range=[0, 10]),
                 barmode="overlay",
                 legend=go.layout.Legend(visible=False),
-                hovermode="x",
+                hovermode="x unified",
             ),
         ),
         config=get_plotly_configs("A PONTE - Vela"),
@@ -93,6 +93,7 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     text="<b>Pontuação das competências comerciais</b>"
                 ),
                 height=550,
+                hovermode="x unified",
             ),
         ),
         config=get_plotly_configs("A PONTE - Competências comerciaias"),
