@@ -44,6 +44,17 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
                 go.Bar(
                     x=df.get_column("nome").to_list(),
                     y=df.get_column("pontos").to_list(),
+                    marker=go.bar.Marker(
+                        color=[
+                            "#f54323",
+                            "#fac82c",
+                            "#f5183f",
+                            "#1840f5",
+                            "#45a089",
+                            "#6818f5",
+                            "#6b5f49",
+                        ]
+                    ),
                     customdata=df.select("desc").to_numpy(),
                     name="",
                     hovertemplate="<b>%{customdata[0]}</b>: %{y:.1f}",
@@ -53,10 +64,10 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
             ],
             layout=go.Layout(
                 title=go.layout.Title(text="<b>Pontuação por etapa do atendimento</b>"),
-                yaxis=go.layout.YAxis(range=[0, 10]),
+                yaxis=go.layout.YAxis(showticklabels=False),
                 barmode="overlay",
                 legend=go.layout.Legend(visible=False),
-                hovermode="x unified",
+                margin=go.layout.Margin(l=40, r=40),
             ),
         ),
         config=get_plotly_configs("A PONTE - Vela"),
@@ -76,7 +87,9 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                         color=df_categoria.get_column("Cor").max()
                     ),
                 )
-                for categoria, df_categoria in df.group_by("Categoria")
+                for categoria, df_categoria in df.sort(
+                    "pontos", descending=True
+                ).group_by("Categoria", maintain_order=True)
             ],
             layout=go.Layout(
                 polar=go.layout.Polar(
@@ -93,7 +106,9 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     text="<b>Pontuação das competências comerciais</b>"
                 ),
                 height=550,
-                hovermode="x unified",
+                legend=go.layout.Legend(
+                    x=0.5, y=1.05, xanchor="center", yanchor="bottom", orientation="h"
+                ),
             ),
         ),
         config=get_plotly_configs("A PONTE - Competências comerciaias"),

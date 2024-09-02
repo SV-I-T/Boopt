@@ -153,7 +153,7 @@ class Vela(BaseModel):
             )
             .with_columns(
                 pl.col("Categoria")
-                .replace({"Bom": "#57b956", "Regular": "#ffcc00", "Ruim": "#d23535"})
+                .replace({"Bom": "#7fbe6d", "Regular": "#ffd240", "Ruim": "#f65a3c"})
                 .alias("Cor")
             )
             .sort("nome")
