@@ -32,7 +32,7 @@ app = Dash(
     external_stylesheets=[
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
-    meta_tags=[{"name": "theme-color", "content": "#ffffff"}],
+    meta_tags=[{"name": "theme-color", "content": "#f3f3f3"}],
 )
 auth = BasicAuth(
     app=app,
