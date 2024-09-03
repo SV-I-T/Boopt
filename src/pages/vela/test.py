@@ -198,12 +198,15 @@ def layout(
                             color="dark",
                             id="btn-next-vela",
                         ),
-                        # dmc.ActionIcon(
-                        #     DashIconify(
-                        #         icon="fluent:arrow-shuffle-16-filled", width=16
-                        #     ),
-                        #     id="btn-last-vela",
-                        # ),
+                        dmc.Button(
+                            "Preencher aleatoriamente",
+                            leftIcon=DashIconify(
+                                icon="fluent:arrow-shuffle-16-filled", width=16
+                            ),
+                            id="btn-last-vela",
+                            variant="white",
+                            c="gray",
+                        ),
                     ],
                 ),
                 html.Div(id="send-container-vela"),
@@ -211,20 +214,23 @@ def layout(
         )
 
 
-# # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
-# @callback(
-#     Output("store-frases-vela", "data", allow_duplicate=True),
-#     Input("btn-last-vela", "n_clicks"),
-#     State("store-frases-vela", "data"),
-#     prevent_initial_call=True,
-# )
-# def preencher_auto(n, frases):
-#     if not n:
-#         raise PreventUpdate
-#     else:
-#         for k in frases:
-#             frases[k]["valor"] = choice(["1", "2", "3", "4", "5"])
-#         return frases
+# CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
+@callback(
+    Output("store-frases-vela", "data", allow_duplicate=True),
+    Output("btn-back-vela", "n_clicks"),
+    Output("store-frase-atual-vela", "data", allow_duplicate=True),
+    Input("btn-last-vela", "n_clicks"),
+    State("store-frases-vela", "data"),
+    State("btn-back-vela", "n_clicks"),
+    prevent_initial_call=True,
+)
+def preencher_auto(n, frases, n_clicks):
+    if not n:
+        raise PreventUpdate
+    else:
+        for k in frases:
+            frases[k]["valor"] = choice(["1", "2", "3", "4", "5"])
+        return frases, n_clicks, len(frases) - 1
 
 
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
@@ -272,16 +278,14 @@ def habilitar_envio(status_pronto, search: str):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return dmc.Group(
-            style={"margin-top": "auto", "flex-wrap": "nowrap"},
-            position="apart",
+        return html.Div(
+            className="vela-test-send-box",
             children=[
-                dmc.Stack(
-                    spacing=0,
+                html.Div(
                     children=[
-                        dmc.Text("Tudo pronto!", weight=700, size=40),
-                        dmc.Text(
-                            "Você pode revisar suas respostas ou enviá-las agora mesmo.",
+                        html.Div("Tudo pronto!"),
+                        html.Div(
+                            "Você pode revisar suas respostas ou enviá-las agora mesmo."
                         ),
                     ],
                 ),
