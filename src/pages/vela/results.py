@@ -1,6 +1,6 @@
 import plotly.graph_objects as go
 import polars as pl
-from dash import dcc, html, register_page
+from dash import dcc, get_asset_url, html, register_page
 
 from utils.plotly import get_plotly_configs
 from utils.vela import Vela
@@ -14,14 +14,36 @@ register_page(
 
 def layout(id_resposta: str):
     df_competencias, df_etapas = Vela.consultar_dfs_resposta(id_resposta)
+    nota = df_etapas.get_column("pontos").sum()
+    nota_pct = nota / 70
     return [
         html.Div(
             className="vela-report",
             style={"margin-top": "7rem"},
             children=[
+                html.H1("Análise do perfil comercial", className="titulo-pagina"),
                 html.Div(
-                    className="nota-pct",
-                    children=f'{df_etapas.get_column("pontos").sum() / 70:.0%}',
+                    className="potencial",
+                    children=[
+                        html.Div(
+                            className="rosca",
+                            children=[
+                                construir_grafico_progresso(nota_pct),
+                                html.Img(
+                                    src=get_asset_url("imgs/vela/logo.svg"),
+                                    alt="Logo Vela",
+                                ),
+                            ],
+                        ),
+                        html.Div(
+                            children=[
+                                html.Div(
+                                    children=f"{nota_pct:.0%}", className="nota-pct"
+                                ),
+                                html.Div("POTENCIAL DE SUCESSO"),
+                            ]
+                        ),
+                    ],
                 ),
                 construir_grafico_etapas(df_etapas),
                 construir_grafico_competencias(df_competencias),
@@ -30,8 +52,34 @@ def layout(id_resposta: str):
     ]
 
 
+def construir_grafico_progresso(nota_pct: float) -> dcc.Graph:
+    # nota_pct = 1
+    return dcc.Graph(
+        figure=go.Figure(
+            data=go.Pie(
+                values=[nota_pct, 1 - nota_pct],
+                labels=["a", "b"],
+                marker=go.pie.Marker(colors=["#f54323", "#d3d3d3"]),
+                hole=0.7,
+                textinfo="none",
+                sort=False,
+            ),
+            layout=go.Layout(
+                legend=go.layout.Legend(visible=False),
+                margin=go.layout.Margin(l=0, r=0, t=0, b=0),
+                paper_bgcolor="rgba(0,0,0,0)",
+                height=160,
+                width=160,
+            ),
+        ),
+        responsive=False,
+        config=get_plotly_configs(staticPlot=True, responsive=False, autosizable=False),
+    )
+
+
 def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
     return dcc.Graph(
+        className="plot-box",
         figure=go.Figure(
             data=[
                 go.Bar(
@@ -76,6 +124,7 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
 
 def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
     return dcc.Graph(
+        className="plot-box",
         figure=go.Figure(
             data=[
                 go.Barpolar(

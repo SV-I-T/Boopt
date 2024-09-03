@@ -4,12 +4,38 @@
     gap: 1rem;
 }
 
-.vela-report .nota-pct {
-    font-size: 40px;
+.vela-report .plot-box svg.main-svg {
+    border-radius: 15px;
+    box-shadow: 0px 2px 3px 0px rgba(37, 36, 35, 0.1);
+}
+
+.vela-report .potencial {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.vela-report .rosca {
+    position: relative;
+}
+
+.vela-report .rosca img {
+    position: absolute;
+    height: 60px;
+    top: 50px;
+    left: 50px;
+}
+
+.vela-report .rosca .dash-graph .pielayer .slice:first-child .surface {
+    /* mask-image: radial-gradient(at 0% 0%, blue, var(--amarelo-vela)); */
+    mask-image: linear-gradient(45deg, transparent -100%, var(--laranja-vela) 100%);
+}
+
+.vela-report .potencial * {
     font-weight: 700;
 }
 
-.vela-report svg.main-svg {
-    border-radius: 15px;
-    box-shadow: 0px 2px 3px 0px rgba(37, 36, 35, 0.1);
+.vela-report .potencial .nota-pct {
+    font-size: 40px;
+
 }
