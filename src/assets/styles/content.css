@@ -33,6 +33,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 #wrapper header .beta-tag {
@@ -87,26 +90,28 @@ div:has(>#_pages_content) {
 }
 
 @media only screen and (max-width: 900px) {
-    #wrapper header .beta-tag {
-        font-size: 12px;
-        color: #f3f3f3;
+    #wrapper:has(.form-infos-vela) header {
+        background-color: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
-    #wrapper:not(:has(.form-infos-vela)) header {
-        background-color: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-
+    #wrapper header .logo-boopt {
+        height: 40px;
+        width: 130px;
     }
 
     #wrapper:has(.form-infos-vela) header .logo-boopt {
         color: transparent;
+        background: url('../imgs/boopt/horizontal_branco.svg') no-repeat;
     }
 
-    #wrapper header .logo-boopt {
-        background: url('../imgs/boopt/horizontal_branco.svg') no-repeat;
-        height: 40px;
-        width: 130px;
+    #wrapper header .beta-tag {
+        font-size: 12px;
+    }
+
+    #wrapper:has(.form-infos-vela) header .beta-tag {
+        color: #f3f3f3;
     }
 
     #app {
