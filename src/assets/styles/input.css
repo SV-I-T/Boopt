@@ -3,6 +3,7 @@ input,
 .mantine-TextInput-input,
 .mantine-Select-input {
     border-radius: 40px !important;
+    font-size: 16px;
 }
 
 input.input {
