@@ -45,8 +45,20 @@ def layout(id_resposta: str):
                         ),
                     ],
                 ),
-                construir_grafico_etapas(df_etapas),
-                construir_grafico_competencias(df_competencias),
+                html.Div(
+                    className="plot-box",
+                    children=[
+                        html.H1("Pontuação por etapa do atendimento"),
+                        construir_grafico_etapas(df_etapas),
+                    ],
+                ),
+                html.Div(
+                    className="plot-box",
+                    children=[
+                        html.H1("Pontuação por competência comercial"),
+                        construir_grafico_competencias(df_competencias),
+                    ],
+                ),
             ],
         ),
     ]
@@ -59,7 +71,7 @@ def construir_grafico_progresso(nota_pct: float) -> dcc.Graph:
             data=go.Pie(
                 values=[nota_pct, 1 - nota_pct],
                 labels=["a", "b"],
-                marker=go.pie.Marker(colors=["#f54323", "#d3d3d3"]),
+                marker=go.pie.Marker(colors=["#FF7730", "#d3d3d3"]),
                 hole=0.7,
                 textinfo="none",
                 sort=False,
@@ -79,7 +91,6 @@ def construir_grafico_progresso(nota_pct: float) -> dcc.Graph:
 
 def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
     return dcc.Graph(
-        className="plot-box",
         figure=go.Figure(
             data=[
                 go.Bar(
@@ -111,11 +122,11 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
                 ),
             ],
             layout=go.Layout(
-                title=go.layout.Title(text="<b>Pontuação por etapa do atendimento</b>"),
                 yaxis=go.layout.YAxis(showticklabels=False),
                 barmode="overlay",
                 legend=go.layout.Legend(visible=False),
-                margin=go.layout.Margin(l=40, r=40),
+                margin=go.layout.Margin(l=0, r=0, b=20, t=20),
+                height=300,
             ),
         ),
         config=get_plotly_configs("A PONTE - Vela"),
@@ -124,11 +135,12 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
 
 def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
     return dcc.Graph(
-        className="plot-box",
         figure=go.Figure(
             data=[
                 go.Barpolar(
-                    theta=df_categoria.get_column("nome").to_list(),
+                    theta=df_categoria.select(pl.col("nome").str.replace(" ", "<br>"))
+                    .get_column("nome")
+                    .to_list(),
                     r=df_categoria.get_column("pontos").to_list(),
                     hovertemplate="<b>%{theta}</b>: %{r:.1f}",
                     name=categoria[0],
@@ -151,12 +163,13 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                         categoryorder="category ascending",
                     ),
                 ),
-                title=go.layout.Title(
-                    text="<b>Pontuação das competências comerciais</b>"
-                ),
-                height=550,
+                height=500,
                 legend=go.layout.Legend(
-                    x=0.5, y=1.05, xanchor="center", yanchor="bottom", orientation="h"
+                    x=0.5,
+                    y=1.1,
+                    xanchor="center",
+                    yanchor="bottom",
+                    orientation="h",
                 ),
             ),
         ),

@@ -12,6 +12,24 @@
     color: #fff !important;
 }
 
+.plot-box {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0px 2px 3px 0px rgba(37, 36, 35, 0.1);
+    padding: 1rem;
+}
+
+.plot-box svg.main-svg {
+    background: none !important;
+}
+
+.plot-box h1 {
+    color: #000;
+    text-align: center;
+    font-size: 20px;
+    margin: 0;
+}
+
 svg.main-svg .hoverlayer .bg {
     rx: 5;
     shape-rendering: auto;
