@@ -54,11 +54,17 @@ def layout():
                             html.Header(
                                 children=[
                                     dmc.Anchor(
-                                        className="logo-boopt",
-                                        children="Logo Boopt",
+                                        html.Div(
+                                            className="logo-boopt",
+                                            children="Logo Boopt",
+                                        ),
                                         href="/",
                                     ),
-                                    html.Div("VERSÃO BETA", className="beta-tag"),
+                                    dmc.Anchor(
+                                        "VERSÃO BETA",
+                                        className="beta-tag",
+                                        href="/dashboard",
+                                    ),
                                 ]
                             ),
                             page_container,
