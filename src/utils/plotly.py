@@ -17,9 +17,12 @@ def get_plotly_configs(filename: str = "gráfico_exportado", **kwargs) -> dict:
     configs = {
         "locale": "pt-br",
         "displaylogo": False,
-        "frameMargins": 0,
-        "showTips": True,
-        "toImageButtonOptions": {"filename": filename},
+        "toImageButtonOptions": {
+            "filename": filename,
+            "scale": 2,
+            "height": 400,
+            "width": 600,
+        },
     }
     for k, v in kwargs.items():
         configs[k] = v
