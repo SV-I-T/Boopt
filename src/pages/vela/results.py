@@ -171,6 +171,7 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     yanchor="bottom",
                     orientation="h",
                 ),
+                dragmode="zoom",
             ),
         ),
         config=get_plotly_configs("A PONTE - Competências comerciaias"),
