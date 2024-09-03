@@ -54,10 +54,8 @@ def layout():
                             html.Header(
                                 children=[
                                     dmc.Anchor(
-                                        html.Div(
-                                            className="logo-boopt",
-                                            children="Logo Boopt",
-                                        ),
+                                        className="logo-boopt",
+                                        children="Logo Boopt",
                                         href="/",
                                     ),
                                     dmc.Anchor(
