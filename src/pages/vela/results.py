@@ -56,14 +56,14 @@ def layout(id_resposta: str):
                     className="plot-box",
                     children=[
                         html.H1("Pontuação por competência comercial"),
-                        construir_grafico_competencias_polar(df_competencias),
+                        construir_grafico_competencias(df_competencias),
                     ],
                 ),
                 html.Div(
                     className="plot-box",
                     children=[
                         html.H1("Pontuação por competência comercial"),
-                        construir_grafico_competencias(df_competencias),
+                        construir_grafico_competencias_polar(df_competencias),
                     ],
                 ),
             ],
@@ -202,7 +202,7 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     marker=go.bar.Marker(color=df_categoria.get_column("Cor").max()),
                     texttemplate="%{x:.1f}",
                     textfont=go.bar.Textfont(
-                        color="black" if categoria[0] == "Regular" else "white", size=20
+                        color="black" if categoria[0] == "Média" else "white", size=20
                     ),
                 )
                 for categoria, df_categoria in df.sort(
