@@ -23,6 +23,8 @@ def get_plotly_configs(filename: str = "gráfico_exportado", **kwargs) -> dict:
             "height": 400,
             "width": 600,
         },
+        "doubleClick": "reset",
+        "modeBarButtons": [["toImage"]],
     }
     for k, v in kwargs.items():
         configs[k] = v
