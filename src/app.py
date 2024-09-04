@@ -1,7 +1,6 @@
 import locale
 
 from dash import Dash
-from dash_auth import BasicAuth
 from dotenv import load_dotenv
 from flask import Flask, Response
 
@@ -33,17 +32,6 @@ app = Dash(
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
     meta_tags=[{"name": "theme-color", "content": "#f3f3f3"}],
-)
-auth = BasicAuth(
-    app=app,
-    username_password_list={"admin": "tamojunto"},
-    public_routes=[
-        "/",
-        "/test/",
-        "/assets/<path:subpath>",
-        "/_dash-update-component",
-        "/report/<path:subpath>",
-    ],
 )
 
 mongo.init_app(server)
