@@ -2,7 +2,7 @@ import locale
 
 from dash import Dash
 from dotenv import load_dotenv
-from flask import Flask, Response
+from flask import Flask
 
 from dash_app import layout
 from utils.banco_dados import mongo
@@ -12,12 +12,6 @@ load_dotenv()
 
 server = Flask(__name__, static_folder="assets")
 server.config.from_prefixed_env()
-
-
-@server.get("/logout")
-def logout():
-    return Response(status=401)
-
 
 app = Dash(
     __name__,
