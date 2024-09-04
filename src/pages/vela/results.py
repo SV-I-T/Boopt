@@ -56,6 +56,13 @@ def layout(id_resposta: str):
                     className="plot-box",
                     children=[
                         html.H1("Pontuação por competência comercial"),
+                        construir_grafico_competencias_polar(df_competencias),
+                    ],
+                ),
+                html.Div(
+                    className="plot-box",
+                    children=[
+                        html.H1("Pontuação por competência comercial"),
                         construir_grafico_competencias(df_competencias),
                     ],
                 ),
@@ -133,7 +140,7 @@ def construir_grafico_etapas(df: pl.DataFrame) -> dcc.Graph:
     )
 
 
-def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
+def construir_grafico_competencias_polar(df: pl.DataFrame) -> dcc.Graph:
     return dcc.Graph(
         figure=go.Figure(
             data=[
@@ -174,6 +181,55 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     yref="container",
                 ),
                 dragmode="zoom",
+            ),
+        ),
+        config=get_plotly_configs("A PONTE - Competências comerciaias"),
+    )
+
+
+def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
+    return dcc.Graph(
+        figure=go.Figure(
+            data=[
+                go.Bar(
+                    y=df_categoria.select(pl.col("nome").str.replace(" ", "<br>"))
+                    .get_column("nome")
+                    .to_list(),
+                    x=df_categoria.get_column("pontos").to_list(),
+                    orientation="h",
+                    hovertemplate="<b>%{y}</b>: %{x:.1f}",
+                    name=categoria[0],
+                    marker=go.bar.Marker(color=df_categoria.get_column("Cor").max()),
+                    texttemplate="%{x:.1f}",
+                    textfont=go.bar.Textfont(
+                        color="black" if categoria[0] == "Regular" else "white", size=20
+                    ),
+                )
+                for categoria, df_categoria in df.sort(
+                    "pontos", descending=True
+                ).group_by("Categoria", maintain_order=True)
+            ],
+            layout=go.Layout(
+                yaxis=go.layout.YAxis(
+                    categoryorder="category descending",
+                    automargin="left",
+                    ticklabelstandoff=10,
+                    tickfont=go.layout.yaxis.Tickfont(size=12),
+                    # ticklabelposition="inside",
+                ),
+                legend=go.layout.Legend(
+                    x=0.5,
+                    y=1,
+                    yanchor="top",
+                    xanchor="center",
+                    # yanchor="bottom",
+                    orientation="h",
+                    xref="container",
+                    yref="container",
+                ),
+                height=700,
+                xaxis=go.layout.XAxis(range=[0, 10]),
+                margin=go.layout.Margin(l=0, r=0, t=0, b=0),
             ),
         ),
         config=get_plotly_configs("A PONTE - Competências comerciaias"),
