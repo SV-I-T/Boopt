@@ -31,7 +31,7 @@ EXPLICACAO_MD = """
 
     A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-lo a crescer.
 
-    **Não se preocupe, todo o processo será rápido - cerca de 20 minutos do seu tempo.**
+    **Não se preocupe, todo o processo será rápido - cerca de 10 a 15 minutos do seu tempo.**
 
     Aqui está como funciona: Você encontrará afirmações que precisam ser avaliadas em uma escala de **Discordo totalmente** a **Concordo totalmente**.
 """
