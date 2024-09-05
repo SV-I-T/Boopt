@@ -59,7 +59,7 @@ def layout():
                                         href="/",
                                     ),
                                     dmc.Anchor(
-                                        "VERSÃO BETA",
+                                        "VERSÃO DEMO",
                                         className="beta-tag",
                                         href="/dashboard",
                                     ),
