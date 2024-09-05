@@ -58,10 +58,9 @@ def layout():
                                         children="Logo Boopt",
                                         href="/",
                                     ),
-                                    dmc.Anchor(
+                                    html.Div(
                                         "VERSÃO DEMO",
                                         className="beta-tag",
-                                        href="/dashboard",
                                     ),
                                 ]
                             ),
