@@ -201,9 +201,14 @@ def construir_grafico_competencias(df: pl.DataFrame) -> dcc.Graph:
                     name=categoria[0],
                     marker=go.bar.Marker(color=df_categoria.get_column("Cor").max()),
                     texttemplate="%{x:.1f}",
-                    textfont=go.bar.Textfont(
+                    textposition=[
+                        "outside" if pontos == 0 else "auto"
+                        for pontos in df_categoria.get_column("pontos").to_list()
+                    ],
+                    insidetextfont=go.bar.Insidetextfont(
                         color="black" if categoria[0] == "Média" else "white", size=20
                     ),
+                    outsidetextfont=go.bar.Outsidetextfont(color="black", size=20),
                 )
                 for categoria, df_categoria in df.sort(
                     "pontos", descending=True
