@@ -1,5 +1,4 @@
-from random import choice, sample
-from urllib.parse import parse_qs
+from random import choice, shuffle
 
 import dash_mantine_components as dmc
 import polars as pl
@@ -138,7 +137,8 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
             for frase in df_competencias.iter_rows(named=True)
         }
 
-        ordem = sample(range(1, len(frases) + 1), len(frases))
+        ordem = list(frases.keys())
+        shuffle(ordem)
 
         frase_atual = frases[str(ordem[0])]
 
