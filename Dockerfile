@@ -26,4 +26,4 @@ RUN uv sync --frozen
 RUN uv add gunicorn
 
 # Comando ao iniciar o container
-CMD uv run gunicorn --bind 0.0.0.0:8080 --workers 1 --threads 8 app:server
+CMD uv run gunicorn --bind 0.0.0.0:8080 --workers 2 --threads 2 app:server
