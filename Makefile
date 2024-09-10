@@ -1,5 +1,5 @@
 all:
-	"./.venv/Scripts/activate"& cd ./src& python ./app.py
+	uv run ./src/app.py
 
 build:
 	docker build -t boopt-dev .
