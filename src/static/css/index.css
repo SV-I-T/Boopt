@@ -83,7 +83,7 @@
     padding: 5rem 3rem;
     background-color: var(--azul-sv);
     background:
-        url('../imgs/laptop_screen_mockup_15\ 1.png') no-repeat bottom right/auto 70%,
+        url('../assets/laptop_screen_mockup_15\ 1.png') no-repeat bottom right/auto 70%,
         linear-gradient(var(--off-white), var(--off-white)) padding-box,
         linear-gradient(147deg, var(--laranja-boopt), var(--azul-sv)) border-box;
     border-radius: 30px;

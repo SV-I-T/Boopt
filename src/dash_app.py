@@ -1,15 +1,7 @@
 import dash_mantine_components as dmc
-from components.navbar import layout_navbar
-from dash import (
-    ClientsideFunction,
-    Input,
-    Output,
-    clientside_callback,
-    dcc,
-    get_asset_url,
-    html,
-    page_container,
-)
+from dash import ClientsideFunction, Input, Output, clientside_callback, dcc, html
+
+from components import header, navbar, wrapper
 
 TEMA_PADRAO = {
     "colors": {
@@ -58,39 +50,15 @@ def layout():
             zIndex=10000,
             children=[
                 html.Div(id="notificacoes"),
-                dcc.Store(id="refresh"),
                 dcc.Download(id="download"),
                 dcc.Location(id="url", refresh="callback-nav"),
                 dcc.Location(id="url-no-refresh", refresh=False),
                 html.Div(
                     id="app",
                     children=[
-                        html.Div(
-                            id="wrapper",
-                            children=[
-                                html.Div(id="frame"),
-                                page_container,
-                                html.Div(id="navbar-backdrop"),
-                            ],
-                        ),
-                        layout_navbar(),
-                        html.Header(
-                            id="burger-header",
-                            children=[
-                                dmc.Anchor(
-                                    children=html.Img(
-                                        src=get_asset_url(
-                                            "imgs/boopt/horizontal_branco.svg"
-                                        ),
-                                        alt="Logo Boopt",
-                                    ),
-                                    href="/app/vela",
-                                ),
-                                dmc.Burger(
-                                    id="burger-btn", opened=False, color="white"
-                                ),
-                            ],
-                        ),
+                        wrapper.layout(),
+                        navbar.layout(),
+                        header.layout(),
                     ],
                 ),
             ],
@@ -102,13 +70,5 @@ clientside_callback(
     ClientsideFunction("clientside", "abrir_barra_lateral"),
     Output("navbar", "children"),
     Input("burger-btn", "opened"),
-    prevent_initial_call=True,
-)
-
-
-clientside_callback(
-    ClientsideFunction("clientside", "atualizar_pagina"),
-    Output("refresh", "data"),
-    Input("refresh", "data"),
     prevent_initial_call=True,
 )

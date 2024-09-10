@@ -1,6 +1,7 @@
 import dash_mantine_components as dmc
 from dash import get_asset_url, html, register_page
 from dash_iconify import DashIconify
+
 from utils.login import checar_perfil
 from utils.role import Role
 from utils.usuario import Usuario
@@ -67,7 +68,7 @@ def layout():
         {
             "label": "Vela Assessment",
             "href": "/app/admin/vela",
-            "logo": "imgs/vela/tag_ass.svg",
+            "logo": "assets/vela/tag_ass.svg",
         },
         {"label": "Raio-X", "href": "/app/admin/raiox", "logo": ""},
     )
@@ -83,7 +84,7 @@ def layout():
                     underline=False,
                     children=html.Div(
                         className="card card-painel",
-                        children=dmc.Image(src=get_asset_url(module["logo"])),
+                        children=html.Img(src=get_asset_url(module["logo"])),
                     ),
                 )
                 for module in modules_products

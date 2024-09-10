@@ -3,8 +3,8 @@
     min-width: 550px;
     max-width: 750px;
     background:
-        url("../imgs/boopt/horizontal_branco.svg"),
-        url("../imgs/boopt/promo_frase.svg"),
+        url("../assets/boopt/horizontal_branco.svg"),
+        url("../assets/boopt/promo_frase.svg"),
         linear-gradient(200deg, var(--azul-sv) 50%, var(--laranja-boopt));
     background-repeat:
         no-repeat,

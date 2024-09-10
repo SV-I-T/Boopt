@@ -29,7 +29,7 @@
     }
 
     .vela-circles>div:nth-child(2) {
-        background-image: url('../imgs/vela/barco.png');
+        background-image: url('../assets/vela/barco.png');
         background-position: 0;
     }
 

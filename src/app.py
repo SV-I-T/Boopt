@@ -23,7 +23,7 @@ from utils.usuario import Usuario
 locale.setlocale(locale.LC_ALL, "pt_BR.utf8")
 load_dotenv()
 
-server = Flask(__name__, static_folder="assets")
+server = Flask(__name__)
 server.config.from_prefixed_env()
 
 
@@ -170,7 +170,7 @@ def checar_acesso():
     return redirect(url_for("login_get", next=request.path))
 
 
-app = Dash(
+dash = Dash(
     __name__,
     server=server,
     suppress_callback_exceptions=True,
@@ -179,7 +179,6 @@ app = Dash(
     title="Boopt - Sucesso em Vendas",
     update_title="Carregando...",
     external_scripts=[
-        "https://cdn.plot.ly/plotly-locale-pt-br-latest.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/locale/pt-br.min.js",
     ],
@@ -187,6 +186,7 @@ app = Dash(
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
     ],
     meta_tags=[{"name": "theme-color", "content": "#171C24"}],
+    assets_folder="static",
 )
 
 mongo.init_app(server)
@@ -195,8 +195,8 @@ cache_simple.init_app(server)
 login_manager.init_app(server)
 mail.init_app(server)
 
-app.layout = layout
-app.enable_dev_tools(debug=None)
+dash.layout = layout
+dash.enable_dev_tools(debug=None)
 
 if __name__ == "__main__":
     # server.run(load_dotenv=True, port=8080, host="127.0.0.1")

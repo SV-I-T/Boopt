@@ -9,7 +9,7 @@ def attach_logo(msg: Message):
     msg.attach(
         "HORIZONTAL AZUL.png",
         "image/gif",
-        open(join("assets", "imgs", "boopt", "horizontal_azul.svg"), "rb").read(),
+        open(join("static", "assets", "boopt", "horizontal_azul.svg"), "rb").read(),
         "inline",
         [["Content-ID", "<LogoBoopt>"]],
     )

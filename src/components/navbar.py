@@ -8,16 +8,19 @@ from dash import (
     html,
 )
 from dash_iconify import DashIconify
+
 from utils.role import Role
 from utils.usuario import Usuario
 
 
-def layout_navbar():
+def layout():
     usr = Usuario.atual()
     return html.Nav(
         children=[
             dmc.Anchor(
-                children=html.Img(src=get_asset_url("imgs/boopt/horizontal_azul.svg")),
+                children=html.Img(
+                    src=get_asset_url("assets/boopt/horizontal_azul.svg")
+                ),
                 href="/app/vela",
             ),
             html.Div(id="menu-usr", children=menu_usuario(usr)),

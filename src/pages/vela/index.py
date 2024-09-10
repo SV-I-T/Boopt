@@ -28,7 +28,7 @@ def layout():
             dmc.Text("Seja bem-vindo ao", weight=300),
             dmc.Text("Assessment Vendedor Boopt.", weight=700),
             dmc.Image(
-                src=get_asset_url("imgs/vela/promo-vela.png"),
+                src=get_asset_url("assets/vela/promo-vela.png"),
                 mb="1rem",
                 alt="Logo Vela Assessment",
             ),

@@ -9,10 +9,10 @@
     <!-- FAVICON -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <!-- FOLHAS DE ESTILO -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/botoes.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/iconify.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/botoes.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iconify.css') }}" />
     <!-- FONTE -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,17 +22,17 @@
 
 <body class="index-body">
     <header class="index-header">
-        <img src="{{ url_for('static', filename='imgs/boopt/horizontal_azul.svg') }}" alt="Logo Boopt">
+        <img src="{{ url_for('static', filename='assets/boopt/horizontal_azul.svg') }}" alt="Logo Boopt">
         <a href="/login"><button class="btn btn-gradiente">Entrar</button></a>
     </header>
     <main>
         <div class="sales-enablement">
             <h1>A plataforma de Sales Enablement da Sucesso em Vendas</h1>
             <p>A plataforma de Sales Enablement da Sucesso em Vendas</p>
-            <button class="btn btn">UM CTA BEM FODA</button>
+            <button class="btn">UM CTA BEM FODA</button>
         </div>
         <div class="promo">
-            <img src="{{ url_for('static', filename='imgs/vela/00 - VELA 1.png') }}" alt="Logo Vela Assessment">
+            <img src="{{ url_for('static', filename='assets/vela/00 - VELA 1.png') }}" alt="Logo Vela Assessment">
             <p>O teste de competências comerciais desenvolvido pela consultoria de vendas que mais gera resultado no
                 brasil,
                 a Sucesso em Vendas.</p>
@@ -58,7 +58,7 @@
             </ul>
         </div>
         <div class="historia-boopt">
-            <img src="{{ url_for('static', filename='imgs/boopt/icone_azul.svg') }}" alt="Logo Boopt">
+            <img src="{{ url_for('static', filename='assets/boopt/icone_azul.svg') }}" alt="Logo Boopt">
             <div>
                 <h2>Como a Boopt surgiu?</h2>
                 <p>A <strong>Boopt</strong> foi desenvolvida pela consultoria de vendas <strong>Sucesso em
@@ -74,7 +74,7 @@
     </main>
 
     <footer>
-        <img src="{{ url_for('static', filename='imgs/boopt/horizontal_azul_tag.svg') }}" alt="Logo Boopt">
+        <img src="{{ url_for('static', filename='assets/boopt/horizontal_azul_tag.svg') }}" alt="Logo Boopt">
 
     </footer>
 </body>

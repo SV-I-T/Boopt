@@ -105,7 +105,7 @@ def rosca_grupo(df: pl.DataFrame) -> go.Figure:
         .sort("grupo")
         .with_columns(
             pl.col("grupo")
-            .map_dict({"Alta": "#74dc74", "Média": "#edd577", "Baixa": "#f78080"})
+            .replace({"Alta": "#74dc74", "Média": "#edd577", "Baixa": "#f78080"})
             .alias("cor")
         )
     )
