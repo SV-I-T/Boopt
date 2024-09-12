@@ -1,5 +1,5 @@
 all:
-	uv run ./src/app.py
+	cd ./src &uv run app.py
 
 build:
 	docker build -t boopt-dev .
