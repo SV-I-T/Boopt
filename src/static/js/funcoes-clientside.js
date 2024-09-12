@@ -1,5 +1,68 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
+        construir_grafico_etapas: async function (data) {
+            if (window.grafico_etapas) {
+                window.grafico_etapas.data = data
+                window.grafico_etapas.update()
+            } else {
+                const ctx = document.getElementById('adm-results-vela-etapas')
+
+                window.grafico_etapas = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        scales: {
+                            y: {
+                                max: 10, min: 0
+                            }
+                        },
+                        plugins: {
+                            datalabels: {
+                                formatter: function (value, context) {
+                                    return value.toLocaleString()
+                                },
+                                backgroundColor: "#1618ff",
+                                color: "#fff"
+                            }
+                        }
+                    }
+                });
+            }
+            throw window.dash_clientside.PreventUpdate;
+        },
+        construir_grafico_comps: async function (data) {
+            if (window.grafico_comps) {
+                window.grafico_comps.data = data
+                window.grafico_comps.update()
+            } else {
+                const ctx = document.getElementById('adm-results-vela-comps')
+
+                window.grafico_comps = new Chart(ctx, {
+                    type: 'polarArea',
+                    data: data,
+                    options: {
+                        scales: {
+                            r: {
+                                max: 10, min: 0
+                            }
+                        },
+                        plugins: {
+                            datalabels: {
+                                formatter: function (value, context) {
+                                    return value.toLocaleString()
+                                },
+                                backgroundColor: "#1618ff",
+                                color: "#fff",
+                                align: 'end',
+                                anchor: 'end'
+                            },
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+            throw window.dash_clientside.PreventUpdate;
+        },
         selecionar_todos: async function (n, data) {
             if (!n) {
                 throw window.dash_clientside.PreventUpdate;

@@ -1,3 +1,4 @@
+Chart.register(ChartDataLabels)
 window.addEventListener('keyup', function (e) {
     if (e.key === "Enter") {
         switch (e.target.id) {
@@ -14,7 +15,6 @@ window.addEventListener('keyup', function (e) {
         };
     };
 });
-
 clicar_botao = function (id) {
     this.document.getElementById(id).click();
 };

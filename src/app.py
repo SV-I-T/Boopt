@@ -181,6 +181,10 @@ dash = Dash(
     external_scripts=[
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/locale/pt-br.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/helpers.min.js",
+        "https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0",
     ],
     external_stylesheets=[
         "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
