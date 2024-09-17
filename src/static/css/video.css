@@ -1,0 +1,45 @@
+.video-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+
+}
+
+.video-gallery>a {
+    text-decoration: none;
+    color: var(--azul-sv);
+}
+
+.video-gallery>a:hover {
+    text-decoration: underline;
+}
+
+.video-gallery>a>div {
+    border-radius: 1rem;
+    position: relative;
+}
+
+.video-gallery>a>div>div>img {
+    width: 200px;
+    height: 112.5px;
+    border-radius: 0.5rem;
+    background-color: gray;
+    border: 1px solid gray;
+}
+
+.video-gallery>a>div>div:has(img)::after {
+    content: url('../assets/icons/play-circle.svg');
+    position: absolute;
+    top: 0;
+    height: 112.5px;
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: all 100ms ease
+}
+
+.video-gallery>a>div>div:has(img):hover::after {
+    opacity: 1;
+}

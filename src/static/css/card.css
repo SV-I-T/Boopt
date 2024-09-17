@@ -1,14 +1,26 @@
 .card {
-    border-color: #999999;
-    border-width: 1px;
-    border-style: solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    border: 1px solid #999999;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    padding: 1rem;
+    transition: transform 100ms ease, border-color 100ms ease
 }
 
 .card p {
     margin: 0;
+}
+
+.card * {
+    color: #000;
+}
+
+.card:hover,
+.card:active {
+    transform: scale(1.05);
+    border-color: var(--azul-sv);
 }
 
 .play-videos-av {
@@ -22,25 +34,4 @@
 .card-videos-av p {
     width: auto;
     max-width: 200px;
-}
-
-.card-painel {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 100ms ease, border-color 100ms ease
-}
-
-.card-painel * {
-    color: #000;
-}
-
-.card-painel:hover,
-.card-painel:active {
-    transform: scale(1.05);
-    border-color: var(--azul-sv);
-}
-
-.card-painel img {
-    padding: 0.5rem;
 }

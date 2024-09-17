@@ -1,29 +1,26 @@
-import dash_mantine_components as dmc
 from dash import (
     ClientsideFunction,
     Input,
     Output,
     State,
     clientside_callback,
-    dcc,
     html,
     register_page,
 )
 from dash_player import DashPlayer
 
-register_page(__name__, path="/app/vela/videos", title="Vela - Videos")
+from utils.video import video_teste
+
+register_page(__name__, path_template="/app/vela/videos/<id_video>")
 
 
-def layout():
-    return [
-        DashPlayer(
-            id="vela-player",
-            url="https://vimeo.com/908405972",
-            controls=True,
-            intervalCurrentTime=1000,
-        ),
-        html.P(id="vela-player-progress"),
-    ]
+def layout(id_video: str):
+    return DashPlayer(
+        id=f"vela-v{video_teste.vid}",
+        url=video_teste.url,
+        controls=True,
+        intervalCurrentTime=1000,
+    )
 
 
 clientside_callback(
