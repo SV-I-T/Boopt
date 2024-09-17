@@ -38,7 +38,7 @@ def layout():
     )
 
     menu_system = [
-        html.H1("Sistema", className="secao-pagina"),
+        html.H2("Sistema"),
         html.Div(
             className="grid grid-3-col",
             style={"gap": "1rem"},
@@ -74,7 +74,7 @@ def layout():
     )
 
     menu_products = [
-        html.H1("Produtos", className="secao-pagina"),
+        html.H2("Produtos"),
         html.Div(
             className="grid grid-3-col",
             style={"gap": "1rem"},
@@ -94,9 +94,9 @@ def layout():
 
     if usr.role in (Role.DEV, Role.CONS, Role.ADM):
         return [
-            html.H1("Gestão", className="titulo-pagina"),
+            html.H1("Gestão"),
             *menu_system,
             *menu_products,
         ]
 
-    return [html.H1("Gestão", className="titulo-pagina"), *menu_products]
+    return [html.H1("Gestão"), *menu_products]

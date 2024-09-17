@@ -30,7 +30,7 @@ def layout(id_aplicacao: str = None, **kwargs):
 
     if not assessment:
         return [
-            dmc.Title("Assessment inexistente", className="titulo-pagina"),
+            dmc.Title("Assessment inexistente"),
         ]
 
     respostas_aplicacao: pl.DataFrame = baixar_respostas_aplicacao(id_aplicacao)

@@ -30,7 +30,7 @@ def layout(q: str = "", page: str = "1"):
     page = int(page)
 
     return [
-        html.H1("Usuários", className="titulo-pagina"),
+        html.H1("Usuários"),
         dmc.Stack(
             [
                 dmc.Group(

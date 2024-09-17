@@ -221,7 +221,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
         )
     elif secao == "enviado":
         return [
-            html.H1("Obrigado!", className="titulo-pagina"),
+            html.H1("Obrigado!"),
             dcc.Markdown(
                 "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/vela)"
             ),

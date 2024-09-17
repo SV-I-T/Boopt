@@ -52,11 +52,11 @@ def layout():
     )
 
     return [
-        html.H1("Meu perfil", className="titulo-pagina"),
+        html.H1("Meu perfil"),
         html.Div(
             className="editar-perfil",
             children=[
-                html.H1("Informações pessoais", className="secao-pagina"),
+                html.H2("Informações pessoais"),
                 html.Div(
                     className="grid grid-2-col",
                     children=[
@@ -94,7 +94,7 @@ def layout():
                     ],
                 ),
                 dmc.Divider(),
-                html.H1("Informações profissionais", className="secao-pagina"),
+                html.H2("Informações profissionais"),
                 html.Div(
                     className="grid grid-2-col",
                     children=[
@@ -130,7 +130,7 @@ def layout():
                     ],
                 ),
                 dmc.Divider(),
-                html.H1("Alterar senha", className="secao-pagina"),
+                html.H2("Alterar senha"),
                 html.P(
                     "ATENÇÃO:",
                     className="bold c-laranja",

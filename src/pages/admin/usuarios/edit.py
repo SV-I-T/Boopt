@@ -38,7 +38,7 @@ def layout(id_usuario: str = None):
 
     if id_usuario == "new":
         return [
-            html.H1("Novo usuário", className="titulo-pagina"),
+            html.H1("Novo usuário"),
             *layout_edicao_usr(usr_atual),
         ]
 
@@ -81,7 +81,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
     )
 
     return [
-        html.H1("Informações Pessoais", className="secao-pagina"),
+        html.H2("Informações Pessoais"),
         html.Div(
             className="grid grid-2-col grid-a-end",
             children=[
@@ -133,7 +133,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                 ),
             ],
         ),
-        html.H1("Informações Profissionais", className="secao-pagina"),
+        html.H2("Informações Profissionais"),
         html.Div(
             className="grid grid-2-col grid-a-end",
             children=[

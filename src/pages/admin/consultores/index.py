@@ -23,7 +23,7 @@ def layout():
         )
     )
     return [
-        html.H1("Consultores", className="titulo-pagina"),
+        html.H1("Consultores"),
         dmc.Stack(
             children=[
                 dmc.Select(

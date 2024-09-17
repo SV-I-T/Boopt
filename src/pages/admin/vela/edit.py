@@ -52,7 +52,7 @@ def layout(id_aplicacao: str = None, empresa: str = None, **kwargs):
         assessment = None
 
     return [
-        html.H1(texto_titulo, className="titulo-pagina"),
+        html.H1(texto_titulo),
         html.Div(
             children=[
                 dmc.Select(

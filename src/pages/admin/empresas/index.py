@@ -22,7 +22,7 @@ register_page(__name__, path="/app/admin/empresas", title="Empresas")
 def layout():
     corpo_tabela = consultar_dados_tabela_empresas("")
     return [
-        html.H1("Empresas", className="titulo-pagina"),
+        html.H1("Empresas"),
         dmc.Stack(
             [
                 dmc.Group(

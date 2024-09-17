@@ -19,7 +19,7 @@ def layout():
         data_empresas = usr.consultar_empresas()
 
     return [
-        html.H1("Raio-X", className="titulo-pagina"),
+        html.H1("Raio-X"),
         dmc.Stack(
             [
                 dmc.Group(

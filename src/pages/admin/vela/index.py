@@ -29,7 +29,7 @@ def layout():
     corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa), usr)
 
     return [
-        html.H1("Vela Assessment", className="titulo-pagina"),
+        html.H1("Vela Assessment"),
         dmc.Stack(
             [
                 dmc.Group(

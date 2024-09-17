@@ -44,7 +44,7 @@ def layout(id_empresa: str = None, **kwargs):
         layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
 
     return [
-        html.H1(texto_titulo, className="titulo-pagina"),
+        html.H1(texto_titulo),
         *layout_edicao,
     ]
 

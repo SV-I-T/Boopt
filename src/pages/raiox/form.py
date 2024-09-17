@@ -88,15 +88,15 @@ def layout(v: int = 1):
     )
 
     return [
-        html.H1("Raio-X", className="titulo-pagina"),
-        html.H1("Informações de atendimento", className="secao-pagina"),
+        html.H1("Raio-X"),
+        html.H2("Informações de atendimento"),
         dmc.Select(
             id="raiox-vendedor",
             label="Vendedor",
             data=list(vendedores),
             searchable=True,
         ),
-        html.H1("Etapas do atendimento", className="secao-pagina"),
+        html.H2("Etapas do atendimento"),
         dmc.Accordion(
             variant="separated",
             radius="xl",

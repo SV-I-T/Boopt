@@ -38,7 +38,7 @@ def layout():
     data_unidades = buscar_unidades(usr_atual.empresa)
 
     return [
-        html.H1("Unidades", className="titulo-pagina"),
+        html.H1("Unidades"),
         dmc.Stack(
             [
                 dmc.Select(
@@ -90,7 +90,7 @@ def layout():
                         icon="fluent:arrow-download-16-filled", width=16
                     ),
                 ),
-                html.H1("Importar unidades", className="secao-pagina"),
+                html.H2("Importar unidades"),
                 dcc.Markdown("""
 Você pode adicionar novas unidades ou editar unidades já existentes por meio da importação de uma planilha excel (.xlsx). Para facilitar o processo, recomendamos que baixe a planilha pelo botão acima, edite a mesma e depois faça a importação. É importante que não haja nenhuma mudança nas colunas, caso contrário você receberá um erro.
 

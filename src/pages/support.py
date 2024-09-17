@@ -6,7 +6,7 @@ register_page(__name__, path="/app/support", title="Suporte")
 
 def layout():
     return [
-        html.H1("Suporte", className="titulo-pagina"),
+        html.H1("Suporte"),
         dcc.Markdown(
             children="""
             aqui vc pode pedir ajuda ou nos contatar etc

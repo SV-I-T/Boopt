@@ -47,7 +47,7 @@ def layout():
     data_role = [r.value for r in roles_edit]
 
     return [
-        html.H1("Cadastro em massa", className="titulo-pagina"),
+        html.H1("Cadastro em massa"),
         html.Div(
             [
                 html.P(
@@ -63,7 +63,7 @@ def layout():
                         icon="fluent:arrow-download-16-regular", width=16
                     ),
                 ),
-                html.H1("Como preencher o modelo?", className="secao-pagina"),
+                html.H2("Como preencher o modelo?"),
                 dcc.Markdown("""
 Para que todos os usuários sejam validados e cadastrados, é necessário que o arquivo seja preenchido corretamente. Aqui vão algumas dicas para não ter nenhum problema:
 * Não adicione, modifique, ou remova campos na planilha.
@@ -104,7 +104,7 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
                 ),
             ]
         ),
-        html.H1("Importe seu arquivo excel", className="secao-pagina"),
+        html.H2("Importe seu arquivo excel"),
         dcc.Upload(
             id="upload-cadastro-massa",
             className="container-upload",

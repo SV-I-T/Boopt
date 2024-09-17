@@ -36,12 +36,12 @@ a {
     color: var(--azul-sv);
 }
 
-h1.titulo-pagina {
-    font-weight: 600;
+h1 {
+    font-weight: 700;
     margin-bottom: 2rem;
 }
 
-h1.secao-pagina {
+h2 {
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 0.5rem;
