@@ -28,7 +28,7 @@ def layout():
                             html.Div(
                                 html.Img(src=video_teste.thumbnail_url),
                             ),
-                            html.Div(video_teste.titulo),
+                            html.Span(video_teste.titulo),
                         ],
                     ),
                 )

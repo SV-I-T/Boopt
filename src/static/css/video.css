@@ -1,33 +1,49 @@
 .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+}
+
+/* .video-gallery {
     display: flex;
     flex-wrap: wrap;
     gap: 2rem;
-
-}
+} */
 
 .video-gallery>a {
     text-decoration: none;
     color: var(--azul-sv);
 }
 
-.video-gallery>a:hover {
-    text-decoration: underline;
+
+.video-gallery div,
+.video-gallery a {
+    width: fit-content;
+    height: fit-content;
 }
 
-.video-gallery>a>div {
-    border-radius: 1rem;
+.video-gallery>a>div>div {
     position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
 
 .video-gallery>a>div>div>img {
     width: 200px;
     height: 112.5px;
-    border-radius: 0.5rem;
     background-color: gray;
     border: 1px solid gray;
+    transition: all 100ms ease;
 }
 
-.video-gallery>a>div>div:has(img)::after {
+.video-gallery>a>div>div:hover img,
+.video-gallery>a>div>div:active img {
+    transform: scale(1.2);
+}
+
+.video-gallery>a>div>div::after {
     content: url('../assets/icons/play-circle.svg');
     position: absolute;
     top: 0;
@@ -40,6 +56,19 @@
     transition: all 100ms ease
 }
 
-.video-gallery>a>div>div:has(img):hover::after {
+
+.video-gallery>a>div>div:hover::after,
+.video-gallery>a>div>div:active::after {
     opacity: 1;
+}
+
+.player-wrapper {
+    background-color: gray;
+    border-radius: 1rem;
+    width: fit-content;
+    height: fit-content;
+}
+
+.player-wrapper>div>div {
+    border-radius: 1rem;
 }
