@@ -386,7 +386,7 @@ def atualizar_assessment(
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "ativar"),
+    ClientsideFunction("interacoes", "ativar"),
     Output("confirm-delete-av", "displayed"),
     Input("btn-delete-vela", "n_clicks"),
     prevent_initial_call=True,

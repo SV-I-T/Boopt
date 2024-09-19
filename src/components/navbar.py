@@ -93,7 +93,7 @@ def menu_usuario(usr: Usuario):
 
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="alterar_nav_link"),
+    ClientsideFunction(namespace="interacoes", function_name="alterar_nav_link"),
     Output("menu-usr", "children"),
     Input("menu-usr", "children"),
 )

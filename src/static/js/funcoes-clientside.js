@@ -1,5 +1,5 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
-    clientside: {
+    graficos: {
         construir_grafico_etapas: async function (data) {
             if (window.grafico_etapas) {
                 window.grafico_etapas.data = data
@@ -63,14 +63,9 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             throw window.dash_clientside.PreventUpdate;
         },
-        selecionar_todos: async function (n, data) {
-            if (!n) {
-                throw window.dash_clientside.PreventUpdate;
-            }
-            const values = []
-            data.forEach((e) => values.push(e['value']))
-            return values
-        },
+
+    },
+    interacoes: {
         abrir_barra_lateral: async function (opened) {
             const navbar = document.getElementById('navbar');
             const navbar_backdrop = document.getElementById('navbar-backdrop');
@@ -87,14 +82,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             changeActiveNavLink()
             throw dash_clientside.PreventUpdate
         },
-        upload_arquivo_usr_batelada: async function (x) {
-            document.getElementById('div-usr-massa-arquivo').style.display = x ? 'block' : 'none'
-            return x
-        },
-        upload_arquivo_empresa_unidades: async function (x) {
-            document.getElementById('div-empresa-unidades-arquivo').style.display = x ? 'block' : 'none'
-            return x
-        },
         ativar: async function (x) {
             if (!x) {
                 throw window.dash_clientside.PreventUpdate;
@@ -106,6 +93,16 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             location.reload();
             throw window.dash_clientside.PreventUpdate;
         },
+        selecionar_todos: async function (n, data) {
+            if (!n) {
+                throw window.dash_clientside.PreventUpdate;
+            }
+            const values = []
+            data.forEach((e) => values.push(e['value']))
+            return values
+        },
+    },
+    vela: {
         alterar_frase: async function (n_next, n_back, ordem_atual, frases, ordem) {
             const triggered = window.dash_clientside.callback_context['triggered'].map(t => t['prop_id']);
             switch (triggered[0]) {
@@ -159,9 +156,14 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 throw window.dash_clientside.PreventUpdate;
             }
         },
-        atualizar_infos_player: async function (currentTime, duration) {
-            return "Progresso: " + (currentTime ? `${(currentTime * 100 / duration).toFixed(0)}%` : "0%")
+        atualizar_info_video: async function (currentTime, id_video) {
+            console.log(window.dash_clientside.callback_context)
+            window.localStorage.setItem('v-curtime-' + id_video, currentTime)
+            // return "Progresso: " + (currentTime ? `${(currentTime * 100 / duration).toFixed(0)}%` : "0%")
+            throw window.dash_clientside.PreventUpdate
         },
+    },
+    raiox: {
         alterar_passos_raiox_comprou: function (comprou, passos_comprou, passos_ncomprou) {
             const comprou_bool = Boolean(Number(comprou))
             const r_comprou = []
@@ -170,5 +172,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             passos_ncomprou.forEach((_) => r_ncomprou.push(comprou_bool))
             return [r_comprou, r_ncomprou]
         }
+    },
+    clientside: {
+        upload_arquivo_usr_batelada: async function (x) {
+            document.getElementById('div-usr-massa-arquivo').style.display = x ? 'block' : 'none'
+            return x
+        },
+        upload_arquivo_empresa_unidades: async function (x) {
+            document.getElementById('div-empresa-unidades-arquivo').style.display = x ? 'block' : 'none'
+            return x
+        },
     }
 });

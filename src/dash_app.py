@@ -68,7 +68,7 @@ def layout():
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "abrir_barra_lateral"),
+    ClientsideFunction("interacoes", "abrir_barra_lateral"),
     Output("navbar", "children"),
     Input("burger-btn", "opened"),
     prevent_initial_call=True,

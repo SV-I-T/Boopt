@@ -108,7 +108,7 @@ def layout(v: int = 1):
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "alterar_passos_raiox_comprou"),
+    ClientsideFunction("raiox", "alterar_passos_raiox_comprou"),
     Output({"rx-passo": ALL, "comprou": "True"}, "data-hidden"),
     Output({"rx-passo": ALL, "comprou": "False"}, "data-hidden"),
     Input("raiox-fechou", "value"),

@@ -179,7 +179,7 @@ def layout():
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "selecionar_todos"),
+    ClientsideFunction("interacoes", "selecionar_todos"),
     Output("adm-results-vela-gestores", "value"),
     Input("adm-results-vela-gestores-all", "n_clicks"),
     State("adm-results-vela-gestores", "data"),
@@ -187,7 +187,7 @@ clientside_callback(
 )
 
 clientside_callback(
-    ClientsideFunction("clientside", "selecionar_todos"),
+    ClientsideFunction("interacoes", "selecionar_todos"),
     Output("adm-results-vela-unidades", "value"),
     Input("adm-results-vela-unidades-all", "n_clicks"),
     State("adm-results-vela-unidades", "data"),
@@ -195,7 +195,7 @@ clientside_callback(
 )
 
 clientside_callback(
-    ClientsideFunction("clientside", "selecionar_todos"),
+    ClientsideFunction("interacoes", "selecionar_todos"),
     Output("adm-results-vela-aplicacao", "value"),
     Input("adm-results-vela-aplicacao-all", "n_clicks"),
     State("adm-results-vela-aplicacao", "data"),
@@ -480,13 +480,13 @@ def atualizar_dashboard_adm_vela_resultados(n: int, ids_aplicacao: list[str]):
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "construir_grafico_etapas"),
+    ClientsideFunction("graficos", "construir_grafico_etapas"),
     Output("adm-results-vela-etapas", "children"),
     Input("adm-results-vela-etapas-data", "data"),
 )
 
 clientside_callback(
-    ClientsideFunction("clientside", "construir_grafico_comps"),
+    ClientsideFunction("graficos", "construir_grafico_comps"),
     Output("adm-results-vela-comps", "children"),
     Input("adm-results-vela-comps-data", "data"),
 )

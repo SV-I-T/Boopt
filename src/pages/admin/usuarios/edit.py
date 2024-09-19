@@ -425,7 +425,7 @@ def criar_usuario(
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "ativar"),
+    ClientsideFunction("interacoes", "ativar"),
     Output("confirm-delete-usr", "displayed"),
     Input("btn-delete-usr", "n_clicks"),
     prevent_initial_call=True,
@@ -484,7 +484,7 @@ def excluir_usuario(n: int, endpoint: str):
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "ativar"),
+    ClientsideFunction("interacoes", "ativar"),
     Output("confirm-reset-usr-password", "displayed"),
     Input("btn-reset-usr-password", "n_clicks"),
     prevent_initial_call=True,

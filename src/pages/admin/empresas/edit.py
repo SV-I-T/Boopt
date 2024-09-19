@@ -192,7 +192,7 @@ def salvar_empresa(n, nome: str, segmento: str, endpoint: str):
 
 
 clientside_callback(
-    ClientsideFunction("clientside", "ativar"),
+    ClientsideFunction("interacoes", "ativar"),
     Output("confirm-delete-empresa", "displayed"),
     Input("btn-delete-empresa", "n_clicks"),
     prevent_initial_call=True,

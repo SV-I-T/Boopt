@@ -246,7 +246,7 @@ def preencher_auto(n, frases):
 
 # ALTERA A FRASE ATUAL SEGUNDO OS BOTÕES
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="alterar_frase"),
+    ClientsideFunction(namespace="vela", function_name="alterar_frase"),
     Output("store-frase-atual-vela", "data"),
     Output("text-frase-vela", "children"),
     Output("score-vela", "value"),
@@ -261,7 +261,7 @@ clientside_callback(
 
 # ATUALIZA O VALOR DA FRASE QUANDO CLICA NUMA NOTA
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="nota_clicada"),
+    ClientsideFunction(namespace="vela", function_name="nota_clicada"),
     Output("store-frases-vela", "data"),
     Input("score-vela", "value"),
     State("store-frase-atual-vela", "data"),
@@ -272,7 +272,7 @@ clientside_callback(
 
 # VERIFICA SE TODAS AS FRASES JÁ FORAM RESPONDIDAS
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="check_completado"),
+    ClientsideFunction(namespace="vela", function_name="check_completado"),
     Output("store-status-vela", "data"),
     Input("store-frases-vela", "data"),
 )
