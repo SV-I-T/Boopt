@@ -22,7 +22,7 @@ ENV LC_ALL pt_BR.UTF-8
 RUN pip install uv==0.4.8
 
 # Sincronizando as bibliotecas com o uv e instalando gunicorn
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 RUN uv add gunicorn
 
 # Comando ao iniciar o container
