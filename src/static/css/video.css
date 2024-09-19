@@ -6,12 +6,6 @@
     align-items: center;
 }
 
-/* .video-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-} */
-
 .video-gallery>a {
     text-decoration: none;
     color: var(--azul-sv);
@@ -62,13 +56,11 @@
     opacity: 1;
 }
 
-.player-wrapper {
+.video-player {
     background-color: gray;
     border-radius: 1rem;
-    width: fit-content;
-    height: fit-content;
 }
 
-.player-wrapper>div>div {
+.video-player>div {
     border-radius: 1rem;
 }

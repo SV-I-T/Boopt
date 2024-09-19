@@ -157,10 +157,14 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
         },
         atualizar_info_video: async function (currentTime, id_video) {
-            console.log(window.dash_clientside.callback_context)
-            window.localStorage.setItem('v-curtime-' + id_video, currentTime)
-            // return "Progresso: " + (currentTime ? `${(currentTime * 100 / duration).toFixed(0)}%` : "0%")
-            throw window.dash_clientside.PreventUpdate
+            if (currentTime) {
+                console.log('tem tempo definido')
+                window.localStorage.setItem('v-curtime-' + id_video, currentTime)
+                throw window.dash_clientside.PreventUpdate
+            } else {
+                console.log('não tem tempo definido')
+                return window.localStorage.getItem('v-curtime-' + id_video)
+            }
         },
     },
     raiox: {

@@ -9,23 +9,32 @@ from dash import (
 )
 from dash_player import DashPlayer
 
-from utils.video import video_teste
+from utils.video import Video
 
 register_page(__name__, path_template="/app/vela/videos/<id_video>")
 
 
 def layout(id_video: str):
-    return DashPlayer(
-        id=f"vela-v{video_teste.vid}",
-        url=video_teste.url,
-        controls=True,
-        intervalCurrentTime=1000,
-    )
+    video = Video.consultar(id_video=id_video)
+
+    return [
+        html.H1(video.titulo),
+        DashPlayer(
+            id="vela-video",
+            className="video-player",
+            url=video.url,
+            controls=True,
+            intervalCurrentTime=1000,
+            intervalDuration=10_000_000,
+            intervalSecondsLoaded=10_000_000,
+        ),
+    ]
 
 
 clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="atualizar_infos_player"),
-    Output("vela-player-progress", "children"),
-    Input("vela-player", "currentTime"),
-    State("vela-player", "duration"),
+    ClientsideFunction(namespace="vela", function_name="atualizar_info_video"),
+    Output("vela-video", "seekTo"),
+    Input("vela-video", "currentTime"),
+    State("vela-video", "url"),
+    prevent_initial_update=True,
 )
