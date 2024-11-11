@@ -1,7 +1,6 @@
 import base64
 import io
 
-import dash_ag_grid as dag
 import dash_mantine_components as dmc
 import polars as pl
 from bson import ObjectId
@@ -19,6 +18,7 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+from pymongo import UpdateMany
 
 from utils.banco_dados import db
 from utils.empresa import Empresa
@@ -34,164 +34,297 @@ def layout():
     usr_atual = Usuario.atual()
 
     data_empresas = usr_atual.consultar_empresas()
+    data_unidades = consultar_unidades(usr_atual.empresa)
 
-    data_unidades = buscar_unidades(usr_atual.empresa)
+    # Puxa todos os usuários da empresa
+    data_usuarios = list(
+        db("Usuários").find(
+            {"empresa": usr_atual.empresa},
+            {"value": {"$toString": "$_id"}, "label": "$nome", "_id": 0},
+        )
+    )
 
     return [
         html.H1("Unidades"),
         dmc.Stack(
             [
                 dmc.Select(
-                    id="select-empresa-unidades",
+                    id="unidades-select-empresa",
                     label="Empresa",
                     data=data_empresas,
                     value=str(usr_atual.empresa),
                     display=usr_atual.role != Role.ADM and "block" or "none",
                 ),
-                dag.AgGrid(
-                    id="table-empresa-unidades",
-                    className="ag-theme-quartz compact",
-                    columnDefs=[
-                        {"field": "cod", "headerName": "Código"},
-                        {"field": "nome", "headerName": "Unidade"},
-                    ],
-                    getRowId="params.data.cod",
-                    rowData=data_unidades,
-                    selectedRows=[],
-                    dashGridOptions={
-                        "rowSelection": "multiple",
-                        "suppressRowClickSelection": True,
-                        "overlayLoadingTemplate": {
-                            "function": "'<span>Carregando...</span>'"
-                        },
-                        "overlayNoRowsTemplate": {
-                            "function": "'<span>Não há unidades cadastradas</span>'"
-                        },
-                    },
-                    defaultColDef={
-                        "resizable": False,
-                        "filter": True,
-                        "floatingFilter": True,
-                        "floatingFilterComponentParams": {
-                            "suppressFilterButton": True,
-                        },
-                        "suppressMenu": True,
-                        "suppressMovable": True,
-                        "flex": 1,
-                    },
-                    columnSize="autoSize",
-                    columnSizeOptions={"keys": ["cod"]},
-                    style={"width": 500},
+                dmc.Modal(
+                    id="unidades-modal",
+                    title="Importar unidades",
+                    children=modal_importar_unidades(),
+                    zIndex=100000,
                 ),
-                dmc.Button(
-                    id="btn-download-empresa-unidades",
-                    children="Baixar unidades (.xlsx)",
-                    leftIcon=DashIconify(
-                        icon="fluent:arrow-download-16-filled", width=16
-                    ),
+                dmc.Group(
+                    children=[
+                        dmc.Button(
+                            "Importar unidades",
+                            leftIcon=DashIconify(
+                                icon="fluent:open-16-regular", width=16
+                            ),
+                            variant="light",
+                            id="unidades-modal-btn",
+                        ),
+                        dmc.Button(
+                            id="unidades-download-btn",
+                            children="Baixar unidades (.xlsx)",
+                            leftIcon=DashIconify(
+                                icon="fluent:arrow-download-16-filled", width=16
+                            ),
+                        ),
+                    ]
                 ),
-                html.H2("Importar unidades"),
-                dcc.Markdown("""
+                dmc.Select(
+                    id="unidades-select-unidade",
+                    placeholder="Selecione uma unidade",
+                    data=data_unidades,
+                ),
+                dmc.TransferList(
+                    id="unidades-usuarios",
+                    value=[data_usuarios, []],
+                    titles=["Todos usuários", "Unidade selecionada"],
+                    searchPlaceholder="Procure um usuário",
+                ),
+                dmc.Button("Salvar", id="unidades-usuarios-btn"),
+            ]
+        ),
+    ]
+
+
+def modal_importar_unidades():
+    return [
+        dcc.Markdown("""
 Você pode adicionar novas unidades ou editar unidades já existentes por meio da importação de uma planilha excel (.xlsx). Para facilitar o processo, recomendamos que baixe a planilha pelo botão acima, edite a mesma e depois faça a importação. É importante que não haja nenhuma mudança nas colunas, caso contrário você receberá um erro.
 
 Cada unidade deve sempre conter um código único e numérico de identificação e um nome descritivo.
 
 Para a edição de unidades já existentes, você pode alterar o nome a vontade, porém recomendamos que o código sempre permaneca o mesmo, pois é a ele que vendedores e gerentes/supervisores estarão associados.
 """),
-                dcc.Upload(
-                    id="upload-empresa-unidades",
-                    className="container-upload",
-                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    style_active={},
-                    style_reject={},
-                    className_active="upload-ativo",
-                    className_reject="upload-negado",
-                    max_size=2e6,
+        dcc.Upload(
+            id="unidades-upload",
+            className="container-upload",
+            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            style_active={},
+            style_reject={},
+            className_active="upload-ativo",
+            className_reject="upload-negado",
+            max_size=2e6,
+            children=[
+                "Arraste aqui ou ",
+                html.A("selecione um arquivo"),
+                "(.xlsx)",
+                # DashIconify(
+                #     icon="fluent:document-add-48-regular",
+                #     width=48,
+                #     color="#1717FF",
+                # ),
+                dmc.Text(
+                    "Tamanho máximo: 2MB",
+                    size=14,
+                    opacity=0.5,
+                ),
+                html.Div(
+                    id="div-empresa-unidades-arquivo",
                     children=[
-                        "Arraste aqui ou ",
-                        html.A("selecione um arquivo"),
-                        "(.xlsx)",
-                        # DashIconify(
-                        #     icon="fluent:document-add-48-regular",
-                        #     width=48,
-                        #     color="#1717FF",
-                        # ),
-                        dmc.Text(
-                            "Tamanho máximo: 2MB",
-                            size=14,
-                            opacity=0.5,
-                        ),
-                        html.Div(
-                            id="div-empresa-unidades-arquivo",
+                        dmc.Divider(w="100%"),
+                        dmc.Group(
                             children=[
-                                dmc.Divider(w="100%"),
-                                dmc.Group(
-                                    children=[
-                                        DashIconify(
-                                            icon="vscode-icons:file-type-excel",
-                                            width=24,
-                                        ),
-                                        dmc.Text(id="empresa-unidades-arquivo"),
-                                    ],
+                                DashIconify(
+                                    icon="vscode-icons:file-type-excel",
+                                    width=24,
                                 ),
+                                dmc.Text(id="unidades-arquivo"),
                             ],
-                            style={"display": "none"},
                         ),
                     ],
+                    style={"display": "none"},
                 ),
-                dmc.Button("Importar", id="btn-salvar-empresa-unidades"),
-                html.Div(id="feedback-empresa-unidades"),
-            ]
+            ],
         ),
+        dmc.Button("Importar", id="unidades-import-btn"),
+        html.Div(id="unidades-import-feedback"),
     ]
 
 
-def buscar_unidades(id_empresa: ObjectId) -> list[dict[str, str]]:
+def consultar_unidades(id_empresa: ObjectId) -> list[dict[str, str]]:
     empresa = Empresa.consultar("_id", id_empresa)
-    return [unidade.model_dump() for unidade in empresa.unidades]
+    return [
+        {"value": unidade.cod, "label": unidade.nome} for unidade in empresa.unidades
+    ]
+
+
+def consultar_usuarios(
+    id_empresa: ObjectId, unidade: int = None
+) -> tuple[list[str], list[str]]:
+    usuarios = db("Usuários").find({"empresa": id_empresa}, {"nome": 1, "unidades": 1})
+
+    lista_usuarios = [[], []]
+
+    for usuario in usuarios:
+        if unidade and "unidades" in usuario and unidade in usuario["unidades"]:
+            lista_usuarios[1].append(
+                {"value": str(usuario["_id"]), "label": usuario["nome"]}
+            )
+        else:
+            lista_usuarios[0].append(
+                {"value": str(usuario["_id"]), "label": usuario["nome"]}
+            )
+
+    return lista_usuarios
+
+
+clientside_callback(
+    ClientsideFunction("interacoes", "ativar"),
+    Output("unidades-modal", "opened"),
+    Input("unidades-modal-btn", "n_clicks"),
+)
 
 
 @callback(
-    Output("table-empresa-unidades", "rowData"),
+    Output("unidades-select-unidade", "data"),
+    Output("unidades-select-unidade", "value"),
     Output("notificacoes", "children", allow_duplicate=True),
-    Input("select-empresa-unidades", "value"),
+    Input("unidades-select-empresa", "value"),
     prevent_initial_call=True,
 )
-def atualizar_tabela_unidades(_id_empresa: str):
+def atualizar_lista_unidades(_id_empresa: str):
     usr_atual = Usuario.atual()
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
     id_empresa = ObjectId(_id_empresa)
     if usr_atual.role == Role.ADM and usr_atual.empresa != id_empresa:
-        return no_update, dmc.Notification(
-            id="notif-buscar-unidades",
-            title="Erro de autorização",
-            message="Você não é administrador dessa empresa.",
-            action="show",
-            color="red",
+        return (
+            no_update,
+            no_update,
+            dmc.Notification(
+                id="notif-buscar-unidades",
+                title="Erro de autorização",
+                message="Você não é administrador dessa empresa.",
+                action="show",
+                color="red",
+            ),
         )
 
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
-        return no_update, dmc.Notification(
-            id="notif-buscar-unidades",
-            title="Erro de autorização",
-            message="Você não é consultor dessa empresa.",
+        return (
+            no_update,
+            no_update,
+            dmc.Notification(
+                id="notif-buscar-unidades",
+                title="Erro de autorização",
+                message="Você não é consultor dessa empresa.",
+                action="show",
+                color="red",
+            ),
+        )
+
+    data_unidades = consultar_unidades(id_empresa)
+    return data_unidades, None, no_update
+
+
+@callback(
+    Output("unidades-usuarios", "value"),
+    Input("unidades-select-unidade", "value"),
+    State("unidades-select-empresa", "value"),
+    State("unidades-usuarios", "value"),
+    prevent_initial_call=True,
+)
+def atualizar_colaboradores_unidade(
+    unidade: int,
+    _id_empresa: str,
+    data_usuarios: tuple[list[dict[str, str]], list[dict[str, str]]],
+):
+    usuarios_na_unidade = [
+        str(u["_id"])
+        for u in db("Usuários").find(
+            {"empresa": ObjectId(_id_empresa), "unidades": unidade}, {"_id": 1}
+        )
+    ]
+
+    usuarios = data_usuarios[0] + data_usuarios[1]
+
+    novo_data_usuarios: tuple[list[dict[str, str]], list[dict[str, str]]] = [[], []]
+    for usuario in usuarios:
+        if usuario["value"] in usuarios_na_unidade:
+            novo_data_usuarios[1].append(usuario)
+        else:
+            novo_data_usuarios[0].append(usuario)
+
+    return novo_data_usuarios
+
+
+@callback(
+    Output("notificacoes", "children", allow_duplicate=True),
+    Input("unidades-usuarios-btn", "n_clicks"),
+    State("unidades-select-unidade", "value"),
+    State("unidades-usuarios", "value"),
+    State("unidades-select-empresa", "value"),
+    prevent_initial_call=True,
+)
+def editar_usuarios_unidade(
+    n: int,
+    unidade: int,
+    id_usuarios: tuple[list[dict[str, str]], list[dict[str, str]]],
+    _id_empresa: str,
+):
+    if not n:
+        raise PreventUpdate
+
+    id_empresa = ObjectId(_id_empresa)
+    id_usuarios_na_unidade = [
+        ObjectId(id_usuario["value"]) for id_usuario in id_usuarios[1]
+    ]
+
+    r = db("Usuários").bulk_write(
+        [
+            # Retirar a unidade de todos
+            UpdateMany(
+                filter={"empresa": id_empresa},
+                update={"$pull": {"unidades": unidade}},
+            ),
+            # Adicionar a unidade nos usuarios
+            UpdateMany(
+                filter={
+                    "empresa": id_empresa,
+                    "_id": {"$in": id_usuarios_na_unidade},
+                },
+                update={"$push": {"unidades": unidade}},
+            ),
+        ]
+    )
+
+    if not r.acknowledged:
+        return dmc.Notification(
+            id="notif-salvar-unidades",
+            title="Ops!",
+            message="Houve algum erro ao editar os usuários dessa unidade. Tente novamente mais tarde.",
             action="show",
             color="red",
         )
 
-    data_unidades = buscar_unidades(id_empresa)
-    return data_unidades, no_update
+    return dmc.Notification(
+        id="notif-salvar-unidades",
+        title="Pronto!",
+        message="Os usuários da unidade foram salvos.",
+        action="show",
+        color="green",
+    )
 
 
 @callback(
     Output("download", "data", allow_duplicate=True),
-    Input("btn-download-empresa-unidades", "n_clicks"),
-    State("table-empresa-unidades", "rowData"),
+    Input("unidades-download-btn", "n_clicks"),
+    State("unidades-select-unidade", "data"),
     prevent_initial_call=True,
 )
-def baixar_unidades(n: int, row_data: dict):
+def baixar_unidades(n: int, data: dict):
     if not n:
         raise PreventUpdate
 
@@ -200,8 +333,8 @@ def baixar_unidades(n: int, row_data: dict):
     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
         raise PreventUpdate
 
-    df_unidades = pl.DataFrame(row_data, schema={"cod": int, "nome": str}).rename(
-        {"cod": "Código", "nome": "Unidade"}
+    df_unidades = pl.DataFrame(data, schema={"value": int, "label": str}).rename(
+        {"value": "Código", "label": "Unidade"}
     )
     buf = io.BytesIO()
     df_unidades.write_excel(buf)
@@ -212,19 +345,19 @@ def baixar_unidades(n: int, row_data: dict):
 
 clientside_callback(
     ClientsideFunction("clientside", "upload_arquivo_empresa_unidades"),
-    Output("empresa-unidades-arquivo", "children"),
-    Input("upload-empresa-unidades", "filename"),
+    Output("unidades-arquivo", "children"),
+    Input("unidades-upload", "filename"),
     prevent_initial_call=True,
 )
 
 
 @callback(
-    Output("feedback-empresa-unidades", "children"),
+    Output("unidades-import-feedback", "children"),
     Output("notificacoes", "children", allow_duplicate=True),
-    Input("btn-salvar-empresa-unidades", "n_clicks"),
-    State("upload-empresa-unidades", "contents"),
-    State("upload-empresa-unidades", "filename"),
-    State("select-empresa-unidades", "value"),
+    Input("unidades-import-btn", "n_clicks"),
+    State("unidades-upload", "contents"),
+    State("unidades-upload", "filename"),
+    State("unidades-select-empresa", "value"),
     prevent_initial_call=True,
 )
 def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str):
