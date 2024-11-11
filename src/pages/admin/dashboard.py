@@ -70,7 +70,7 @@ def layout():
             "href": "/app/admin/vela",
             "logo": "assets/vela/tag_ass.svg",
         },
-        {"label": "Raio-X", "href": "/app/admin/raiox", "logo": ""},
+        # {"label": "Raio-X", "href": "/app/admin/raiox", "logo": ""},
     )
 
     menu_products = [
