@@ -18,18 +18,27 @@ class VelaAssessmentDataFrames(BaseModel):
 
 class Vela(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
-    descricao: str = ""
+    descricao: Optional[str] = None
     v_form: Optional[int] = 1
-    empresa: ObjectId
-    participantes: list[ObjectId] = Field(default_factory=list)
+    empresa: Optional[ObjectId] = None
+    participantes: Optional[list[ObjectId]] = []
 
     class Config:
         str_strip_whitespace = True
         arbitrary_types_allowed = True
 
-    def registrar(self) -> None:
-        r = db("VelaAplicações").insert_one(self.model_dump(exclude={"id_"}))
-        assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
+    def salvar(self) -> None:
+        r = db("VelaAplicações").update_one(
+            {"_id": self.id_ or ObjectId()},
+            upsert=True,
+            update={"$set": self.model_dump(by_alias=True, exclude_unset=True)},
+        )
+        assert r.acknowledged, "Ocorreu algo de errado ao salvar a aplicação Vela. Tente novamente mais tarde."
+
+    @classmethod
+    def consultar_aplicacao(cls, id_aplicacao: str | ObjectId = None):
+        aplicacao = db("VelaAplicações").find_one({"_id": ObjectId(id_aplicacao)})
+        return cls(**aplicacao)
 
     @classmethod
     def resultado(cls, id_resposta: ObjectId) -> dict | None:

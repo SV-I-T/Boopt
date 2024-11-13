@@ -3,14 +3,20 @@ from math import ceil
 
 import dash_mantine_components as dmc
 from bson import ObjectId
-from dash import Input, Output, callback, html, register_page
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    html,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
-from utils.banco_dados import db
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.usuario import Usuario
+from utils import Role, Usuario, checar_perfil, db
 
 register_page(__name__, "/app/admin/vela", title="Vela Assessment")
 
@@ -18,15 +24,17 @@ MAX_PAGINA = 10
 
 
 @checar_perfil(permitir=(Role.DEV, Role.ADM, Role.CONS, Role.GEST))
-def layout():
+def layout(empresa: str = None):
+    id_empresa = None
+    if empresa is not None and len(empresa) == 24:
+        id_empresa = empresa
+
     usr = Usuario.atual()
 
-    if usr.role == Role.ADM:
-        data_empresas = [str(usr.empresa)]
-    else:
-        data_empresas = usr.consultar_empresas()
+    data_empresas = usr.consultar_empresas()
+    id_empresa = id_empresa or data_empresas[0]["value"]
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_vela(1, str(usr.empresa), usr)
+    corpo_tabela, n_paginas = construir_tabela_vela(1, str(usr.empresa), usr)
 
     return [
         html.H1("Vela Assessment"),
@@ -36,7 +44,7 @@ def layout():
                     position="right",
                     children=[
                         dmc.Select(
-                            id="empresa-vela",
+                            id="vela-empresa",
                             icon=DashIconify(
                                 icon="fluent:building-24-regular", width=24
                             ),
@@ -48,7 +56,7 @@ def layout():
                             placeholder="Selecione uma empresa",
                             w=250,
                             mr="auto",
-                            value=str(usr.empresa),
+                            value=id_empresa,
                             display="none"
                             if usr.role in (Role.ADM, Role.GEST)
                             else "block",
@@ -65,7 +73,7 @@ def layout():
                         ),
                         dmc.Anchor(
                             id="a-nova-aplicacao",
-                            href="/app/admin/vela/new",
+                            href=f"/app/admin/vela/novo?{('empresa='+empresa) if empresa else ''}",
                             children=dmc.Button(
                                 children="Nova aplicação",
                                 leftIcon=DashIconify(
@@ -113,9 +121,8 @@ def layout():
 @callback(
     Output("table-vela-body", "children"),
     Output("table-vela-nav", "total"),
-    Output("a-nova-aplicacao", "href"),
     Input("table-vela-nav", "page"),
-    Input("empresa-vela", "value"),
+    State("vela-empresa", "value"),
     prevent_initial_call=True,
 )
 def atualizar_tabela_empresas(pagina: int, empresa: str):
@@ -125,16 +132,12 @@ def atualizar_tabela_empresas(pagina: int, empresa: str):
     if usr_atual.role == Role.ADM and str(usr_atual.empresa) != empresa:
         raise PreventUpdate
 
-    corpo_tabela, n_paginas = consultar_dados_tabela_vela(pagina, empresa, usr_atual)
+    corpo_tabela, n_paginas = construir_tabela_vela(pagina, empresa, usr_atual)
 
-    return (
-        corpo_tabela,
-        n_paginas,
-        f"/app/admin/vela/edit?empresa={empresa}",
-    )
+    return (corpo_tabela, n_paginas)
 
 
-def consultar_dados_tabela_vela(
+def construir_tabela_vela(
     pagina: int, empresa: str, usr_atual: Usuario
 ) -> tuple[list[html.Tr], int]:
     r = (
@@ -199,7 +202,7 @@ def consultar_dados_tabela_vela(
                     [
                         dmc.Anchor(
                             "Editar",
-                            href=f'/app/admin/vela/{assessment["_id"]}/edit',
+                            href=f'/app/admin/vela/{assessment["_id"]}',
                             mr="0.5rem",
                         )
                         if usr_atual.role != Role.GEST
@@ -214,3 +217,12 @@ def consultar_dados_tabela_vela(
         )
         for assessment in assessments
     ], n_paginas
+
+
+clientside_callback(
+    ClientsideFunction(namespace="interacoes", function_name="alterar_empresa"),
+    Output("url", "search", allow_duplicate=True),
+    Input("vela-empresa", "value"),
+    State("url", "search"),
+    prevent_initial_call=True,
+)
