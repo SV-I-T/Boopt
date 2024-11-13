@@ -141,7 +141,7 @@ def construir_tabela_vela(
     pagina: int, empresa: str, usr_atual: Usuario
 ) -> tuple[list[html.Tr], int]:
     r = (
-        db("VelaAplicações")
+        db("ViewTabelaVelaAssessments")
         .aggregate(
             [
                 {"$match": {"empresa": ObjectId(empresa)}},
@@ -151,24 +151,7 @@ def construir_tabela_vela(
                 {
                     "$facet": {
                         "cont": [{"$count": "total"}],
-                        "data": [
-                            {"$project": {"id_form": 0}},
-                            {"$set": {"participantes": {"$size": "$participantes"}}},
-                            {
-                                "$lookup": {
-                                    "from": "VelaRespostas",
-                                    "localField": "_id",
-                                    "foreignField": "id_aplicacao",
-                                    "as": "respostas",
-                                }
-                            },
-                            {
-                                "$set": {
-                                    "nota_media": {"$avg": "$respostas.nota"},
-                                    "respostas": {"$size": "$respostas"},
-                                }
-                            },
-                        ],
+                        "data": [],
                     }
                 },
             ]
