@@ -19,7 +19,7 @@ def layout():
 
     data_row_empresas = list(
         db("Empresas").find(
-            {}, {"_id": 0, "id": {"$toString": "$_id", "nome": 1, "segmento": 1}}
+            {}, {"_id": 0, "id": {"$toString": "$_id"}, "nome": 1, "segmento": 1}
         )
     )
     return [
