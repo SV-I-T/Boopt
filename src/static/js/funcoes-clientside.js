@@ -101,6 +101,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             data.forEach((e) => values.push(e['value']))
             return values
         },
+        alterar_empresa: async function (id_empresa, search) {
+            if (!id_empresa) {
+                throw window.dash_clientside.PreventUpdate
+            }
+            if (!search) {
+                return "?empresa=" + id_empresa
+            }
+            return "?" + search.slice(1).split("&").map((q) => { return (q.includes("empresa=")) ? ("empresa=" + id_empresa) : q }).join("&")
+        }
     },
     vela: {
         alterar_frase: async function (n_next, n_back, ordem_atual, frases, ordem) {
