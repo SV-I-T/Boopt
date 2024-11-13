@@ -69,8 +69,14 @@ def layout():
             "label": "Vela Assessment",
             "href": "/app/admin/vela",
             "logo": "assets/vela/tag_ass.svg",
+            "visible": True,
         },
-        # {"label": "Raio-X", "href": "/app/admin/raiox", "logo": ""},
+        {
+            "label": "Missões de campo",
+            "href": "/app/admin/missoes",
+            "logo": "",
+            "visible": usr.role == Role.DEV,
+        },
     )
 
     menu_products = [
@@ -88,6 +94,7 @@ def layout():
                     ),
                 )
                 for module in modules_products
+                if module["visible"]
             ],
         ),
     ]
