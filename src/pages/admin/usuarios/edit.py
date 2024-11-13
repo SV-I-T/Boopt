@@ -19,13 +19,10 @@ from dash_iconify import DashIconify
 from pydantic import ValidationError
 from werkzeug.security import generate_password_hash
 
-from utils.banco_dados import db
-from utils.empresa import Empresa
-from utils.login import checar_perfil, layout_nao_autorizado
+from utils import Empresa, Role, UrlUtils, Usuario, checar_perfil, db, nova_notificacao
+from utils.login import layout_nao_autorizado
 from utils.novo_usuario import NovoUsuario
-from utils.role import Role
-from utils.url import UrlUtils
-from utils.usuario import CARGOS_PADROES, Usuario
+from utils.usuario import CARGOS_PADROES
 
 register_page(
     __name__, path_template="/app/admin/usuarios/<id_usuario>", title="Editar usuário"
@@ -324,21 +321,17 @@ def salvar_usuario(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
-            id="notificacao-salvar-usr",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-usr",
+            type="error",
             message=str(erro),
-            action="show",
-            color="red",
         ), no_update
 
     else:
-        return dmc.Notification(
-            id="notificacao-salvar-usr",
-            title="Pronto!",
+        return nova_notificacao(
+            id="feedback-usr",
+            type="success",
             message=f"Os dados de {nome} foram atualizados com sucesso.",
-            color="green",
-            action="show",
         ), "/app/admin/usuarios"
 
 
@@ -406,21 +399,17 @@ def criar_usuario(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-erro-edit-usr",
-            title="Ops!",
+            type="error",
             message=str(erro),
-            action="show",
-            color="red",
         ), no_update
 
     else:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-novo-usr-suc",
-            title="Pronto!",
+            type="success",
             message=f"O usuário {usr.nome} foi criado com sucesso.",
-            color="green",
-            action="show",
         ), "/app/admin/usuarios"
 
 
@@ -458,28 +447,22 @@ def excluir_usuario(n: int, endpoint: str):
     r = db("Usuários").delete_one(filter=filter)
 
     if not r.acknowledged:
-        return dmc.Notification(
-            id="notificacao-excluir-usr",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-usr",
+            type="error",
             message="Ocorreu um erro ao tentar excluir o usuário. Tente novamente mais tarde.",
-            color="red",
-            action="show",
         ), no_update
     elif r.deleted_count == 0:
-        return dmc.Notification(
-            id="notificacao-excluir-usr",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-usr",
+            type="error",
             message="Este usuário não existe ou você não tem permissão para excluí-lo.",
-            color="red",
-            action="show",
         ), no_update
 
-    return dmc.Notification(
-        id="notificacao-excluir-usr",
-        title="Pronto!",
+    return nova_notificacao(
+        id="feedback-usr",
+        type="success",
         message="O usuário foi excluído com sucesso.",
-        color="green",
-        action="show",
     ), "/app/admin/usuarios"
 
 
@@ -521,26 +504,20 @@ def redefinir_senha(n: int, endpoint: str):
     r = db("Usuários").update_one(filter=filter, update=update)
 
     if not r.acknowledged:
-        return dmc.Notification(
-            id="notificacao-reset-usr-password",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-senha",
+            type="error",
             message="Houve um erro ao tentar redefinir a senha. Tente novamente mais tarde.",
-            color="red",
-            action="show",
         )
     elif r.modified_count == 0:
-        return dmc.Notification(
-            id="notificacao-reset-usr-password",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-senha",
+            type="error",
             message="Este usuário não existe ou você não tem permissao para alterar a senha dele.",
-            color="red",
-            action="show",
         )
 
-    return dmc.Notification(
-        id="notificacao-excluir-usr",
-        title="Pronto!",
+    return nova_notificacao(
+        id="feedback-usr",
+        type="success",
         message=f"A senha do usuário {usr.nome} foi redefinida com sucesso",
-        color="green",
-        action="show",
     )

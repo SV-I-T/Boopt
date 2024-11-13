@@ -19,12 +19,8 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from icecream import ic
 
-from utils.banco_dados import db
-from utils.login import checar_perfil
-from utils.usuario import Usuario
-from utils.vela import Vela
+from utils import Usuario, Vela, checar_perfil, db, nova_notificacao
 
 EXPLICACAO_MD = """
     Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
@@ -344,12 +340,10 @@ def salvar_resposta(n, frases, id_aplicacao):
         if resposta.inserted_id:
             return "?secao=enviado", no_update
         else:
-            return no_update, dmc.Notification(
+            return no_update, nova_notificacao(
                 id="erro-envio-teste",
-                color="red",
-                title="Ops!",
+                type="error",
                 message="Erro ao salvar resposta. Tente novamente",
-                action="show",
             )
 
 

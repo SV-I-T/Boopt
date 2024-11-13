@@ -8,7 +8,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 
-from utils import Missao, Role, UrlUtils, Usuario, db
+from utils import Missao, Role, UrlUtils, Usuario, db, nova_notificacao
 
 register_page(
     __name__,
@@ -215,19 +215,13 @@ def salvar_missao(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
-            id="feedback-missao",
-            title="Ops!",
-            message=str(erro),
-            color="red",
-            action="show",
+        return nova_notificacao(
+            id="feedback-missao", type="error", message=str(erro)
         ), no_update
 
     else:
-        return dmc.Notification(
+        return nova_notificacao(
             id="feedback-missao",
-            title="Pronto!",
             message="A missão foi criada com sucesso.",
-            color="green",
-            action="show",
+            type="success",
         ), "/app/admin/missoes"

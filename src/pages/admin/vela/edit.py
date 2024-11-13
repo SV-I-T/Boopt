@@ -19,12 +19,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 
-from utils.banco_dados import db
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.url import UrlUtils
-from utils.usuario import Usuario
-from utils.vela import Vela
+from utils import Role, UrlUtils, Usuario, Vela, checar_perfil, db, nova_notificacao
 
 register_page(
     __name__,
@@ -216,21 +211,17 @@ def atualizar_assessment(
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
+        return nova_notificacao(
             id="feedback-missao",
-            title="Ops!",
+            type="error",
             message=str(erro),
-            color="red",
-            action="show",
         ), no_update
 
     else:
-        return dmc.Notification(
+        return nova_notificacao(
             id="feedback-missao",
-            title="Pronto!",
+            type="success",
             message="A missão foi criada com sucesso.",
-            color="green",
-            action="show",
         ), "/app/admin/vela"
 
 
@@ -265,37 +256,29 @@ def excluir_assessment(n: int, endpoint: str):
     )
 
     if usr_atual.role == Role.ADM and usr_atual.empresa != aplicacao["empresa"]:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notif-delete-vela",
-            title="Ops!",
+            type="error",
             message="Você não tem permissão para excluir essa aplicação.",
-            action="show",
-            color="red",
         ), no_update
 
     r = db("VelaAplicações").delete_one({"_id": ObjectId(id_aplicacao)})
 
     if not r.acknowledged:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notif-delete-vela",
-            title="Ops!",
+            type="error",
             message="Ocorreu um erro ao tentar excluir a aplicação. Tente novamente mais tarde",
-            action="show",
-            color="red",
         ), no_update
     elif r.deleted_count == 0:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notif-delete-vela",
-            title="Ops!",
+            type="error",
             message="Essa aplicação não existe mais ou você não tem permissão para excluí-la.",
-            action="show",
-            color="red",
         ), no_update
 
-    return dmc.Notification(
+    return nova_notificacao(
         id="notif-delete-vela",
-        title="Pronto!",
+        type="success",
         message="A aplicação foi excluída com sucesso.",
-        action="show",
-        color="green",
     ), "/app/admin/vela"

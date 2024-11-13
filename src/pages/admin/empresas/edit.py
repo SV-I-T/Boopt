@@ -16,12 +16,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 
-from utils.banco_dados import db
-from utils.empresa import Empresa
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.url import UrlUtils
-from utils.usuario import Usuario
+from utils import Empresa, Role, UrlUtils, Usuario, checar_perfil, db, nova_notificacao
 
 register_page(
     __name__, path_template="/app/admin/empresas/<id_empresa>", title="Editar empresa"
@@ -119,20 +114,14 @@ def criar_empresa(n, nome: str, segmento: str):
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
-            id="notificacao-erro-criar-empresa",
-            title="Ops!",
-            message=str(erro),
-            color="red",
-            action="show",
+        return nova_notificacao(
+            id="feedback-empresa", type="error", message=str(erro)
         ), no_update
 
     else:
-        return dmc.Notification(
-            id="empresa-criada",
-            color="green",
-            title="Pronto!",
-            action="show",
+        return nova_notificacao(
+            id="feedback-empresa",
+            type="success",
             message=[
                 dmc.Text("A empresa ", span=True),
                 dmc.Text(nome, span=True, weight=700),
@@ -169,20 +158,14 @@ def salvar_empresa(n, nome: str, segmento: str, endpoint: str):
                 erro = e.errors()[0]["ctx"]["error"]
             case _:
                 erro = e
-        return dmc.Notification(
-            id="notificacao-erro-criar-empresa",
-            title="Ops!",
-            message=str(erro),
-            color="red",
-            action="show",
+        return nova_notificacao(
+            id="feedback-empresa", type="error", message=str(erro)
         ), no_update
 
     else:
-        return dmc.Notification(
-            id="notificacao-empresa-salva",
-            color="green",
-            action="show",
-            title="Pronto!",
+        return nova_notificacao(
+            id="feedback-empresa",
+            type="success",
             message=[
                 dmc.Text("A empresa ", span=True),
                 dmc.Text(nome, span=True, weight=700),
@@ -223,18 +206,14 @@ def excluir_empresa(n: int, endpoint: str):
     r = db("Empresas").delete_one({"_id": ObjectId(id_empresa)})
 
     if not r.acknowledged:
-        return dmc.Notification(
-            id="notificacao-excluir-usr",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-empresa",
+            type="error",
             message="Houve um erro ao excluir a empresa. Tente novamente mais tarde.",
-            color="red",
-            action="show",
         ), no_update
 
-    return dmc.Notification(
-        id="notificacao-excluir-usr",
-        title="Pronto!",
+    return nova_notificacao(
+        id="feedback-empresa",
+        type="success",
         message="A empresa foi excluído com sucesso.",
-        color="green",
-        action="show",
     ), "/app/admin/empresas"

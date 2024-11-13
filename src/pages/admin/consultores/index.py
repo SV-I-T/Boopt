@@ -5,10 +5,7 @@ from dash import Input, Output, State, callback, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
-from utils.banco_dados import db
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.usuario import Usuario
+from utils import Role, Usuario, checar_perfil, db, nova_notificacao
 
 register_page(__name__, path="/app/admin/consultores", title="Consultores")
 
@@ -122,12 +119,10 @@ def salvar_clientes_consultor(
         raise PreventUpdate
 
     if not _id_consultor:
-        return dmc.Notification(
-            id="notificacao-edit-clientes-consultor",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-clientes-consultor",
             message="Selecione um consultor",
-            action="show",
-            color="red",
+            type="error",
         )
     usr_atual = Usuario.atual()
 
@@ -145,17 +140,14 @@ def salvar_clientes_consultor(
     r = db("Usuários").update_one({"_id": id_consultor}, update=update)
 
     if not r.acknowledged:
-        return dmc.Notification(
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-clientes-consultor",
             message="Ocorreu algo de errado ao tentar editar os clientes. Tente novamente mais tarde.",
-            action="show",
-            color="red",
+            type="error",
         )
 
-    return dmc.Notification(
-        id="notificacao-edit-clientes-consultor",
-        title="Pronto!",
+    return nova_notificacao(
+        id="feedback-clientes-consultor",
         message="Os clientes foram editados com sucesso.",
-        action="show",
-        color="green",
+        type="success",
     )

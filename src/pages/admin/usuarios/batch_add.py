@@ -19,10 +19,8 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pydantic import ValidationError
 
-from utils.login import checar_perfil
+from utils import Role, Usuario, checar_perfil, nova_notificacao
 from utils.novos_usuarios_batch import MultipleErrors, NovosUsuariosBatelada
-from utils.role import Role
-from utils.usuario import Usuario
 
 register_page(
     __name__,
@@ -262,12 +260,10 @@ def carregar_arquivo_xlsx(n: int, contents: str, nome: str, empresa: str, role: 
             URL = no_update
         else:
             ALERTA = None
-            NOTIFICACAO = dmc.Notification(
-                id="notificacao-usr-massa-suc",
-                action="show",
-                title="Pronto!",
+            NOTIFICACAO = nova_notificacao(
+                id="feedback-usr-batch",
+                type="success",
                 message=f"{len(novos_usuarios.usuarios)} usuários foram criados com sucesso.",
-                color="green",
             )
             URL = "/app/admin/usuarios"
 

@@ -20,11 +20,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pymongo import UpdateMany
 
-from utils.banco_dados import db
-from utils.empresa import Empresa
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.usuario import Usuario
+from utils import Empresa, Role, Usuario, checar_perfil, db, nova_notificacao
 
 register_page(__name__, path="/app/admin/unidades", title="Unidades")
 
@@ -203,12 +199,10 @@ def atualizar_lista_unidades(_id_empresa: str):
         return (
             no_update,
             no_update,
-            dmc.Notification(
-                id="notif-buscar-unidades",
-                title="Erro de autorização",
+            nova_notificacao(
+                id="feedback-unidades",
+                type="error",
                 message="Você não é administrador dessa empresa.",
-                action="show",
-                color="red",
             ),
         )
 
@@ -216,12 +210,10 @@ def atualizar_lista_unidades(_id_empresa: str):
         return (
             no_update,
             no_update,
-            dmc.Notification(
-                id="notif-buscar-unidades",
-                title="Erro de autorização",
+            nova_notificacao(
+                id="feedback-unidades",
+                type="error",
                 message="Você não é consultor dessa empresa.",
-                action="show",
-                color="red",
             ),
         )
 
@@ -301,20 +293,16 @@ def editar_usuarios_unidade(
     )
 
     if not r.acknowledged:
-        return dmc.Notification(
-            id="notif-salvar-unidades",
-            title="Ops!",
+        return nova_notificacao(
+            id="feedback-unidades",
+            type="error",
             message="Houve algum erro ao editar os usuários dessa unidade. Tente novamente mais tarde.",
-            action="show",
-            color="red",
         )
 
-    return dmc.Notification(
-        id="notif-salvar-unidades",
-        title="Pronto!",
+    return nova_notificacao(
+        id="feedback-unidades",
+        type="success",
         message="Os usuários da unidade foram salvos.",
-        action="show",
-        color="green",
     )
 
 
@@ -370,21 +358,17 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
         raise PreventUpdate
 
     if usr_atual.role == Role.ADM and usr_atual.empresa != id_empresa:
-        return no_update, dmc.Notification(
-            id="notif-salvar-unidades",
-            title="Erro de autorização",
+        return no_update, nova_notificacao(
+            id="feedback-unidades",
+            type="error",
             message="Você não é administrador dessa empresa",
-            action="show",
-            color="red",
         )
 
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
-        return no_update, dmc.Notification(
-            id="notif-salvar-unidades",
-            title="Erro de autorização",
+        return no_update, nova_notificacao(
+            id="feedback-unidades",
+            type="error",
             message="Você não é consultor dessa empresa",
-            action="show",
-            color="red",
         )
 
     if not contents:
@@ -441,10 +425,8 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
             ), no_update
 
         else:
-            return None, dmc.Notification(
-                id="notif-salvar-unidades",
-                action="show",
-                title="Pronto!",
+            return None, nova_notificacao(
+                id="feedback-unidades",
+                type="success",
                 message="As unidades foram atualizadas com sucesso.",
-                color="green",
             )

@@ -1,18 +1,14 @@
 import re
 
 import dash_mantine_components as dmc
-from bson import ObjectId
 from dash import Input, Output, State, callback, html, no_update, register_page
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from pydantic import ValidationError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from utils.banco_dados import db
+from utils import Role, Usuario, checar_perfil, db, nova_notificacao
 from utils.cache import cache_simple
-from utils.login import checar_perfil
-from utils.role import Role
-from utils.usuario import Usuario
 
 register_page(__name__, path="/app/perfil", title="Meu perfil")
 
@@ -199,12 +195,10 @@ def editar_email(n: int, acao: str, email: str):
             r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
         ).fullmatch(email):
             return (
-                dmc.Notification(
-                    id="notificacao-email-alterado",
+                nova_notificacao(
+                    id="feedback-email",
                     message="E-mail inválido. Verifique e tente novamente",
-                    color="red",
-                    title="Ops!",
-                    action="show",
+                    type="error",
                 ),
                 no_update,
                 no_update,
@@ -220,12 +214,10 @@ def editar_email(n: int, acao: str, email: str):
 
         except ValidationError as _:
             return (
-                dmc.Notification(
-                    id="notificacao-email-alterado",
+                nova_notificacao(
+                    id="feedback-email",
                     message="Não conseguimos alterar seu e-mail. Tente novamente mais tarde.",
-                    color="red",
-                    title="Ops!",
-                    action="show",
+                    type="error",
                 ),
                 no_update,
                 no_update,
@@ -238,12 +230,10 @@ def editar_email(n: int, acao: str, email: str):
         cache_simple.delete_memoized(Usuario.consultar_pelo_id, Usuario, usr.id)
 
         return (
-            dmc.Notification(
-                id="notificacao-email-alterado",
+            nova_notificacao(
+                id="feedback-email",
                 message="Email alterado com sucesso",
-                color="green",
-                title="Pronto!",
-                action="show",
+                type="success",
             ),
             True,
             "Editar",
@@ -267,47 +257,37 @@ def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
         raise PreventUpdate
 
     if not senha_atual or not senha_nova or not senha_nova2:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-senha-alterada",
             message="Preencha todos os campos. Tente novamente.",
-            color="red",
-            title="Ops!",
-            action="show",
+            type="error",
         )
 
     if senha_nova != senha_nova2:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-senha-alterada",
             message="As senhas digitadas devem ser iguais. Tente novamente.",
-            color="red",
-            title="Ops!",
-            action="show",
+            type="error",
         )
 
     if not check_password_hash(usr.senha_hash, senha_atual):
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-senha-alterada",
             message="Senha atual inválida. Tente novamente.",
-            color="red",
-            title="Ops!",
-            action="show",
+            type="error",
         )
 
     try:
         usr.atualizar({"senha_hash": generate_password_hash(senha_nova)})
     except ValidationError as e:
-        return dmc.Notification(
+        return nova_notificacao(
             id="notificacao-senha-alterada",
             message=str(e),
-            color="red",
-            title="Ops!",
-            action="show",
+            type="error",
         )
 
-    return dmc.Notification(
+    return nova_notificacao(
         id="notificacao-senha-alterada",
         message="Senha alterada com sucesso",
-        color="green",
-        title="Pronto!",
-        action="show",
+        type="success",
     )
