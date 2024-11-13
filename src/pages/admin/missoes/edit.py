@@ -42,6 +42,8 @@ def layout(id_missao: str, empresa: str = None):
 
     if not novo:
         missao = Missao.consultar_missao(id_missao)
+    else:
+        missao = Missao()
 
     return [
         html.H1(missao.nome or "Nova missão"),
@@ -49,7 +51,7 @@ def layout(id_missao: str, empresa: str = None):
             [
                 dmc.Select(
                     id="missao-empresa",
-                    icon=DashIconify(icon="fluent:building-24-regular", width=24),
+                    icon=DashIconify(icon="fluent:building-20-regular", width=20),
                     name="empresa",
                     data=data_empresas,
                     required=True,
@@ -66,43 +68,35 @@ def layout(id_missao: str, empresa: str = None):
                     children=[
                         dmc.TextInput(
                             id="missao-nome",
-                            placeholder="Nome",
                             value=missao.nome,
-                            icon=DashIconify(
-                                icon="fluent:app-title-20-filled", width=20
-                            ),
                             required=True,
+                            label="Missão",
                         ),
                         dmc.DateRangePicker(
                             id="missao-datas",
-                            placeholder="Prazo (Início - Fim)",
+                            placeholder="Início - Fim",
                             locale="pt-br",
                             value=[
                                 str(missao.dti) if missao.dti else None,
                                 str(missao.dtf) if missao.dtf else None,
                             ],
                             inputFormat="DD/MM/YY",
-                            icon=DashIconify(
-                                icon="fluent:calendar-20-filled", width=20
-                            ),
                             firstDayOfWeek="sunday",
                             required=True,
+                            label="Prazo",
                         ),
                     ],
                 ),
                 dmc.TextInput(
                     id="missao-desc",
-                    placeholder="Descrição",
                     value=missao.descricao,
-                    icon=DashIconify(
-                        icon="fluent:text-description-20-filled", width=20
-                    ),
+                    label="Descrição",
                 ),
                 dmc.TextInput(
                     id="missao-campo-desc",
                     placeholder="Descreva a missão de campo",
                     value=missao.campo_desc,
-                    icon=DashIconify(icon="fluent:slide-text-edit-20-filled", width=20),
+                    label="Campo de descrição",
                     description="Qual será a pergunta pedindo a descrição da entrega",
                 ),
                 html.H2("Participantes"),

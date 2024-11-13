@@ -8,15 +8,11 @@ from dash import (
     Input,
     Output,
     State,
-    callback,
     clientside_callback,
     html,
-    no_update,
     register_page,
 )
-from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
-from pydantic import ValidationError
 
 from utils import Missao, Role, Usuario, checar_perfil, db
 
@@ -48,7 +44,7 @@ def layout(empresa: str = None):
                         dmc.Select(
                             id="missao-empresa",
                             icon=DashIconify(
-                                icon="fluent:building-24-regular", width=24
+                                icon="fluent:building-20-regular", width=20
                             ),
                             name="empresa",
                             data=data_empresas,
@@ -134,7 +130,7 @@ def construir_tabela_missoes(id_empresa: ObjectId | str):
                 html.Td(dmc.Anchor("Editar", href=f"/app/admin/missoes/{missao.id_}")),
             ]
         )
-        for missao in missoes
+        for missao in reversed(missoes)
     ]
     return missoes_linhas
 
