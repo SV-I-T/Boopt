@@ -28,7 +28,7 @@ def layout():
                         dmc.Select(
                             id="empresa-vela",
                             icon=DashIconify(
-                                icon="fluent:building-24-regular", width=24
+                                icon="fluent:building-20-regular", width=20
                             ),
                             name="empresa",
                             data=data_empresas,

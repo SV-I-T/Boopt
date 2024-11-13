@@ -44,7 +44,7 @@ def layout():
             label="Empresa",
             data=data_empresas,
             value=str(valor_empresa),
-            icon=DashIconify(icon="fluent:building-24-regular", width=24),
+            icon=DashIconify(icon="fluent:building-20-regular", width=20),
             searchable=True,
             nothingFound="Não encontramos nada",
             display="block" and (usr_atual.role in (Role.DEV, Role.CONS)) or "none",
