@@ -51,7 +51,7 @@ def layout(q: str = "", page: str = "1"):
                         dmc.Group(
                             children=[
                                 dmc.Anchor(
-                                    href="/app/admin/usuarios/new",
+                                    href="/app/admin/usuarios/novo",
                                     children=dmc.Button(
                                         id="btn-novo-usr",
                                         children="Novo Usuário",
@@ -62,7 +62,7 @@ def layout(q: str = "", page: str = "1"):
                                     ),
                                 ),
                                 dmc.Anchor(
-                                    href="/app/admin/usuarios/new-batch",
+                                    href="/app/admin/usuarios/batelada",
                                     children=dmc.Button(
                                         id="btn-modal-usr-massa",
                                         children="Cadastro em massa",

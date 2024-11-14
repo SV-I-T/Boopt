@@ -33,7 +33,7 @@ register_page(
 def layout(id_usuario: str = None):
     usr_atual = Usuario.atual()
 
-    if id_usuario == "new":
+    if id_usuario == "novo":
         return [
             html.H1("Novo usuário"),
             *layout_edicao_usr(usr_atual),

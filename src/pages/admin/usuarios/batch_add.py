@@ -24,7 +24,7 @@ from utils.novos_usuarios_batch import MultipleErrors, NovosUsuariosBatelada
 
 register_page(
     __name__,
-    path="/app/admin/usuarios/new-batch",
+    path="/app/admin/usuarios/batelada",
     title="ADM - Cadastrar usuários em massa",
 )
 
