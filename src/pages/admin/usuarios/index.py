@@ -34,12 +34,10 @@ def layout(q: str = "", page: str = "1"):
         dmc.Stack(
             [
                 dmc.Group(
-                    align="end",
-                    children=[
+                    [
                         dmc.TextInput(
                             id="usuario-filtro-input",
-                            placeholder="Filtrar",
-                            description="Dica: Você pode filtrar mais de uma coluna",
+                            placeholder="Buscar por palavras-chave",
                             w=300,
                             value=q,
                             icon=dmc.ActionIcon(
