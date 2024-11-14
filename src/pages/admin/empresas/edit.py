@@ -66,8 +66,7 @@ def layout_nova_empresa(nome: str = None, segmento: str = None):
                 dmc.Button(
                     id="btn-criar-empresa" if nome is None else "btn-salvar-empresa",
                     children="Criar" if nome is None else "Salvar",
-                    ml="auto",
-                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                    leftIcon=DashIconify(icon="fluent:checkmark-20-regular", width=20),
                 ),
                 dmc.Button(
                     id="btn-delete-empresa",

@@ -87,7 +87,15 @@ def layout():
                     titles=["Todos usuários", "Unidade selecionada"],
                     searchPlaceholder="Procure um usuário",
                 ),
-                dmc.Button("Salvar", id="unidades-usuarios-btn"),
+                dmc.Group(
+                    dmc.Button(
+                        "Salvar",
+                        leftIcon=DashIconify(
+                            icon="fluent:checkmark-20-regular", width=20
+                        ),
+                        id="unidades-usuarios-btn",
+                    )
+                ),
             ]
         ),
     ]

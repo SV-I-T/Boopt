@@ -185,21 +185,10 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
         dmc.Group(
             children=[
                 dmc.Button(
-                    id="btn-reset-usr-password",
-                    children="Redefinir senha",
-                    disabled=desabilitar_edicao,
-                    leftIcon=DashIconify(
-                        icon="fluent:arrow-reset-20-regular", width=20
-                    ),
-                )
-                if usr
-                else None,
-                dmc.Button(
                     id="btn-salvar-usr" if usr else "btn-criar-usr",
                     children="Salvar" if usr else "Criar",
                     disabled=desabilitar_edicao,
-                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
-                    ml="auto",
+                    leftIcon=DashIconify(icon="fluent:checkmark-20-regular", width=20),
                 ),
                 dmc.Button(
                     id="btn-delete-usr",
@@ -207,6 +196,17 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                     color="red",
                     disabled=desabilitar_edicao,
                     leftIcon=DashIconify(icon="fluent:delete-20-regular", width=20),
+                )
+                if usr
+                else None,
+                dmc.Button(
+                    id="btn-reset-usr-password",
+                    children="Redefinir senha",
+                    disabled=desabilitar_edicao,
+                    leftIcon=DashIconify(
+                        icon="fluent:arrow-reset-20-regular", width=20
+                    ),
+                    ml="auto",
                 )
                 if usr
                 else None,

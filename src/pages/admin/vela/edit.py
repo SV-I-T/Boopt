@@ -135,9 +135,8 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
                         dmc.Button(
                             id="vela-salvar",
                             children="Salvar" if id_vela else "Criar",
-                            ml="auto",
                             leftIcon=DashIconify(
-                                icon="fluent:save-20-regular", width=20
+                                icon="fluent:checkmark-20-regular", width=20
                             ),
                         ),
                         dmc.Button(

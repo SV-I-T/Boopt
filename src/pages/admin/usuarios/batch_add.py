@@ -143,7 +143,13 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
                 ),
             ],
         ),
-        dmc.Button("Enviar", id="btn-criar-usrs-batelada"),
+        dmc.Group(
+            dmc.Button(
+                "Enviar",
+                leftIcon=DashIconify(icon="fluent:arrow-upload-20-regular", width=20),
+                id="btn-criar-usrs-batelada",
+            )
+        ),
         html.Div(id="feedback-usr-massa"),
     ]
 

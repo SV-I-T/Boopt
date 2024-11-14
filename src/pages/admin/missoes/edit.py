@@ -142,10 +142,14 @@ def layout(id_missao: str, empresa: str = None):
                     },
                     className="ag-theme-quartz compact",
                 ),
-                dmc.Button(
-                    id="missao-salvar",
-                    children="Criar" if novo else "Salvar",
-                    leftIcon=DashIconify(icon="fluent:save-20-regular", width=20),
+                dmc.Group(
+                    dmc.Button(
+                        id="missao-salvar",
+                        children="Criar" if novo else "Salvar",
+                        leftIcon=DashIconify(
+                            icon="fluent:checkmark-20-regular", width=20
+                        ),
+                    )
                 ),
             ]
         ),
