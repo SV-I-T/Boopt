@@ -34,40 +34,43 @@ def layout(q: str = "", page: str = "1"):
         dmc.Stack(
             [
                 dmc.Group(
-                    spacing="sm",
+                    align="end",
                     children=[
                         dmc.TextInput(
                             id="usuario-filtro-input",
-                            placeholder="Pesquisar por nome, empresa, cargo...",
+                            placeholder="Filtrar",
+                            description="Dica: Você pode filtrar mais de uma coluna",
                             w=300,
                             value=q,
-                        ),
-                        dmc.ActionIcon(
-                            id="usuario-filtro-btn",
-                            children=DashIconify(
-                                icon="fluent:search-20-regular", width=24
+                            icon=dmc.ActionIcon(
+                                id="usuario-filtro-btn",
+                                children=DashIconify(
+                                    icon="fluent:search-20-regular", width=20
+                                ),
                             ),
-                            color="theme.primaryColor",
-                            variant="subtle",
                             mr="auto",
                         ),
-                        dmc.Anchor(
-                            href="/app/admin/usuarios/new",
-                            children=dmc.Button(
-                                id="btn-novo-usr",
-                                children="Novo Usuário",
-                                leftIcon=DashIconify(
-                                    icon="fluent:add-24-regular", width=24
+                        dmc.Group(
+                            children=[
+                                dmc.Anchor(
+                                    href="/app/admin/usuarios/new",
+                                    children=dmc.Button(
+                                        id="btn-novo-usr",
+                                        children="Novo Usuário",
+                                        leftIcon=DashIconify(
+                                            icon="fluent:add-20-regular", width=20
+                                        ),
+                                        variant="gradient",
+                                    ),
                                 ),
-                                variant="gradient",
-                            ),
-                        ),
-                        dmc.Anchor(
-                            href="/app/admin/usuarios/new-batch",
-                            children=dmc.Button(
-                                id="btn-modal-usr-massa",
-                                children="Cadastro em massa",
-                            ),
+                                dmc.Anchor(
+                                    href="/app/admin/usuarios/new-batch",
+                                    children=dmc.Button(
+                                        id="btn-modal-usr-massa",
+                                        children="Cadastro em massa",
+                                    ),
+                                ),
+                            ],
                         ),
                     ],
                 ),
@@ -132,14 +135,12 @@ def atualizar_tabela_usuarios(page: int, n: int, q: str):
 def consultar_dados_tabela_usuarios(
     usr_atual: Usuario, pagina: int, busca: str
 ) -> tuple[list[html.Tr], int]:
-    busca_regex = {"$regex": busca, "$options": "i"}
+    palavras_busca = busca.split()
+    palavras_regex_busca = "".join([rf"(?=.*{palavra})" for palavra in palavras_busca])
+    regex_pattern = f"^{palavras_regex_busca}.+"
 
     pipeline = [
-        {
-            "$match": {
-                "$or": [{campo: busca_regex} for campo in ("nome", "cargo", "empresa")]
-            }
-        },
+        {"$match": {"search": {"$regex": regex_pattern, "$options": "i"}}},
         {
             "$facet": {
                 "cont": [{"$count": "total"}],
