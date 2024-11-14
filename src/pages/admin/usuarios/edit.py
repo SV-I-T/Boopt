@@ -73,9 +73,14 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
 
     data_perfis = [r.value for r in roles_acessiveis]
     data_empresas = usr_atual.consultar_empresas()
-    data_unidades = Empresa.consultar_data_unidades(
-        id_empresa=usr.empresa if usr else usr_atual.empresa
-    )
+    empresa = Empresa(_id=usr.empresa if usr else usr_atual.empresa)
+    data_unidades = [
+        {
+            "value": unidade.cod,
+            "label": f"{unidade.cod}. {unidade.nome}",
+        }
+        for unidade in empresa.consultar_unidades()
+    ]
 
     return [
         html.H2("Informações Pessoais"),
@@ -165,6 +170,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                     data=data_unidades,
                     value=usr.unidades if usr else None,
                     disabled=desabilitar_edicao,
+                    searchable=True,
                 ),
                 dmc.Select(
                     id="role-edit-usr",
@@ -237,7 +243,7 @@ def atualizar_data_unidades(_id_empresa: str):
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
         raise PreventUpdate
 
-    return Empresa.consultar_data_unidades(id_empresa)
+    return Empresa.consultar_unidades(id_empresa)
 
 
 @callback(

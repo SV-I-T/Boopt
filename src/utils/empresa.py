@@ -13,9 +13,9 @@ class Unidade(BaseModel):
 
 class Empresa(BaseModel):
     id_: Optional[ObjectId] = Field(alias="_id", default=None)
-    nome: str
+    nome: Optional[str] = None
     segmento: Optional[str] = None
-    unidades: list[Unidade] = None
+    unidades: Optional[list[Unidade]] = []
 
     class Config:
         str_strip_whitespace = True
@@ -41,6 +41,10 @@ class Empresa(BaseModel):
         )
         assert r.acknowledged, "Ocorreu algo de errado. Tente novamente mais tarde."
 
+    def consultar_unidades(self) -> list[Unidade]:
+        r = db("ViewUnidades").find({"_id": self.id_}, {"_id": 0})
+        return [Unidade(**unidade) for unidade in r]
+
     @classmethod
     def consultar(cls, identificador: Literal["_id", "nome"], valor: str):
         if identificador == "_id":
@@ -49,11 +53,3 @@ class Empresa(BaseModel):
         assert empresa, "Essa empresa não existe."
 
         return cls(**empresa)
-
-    @classmethod
-    def consultar_data_unidades(cls, id_empresa: ObjectId) -> list:
-        r = db("ViewUnidades").find({"_id": id_empresa}, {"_id": 0})
-        return [
-            {"value": unidade["cod"], "label": f'[{unidade["cod"]}] {unidade["nome"]}'}
-            for unidade in r
-        ]
