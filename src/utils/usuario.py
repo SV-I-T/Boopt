@@ -6,18 +6,28 @@ from flask_login import UserMixin, current_user
 from pydantic import BaseModel, Field, computed_field
 from werkzeug.security import check_password_hash
 
-from utils.banco_dados import db
+from utils import db
 from utils.cache import cache_simple
 from utils.role import Role
 
 CARGOS_PADROES = sorted(
     [
         "Vendedor",
-        "Diretor Comercial",
-        "Gerente de Loja",
+        "Diretor",
+        "Gerente",
         "Atendente",
-        "Supervisor de Loja",
+        "Supervisor",
         "Regional",
+        "Consultor",
+        "Regional",
+        "RH",
+        "Caixa",
+        "Televendas",
+        "Subgerente",
+        "CEO",
+        "Líder",
+        "Auxiliar",
+        "Multiplicador",
     ]
 )
 
