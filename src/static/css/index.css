@@ -82,7 +82,6 @@
     padding: 5rem 3rem;
     background-color: var(--azul-sv);
     background:
-        url('../assets/laptop_screen_mockup_15\ 1.png') no-repeat 100% 101%/70% auto,
         linear-gradient(var(--off-white), var(--off-white)) padding-box,
         linear-gradient(147deg, var(--laranja-boopt), var(--azul-sv)) border-box;
     border-radius: 30px;
@@ -91,11 +90,6 @@
 
 .index-body div.promo img {
     height: 100px;
-}
-
-.index-body div.promo p,
-.index-body div.promo h1 {
-    width: 50%;
 }
 
 .index-body div.promo h1 {
