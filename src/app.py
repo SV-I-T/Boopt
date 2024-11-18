@@ -187,7 +187,7 @@ dash = Dash(
         "https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0",
     ],
     external_stylesheets=[
-        "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
     ],
     meta_tags=[{"name": "theme-color", "content": "#171C24"}],
     assets_folder="static",

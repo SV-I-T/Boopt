@@ -34,7 +34,7 @@ TEMA_PADRAO = {
     "colorScheme": "light",
     "defaultRadius": "lg",
     "defaultGradient": {"from": "SVAzul", "to": "BooptLaranja"},
-    "fontFamily": "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, system-ui;",
+    "fontFamily": "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, system-ui;",
 }
 
 
