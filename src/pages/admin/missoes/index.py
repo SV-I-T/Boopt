@@ -57,22 +57,22 @@ def layout(empresa: str = None):
                             value=id_empresa,
                         ),
                         dmc.Anchor(
-                            href="/app/admin/missoes/dashboard",
-                            children=dmc.Button(
-                                children="Resultados",
-                                leftIcon=DashIconify(
-                                    icon="fluent:chart-multiple-24-regular", width=24
-                                ),
-                            ),
-                        ),
-                        dmc.Anchor(
                             href=f"/app/admin/missoes/novo?{('empresa='+empresa) if empresa else ''}",
                             children=dmc.Button(
                                 children="Nova missão",
                                 leftIcon=DashIconify(
-                                    icon="fluent:add-24-regular", width=24
+                                    icon="fluent:add-20-regular", width=20
                                 ),
-                                variant="gradient",
+                            ),
+                        ),
+                        dmc.Anchor(
+                            href="/app/admin/missoes/dashboard",
+                            children=dmc.Button(
+                                children="Resultados",
+                                leftIcon=DashIconify(
+                                    icon="fluent:chart-multiple-20-regular", width=20
+                                ),
+                                color="dark",
                             ),
                         ),
                     ],
