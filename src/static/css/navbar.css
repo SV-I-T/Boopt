@@ -11,7 +11,7 @@
     padding: 2rem 1rem;
     transition: transform 100ms ease-in;
     width: var(--navbar-width);
-    z-index: 10000;
+
 }
 
 #navbar img {
@@ -31,7 +31,7 @@
     background-color: var(--azul-sv);
     color: #fff;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 20px;
     font-weight: 700;
 }
@@ -61,7 +61,7 @@
 }
 
 #navbar .mantine-NavLink-root {
-    border-radius: 15px;
+    border-radius: 9px;
     margin-bottom: 0.5rem;
 }
 
@@ -87,6 +87,7 @@
 @media only screen and (max-width: 1000px) {
     #navbar {
         transform: translateX(-100%);
+        z-index: 10000;
     }
 
     body:has(#navbar[visible=true]) {
