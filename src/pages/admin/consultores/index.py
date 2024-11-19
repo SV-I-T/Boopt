@@ -74,9 +74,8 @@ def layout():
                         dmc.Button(
                             id="btn-salvar-clientes-consultor",
                             children="Salvar",
-                            ml="auto",
                             leftIcon=DashIconify(
-                                icon="fluent:save-20-regular", width=20
+                                icon="fluent:checkmark-20-regular", width=20
                             ),
                         ),
                     ]
