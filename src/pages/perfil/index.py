@@ -1,8 +1,19 @@
 import re
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, html, no_update, register_page
+from dash import (
+    ClientsideFunction,
+    Input,
+    Output,
+    State,
+    callback,
+    clientside_callback,
+    html,
+    no_update,
+    register_page,
+)
 from dash.exceptions import PreventUpdate
+from dash_iconify import DashIconify
 from flask_login import current_user
 from pydantic import ValidationError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -126,37 +137,43 @@ def layout():
                     ],
                 ),
                 dmc.Divider(),
-                html.H2("Alterar senha"),
-                html.P(
-                    "ATENÇÃO:",
-                    className="bold c-laranja",
-                    style={"margin": 0},
+                modal_alterar_senha(usr),
+                dmc.Button(
+                    id="modal-alterar-senha-btn",
+                    children="Alterar senha",
+                    leftIcon=DashIconify(icon="fluent:open-20-regular", width=20),
+                    color="dark",
                 ),
-                html.P(
+                html.Small(
                     "Para alterar sua senha, primeiro você precisa cadastrar um email",
-                    className="light",
-                    style={"margin-top": 0},
+                    style={"margin-left": "1rem"},
                 ),
-                dmc.Stack(
-                    mb="1rem",
-                    maw=400,
-                    children=[
-                        dmc.PasswordInput(
-                            id="input-perfil-senha-atual",
-                            label="Senha atual",
-                            disabled=not bool(usr.email),
-                        ),
-                        dmc.PasswordInput(
-                            id="input-perfil-senha-nova",
-                            label="Nova senha",
-                            disabled=not bool(usr.email),
-                        ),
-                        dmc.PasswordInput(
-                            id="input-perfil-senha-nova2",
-                            label="Confirmação da nova senha",
-                            disabled=not bool(usr.email),
-                        ),
-                    ],
+            ],
+        ),
+    ]
+
+
+def modal_alterar_senha(usr: Usuario):
+    return dmc.Modal(
+        title="Alterar senha",
+        children=dmc.Stack(
+            mb="1rem",
+            maw=400,
+            children=[
+                dmc.PasswordInput(
+                    id="input-perfil-senha-atual",
+                    label="Senha atual",
+                    disabled=not bool(usr.email),
+                ),
+                dmc.PasswordInput(
+                    id="input-perfil-senha-nova",
+                    label="Nova senha",
+                    disabled=not bool(usr.email),
+                ),
+                dmc.PasswordInput(
+                    id="input-perfil-senha-nova2",
+                    label="Confirmação da nova senha",
+                    disabled=not bool(usr.email),
                 ),
                 dmc.Button(
                     id="btn-perfil-alterar-senha",
@@ -165,7 +182,9 @@ def layout():
                 ),
             ],
         ),
-    ]
+        opened=False,
+        id="modal-alterar-senha",
+    )
 
 
 @callback(
@@ -175,7 +194,7 @@ def layout():
     Output("input-perfil-senha-atual", "disabled"),
     Output("input-perfil-senha-nova", "disabled"),
     Output("input-perfil-senha-nova2", "disabled"),
-    Output("btn-perfil-alterar-senha", "disabled"),
+    Output("modal-alterar-senha-btn", "disabled"),
     Input("btn-perfil-editar-email", "n_clicks"),
     State("btn-perfil-editar-email", "children"),
     State("input-perfil-email", "value"),
@@ -241,6 +260,14 @@ def editar_email(n: int, acao: str, email: str):
         )
     else:
         raise PreventUpdate
+
+
+clientside_callback(
+    ClientsideFunction("interacoes", "ativar"),
+    Output("modal-alterar-senha", "opened"),
+    Input("modal-alterar-senha-btn", "n_clicks"),
+    prevent_initial_call=True,
+)
 
 
 @callback(
