@@ -58,7 +58,6 @@ def layout(q: str = "", page: str = "1"):
                                         leftIcon=DashIconify(
                                             icon="fluent:add-20-regular", width=20
                                         ),
-                                        variant="gradient",
                                     ),
                                 ),
                                 dmc.Anchor(
@@ -66,6 +65,7 @@ def layout(q: str = "", page: str = "1"):
                                     children=dmc.Button(
                                         id="btn-modal-usr-massa",
                                         children="Cadastro em massa",
+                                        color="dark",
                                     ),
                                 ),
                             ],

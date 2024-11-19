@@ -135,6 +135,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                 ),
             ],
         ),
+        dmc.Divider(),
         html.H2("Informações Profissionais"),
         html.Div(
             className="grid grid-2-col grid-a-end",
@@ -207,6 +208,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                         icon="fluent:arrow-reset-20-regular", width=20
                     ),
                     ml="auto",
+                    color="dark",
                 )
                 if usr
                 else None,
