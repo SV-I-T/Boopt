@@ -71,10 +71,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             const navbar_backdrop = document.getElementById('navbar-backdrop');
             if (opened) {
                 navbar.setAttribute('visible', 'true')
-                navbar_backdrop.setAttribute('visible', 'true')
             } else {
                 navbar.removeAttribute('visible')
-                navbar_backdrop.setAttribute('visible', 'false')
             }
             throw window.dash_clientside.PreventUpdate
         },

@@ -8,7 +8,11 @@
     --amarelo-vela: #FAC82C;
     --max-size: 1200px;
     --navbar-width: 250px;
-    --burger-header-height: 70px;
+    --burger-header-height: 4rem;
+}
+
+html {
+    background-color: var(--off-white);
 }
 
 body.index-body,
@@ -30,6 +34,7 @@ body:not(.index-body) {
     background-color: #fff;
     display: flex;
     flex-direction: column;
+    max-width: 100vw;
 }
 
 a {

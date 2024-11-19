@@ -1,12 +1,13 @@
 from dash import html, page_container
 
+from components import header
+
 
 def layout():
     return html.Div(
         id="wrapper",
         children=[
-            html.Div(id="frame"),
+            header.layout(),
             page_container,
-            html.Div(id="navbar-backdrop"),
         ],
     )

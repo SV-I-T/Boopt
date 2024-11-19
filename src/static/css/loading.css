@@ -1,3 +1,7 @@
+#react-entry-point {
+    background-color: var(--off-white);
+}
+
 ._dash-loading {
     color: transparent;
     text-align: center;

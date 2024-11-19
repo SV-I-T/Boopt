@@ -189,7 +189,7 @@ dash = Dash(
     external_stylesheets=[
         "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
     ],
-    meta_tags=[{"name": "theme-color", "content": "#171C24"}],
+    meta_tags=[{"name": "theme-color", "content": "#f2f2f2"}],
     assets_folder="static",
 )
 

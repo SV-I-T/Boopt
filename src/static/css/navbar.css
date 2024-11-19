@@ -3,13 +3,15 @@
     display: flex;
     flex-direction: column;
     top: 0px;
-    bottom: 0px;
+    height: 100dvh;
     left: 0px;
-    background-color: transparent;
-    border: none;
-    padding: 3rem 1rem 0.5rem 1rem;
-    z-index: -1;
+    background-color: #fff;
+    border-radius: 0 2rem 0 0;
+    box-shadow: 3px 4px 17.4px 9px rgba(0, 0, 0, 0.05);
+    padding: 2rem 1rem;
     transition: transform 100ms ease-in;
+    width: var(--navbar-width);
+    z-index: 10000;
 }
 
 #navbar img {
@@ -32,7 +34,6 @@
     border-radius: 8px;
     font-size: 20px;
     font-weight: 700;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
 #navbar div:has(>.nome-usr-navbar) {
@@ -64,104 +65,35 @@
     margin-bottom: 0.5rem;
 }
 
-#navbar .mantine-NavLink-root:not([data-active=true]) *:not(.avatar) {
-    color: #484848;
+#navbar .mantine-NavLink-root[data-active=true] .avatar {
+    background-color: var(--off-white);
+    color: var(--azul-sv);
 }
 
 #navbar .mantine-NavLink-root[data-active=true],
 #navbar .mantine-NavLink-root[data-active=true] * {
     background-color: var(--azul-sv);
-    color: #f3f3f3;
+    color: #fff;
 }
 
 #navbar .mantine-NavLink-root:not([data-active=true]):hover {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.07);
 }
 
 #navbar .mantine-NavLink-label {
     font-weight: 500;
 }
 
-
-#burger-header {
-    display: flex;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    height: calc(var(--burger-header-height));
-    display: block;
-    position: fixed;
-    background-color: var(--preto-sv);
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1rem;
-    z-index: 1000000;
-    border-radius: 0 0 20px 20px;
-}
-
-#burger-header>a {
-    height: 100%;
-}
-
-#burger-header img {
-    height: 100%;
-}
-
-#navbar-backdrop {
-    visibility: hidden;
-    opacity: 0;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(15px);
-    z-index: 100000;
-    -webkit-backdrop-filter: blur(15px);
-}
-
-
 @media only screen and (max-width: 1000px) {
     #navbar {
-        width: 300px;
-        border-radius: 0 20px 20px 0;
-        z-index: 10000000000;
         transform: translateX(-100%);
-        background-color: var(--off-white);
-    }
-
-    #navbar[visible=true] {
-        transform: translateX(0);
     }
 
     body:has(#navbar[visible=true]) {
         overflow: hidden;
     }
 
-    #navbar-backdrop[visible=false] {
-        transition: visibility 0s 100ms, opacity 100ms linear;
-    }
-
-    #navbar-backdrop[visible=true] {
-        visibility: visible;
-        opacity: 1;
-        transition: opacity 100ms, visibility 0s linear;
-    }
-
-    #burger-header {
-        display: flex;
-    }
-
-}
-
-@media only screen and (min-width: 1000px) {
-    #navbar {
-        width: var(--navbar-width);
-        z-index: 100;
-    }
-
-    #burger-header {
-        display: none;
+    body:has(#navbar[visible=true]) #navbar {
+        transform: translateX(0);
     }
 }

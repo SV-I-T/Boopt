@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import ClientsideFunction, Input, Output, clientside_callback, dcc, html
 
-from components import header, navbar, wrapper
+from components import navbar, wrapper
 
 TEMA_PADRAO = {
     "colors": {
@@ -59,7 +59,6 @@ def layout():
                     children=[
                         wrapper.layout(),
                         navbar.layout(),
-                        header.layout(),
                     ],
                 ),
             ],
