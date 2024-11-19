@@ -34,7 +34,7 @@ def layout(empresa: str = None):
     data_empresas = usr.consultar_empresas()
     id_empresa = id_empresa or data_empresas[0]["value"]
 
-    corpo_tabela, n_paginas = construir_tabela_vela(1, str(usr.empresa), usr)
+    corpo_tabela = construir_tabela_vela(id_empresa, usr)
 
     return [
         html.H1("Vela Assessment"),
@@ -96,111 +96,64 @@ def layout(empresa: str = None):
                             html.Tr(
                                 [
                                     html.Th("Descrição"),
-                                    html.Th("Criado em", style={"width": 100}),
+                                    html.Th("Criado em", style={"width": 120}),
                                     html.Th("Adesão", style={"width": 100}),
                                     html.Th("Nota média", style={"width": 120}),
                                     html.Th("Ações", style={"width": 150}),
                                 ]
                             )
                         ),
-                        html.Tbody(
-                            id="table-vela-body",
-                            children=corpo_tabela,
-                        ),
+                        html.Tbody(id="table-vela-body", children=corpo_tabela),
                     ],
-                ),
-                dmc.Pagination(
-                    id="table-vela-nav", total=n_paginas, page=1, radius="xl"
                 ),
             ]
         ),
     ]
 
 
-@callback(
-    Output("table-vela-body", "children"),
-    Output("table-vela-nav", "total"),
-    Input("table-vela-nav", "page"),
-    State("vela-empresa", "value"),
-    prevent_initial_call=True,
-)
-def atualizar_tabela_empresas(pagina: int, empresa: str):
-    usr_atual = Usuario.atual()
-    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
-        raise PreventUpdate
-    if usr_atual.role == Role.ADM and str(usr_atual.empresa) != empresa:
-        raise PreventUpdate
+def construir_tabela_vela(empresa: str, usr_atual: Usuario):
+    r = db("ViewTabelaVelaAssessments").find({"empresa": ObjectId(empresa)})
+    velas = list(r)
 
-    corpo_tabela, n_paginas = construir_tabela_vela(pagina, empresa, usr_atual)
-
-    return (corpo_tabela, n_paginas)
-
-
-def construir_tabela_vela(
-    pagina: int, empresa: str, usr_atual: Usuario
-) -> tuple[list[html.Tr], int]:
-    r = (
-        db("ViewTabelaVelaAssessments")
-        .aggregate(
-            [
-                {"$match": {"empresa": ObjectId(empresa)}},
-                {
-                    "$facet": {
-                        "cont": [{"$count": "total"}],
-                        "data": [
-                            {"$sort": {"_id": -1}},
-                            {"$skip": (pagina - 1) * MAX_PAGINA},
-                            {"$limit": MAX_PAGINA},
-                            {"$project": {"id_empresa": 0}},
-                        ],
-                    }
-                },
-            ]
-        )
-        .next()
-    )
-
-    assessments = r["data"]
-
-    if not assessments:
-        return [html.Tr([html.Td("Sem aplicações", colSpan=5)])], 1
-
-    total = r["cont"][0]["total"]
-
-    n_paginas = ceil(total / MAX_PAGINA)
+    if not velas:
+        return [
+            html.Tr(
+                [html.Td("Sem aplicações", colSpan=5, style={"text-align": "center"})]
+            )
+        ]
 
     return [
         html.Tr(
             [
-                html.Td(assessment.get("descricao", "")),
-                html.Td(assessment["_id"].generation_time.date().strftime("%d/%m/%Y")),
+                html.Td(vela.get("descricao", "")),
+                html.Td(vela["_id"].generation_time.date().strftime("%d/%m/%Y")),
                 html.Td(
-                    f'{(assessment["respostas"] / assessment["participantes"]):.0%} ({assessment["respostas"]}/{assessment["participantes"]})'
+                    f'{(vela["respostas"] / vela["participantes"]):.0%} ({vela["respostas"]}/{vela["participantes"]})'
                 ),
                 html.Td(
-                    f'{locale.format_string("%.1f",assessment["nota_media"])}/70'
-                    if assessment["nota_media"]
+                    locale.format_string("%.1f%%", vela["nota_media"] / 70 * 100)
+                    if vela["nota_media"]
                     else "--"
                 ),
                 html.Td(
                     [
                         dmc.Anchor(
                             "Editar",
-                            href=f'/app/admin/vela/{assessment["_id"]}',
+                            href=f'/app/admin/vela/{vela["_id"]}?empresa={empresa}',
                             mr="0.5rem",
                         )
                         if usr_atual.role != Role.GEST
                         else None,
                         dmc.Anchor(
                             "Respostas",
-                            href=f'/app/admin/vela/{assessment["_id"]}/view',
+                            href=f'/app/admin/vela/{vela["_id"]}/view',
                         ),
                     ]
                 ),
             ]
         )
-        for assessment in assessments
-    ], n_paginas
+        for vela in velas
+    ]
 
 
 clientside_callback(
