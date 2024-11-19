@@ -62,28 +62,27 @@ def layout(empresa: str = None):
                             else "block",
                         ),
                         dmc.Anchor(
-                            href="/app/admin/vela/dashboard",
-                            children=dmc.Button(
-                                children="Resultados",
-                                leftIcon=DashIconify(
-                                    icon="fluent:chart-multiple-24-regular", width=24
-                                ),
-                                classNames={"root": "btn-vela"},
-                            ),
-                        ),
-                        dmc.Anchor(
                             id="a-nova-aplicacao",
                             href=f"/app/admin/vela/novo?{('empresa='+empresa) if empresa else ''}",
                             children=dmc.Button(
                                 children="Nova aplicação",
                                 leftIcon=DashIconify(
-                                    icon="fluent:add-24-regular", width=24
+                                    icon="fluent:add-20-regular", width=20
                                 ),
-                                variant="gradient",
                             ),
                         )
                         if usr.role != Role.GEST
                         else None,
+                        dmc.Anchor(
+                            href="/app/admin/vela/dashboard",
+                            children=dmc.Button(
+                                children="Resultados",
+                                leftIcon=DashIconify(
+                                    icon="fluent:chart-multiple-20-regular", width=20
+                                ),
+                                color="dark",
+                            ),
+                        ),
                     ],
                 ),
                 dmc.Table(
@@ -145,13 +144,15 @@ def construir_tabela_vela(
         .aggregate(
             [
                 {"$match": {"empresa": ObjectId(empresa)}},
-                {"$sort": {"_id": -1}},
-                {"$skip": (pagina - 1) * MAX_PAGINA},
-                {"$limit": MAX_PAGINA},
                 {
                     "$facet": {
                         "cont": [{"$count": "total"}],
-                        "data": [],
+                        "data": [
+                            {"$sort": {"_id": -1}},
+                            {"$skip": (pagina - 1) * MAX_PAGINA},
+                            {"$limit": MAX_PAGINA},
+                            {"$project": {"id_empresa": 0}},
+                        ],
                     }
                 },
             ]
