@@ -30,16 +30,14 @@ def layout():
                     children=[
                         dmc.TextInput(
                             id="empresa-filtro-input",
-                            placeholder="Pesquisar por nome, segmento...",
+                            placeholder="Buscar por nome, segmento...",
                             w=300,
-                        ),
-                        dmc.ActionIcon(
-                            id="empresa-filtro-btn",
-                            children=DashIconify(
-                                icon="fluent:search-20-regular", width=24
+                            icon=dmc.ActionIcon(
+                                id="empresa-filtro-btn",
+                                children=DashIconify(
+                                    icon="fluent:search-20-regular", width=20
+                                ),
                             ),
-                            color="theme.primaryColor",
-                            variant="subtle",
                             mr="auto",
                         ),
                         dmc.Anchor(
@@ -50,7 +48,6 @@ def layout():
                                 leftIcon=DashIconify(
                                     icon="fluent:add-24-regular", width=24
                                 ),
-                                variant="gradient",
                             ),
                         ),
                     ],

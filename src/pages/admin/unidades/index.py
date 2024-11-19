@@ -72,7 +72,7 @@ def layout():
                             leftIcon=DashIconify(
                                 icon="fluent:open-20-regular", width=20
                             ),
-                            variant="light",
+                            color="dark",
                             id="unidades-modal-btn",
                         ),
                     ]
