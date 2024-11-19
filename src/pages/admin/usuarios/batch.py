@@ -64,7 +64,10 @@ def layout():
                         dmc.Button(
                             id="modal-batelada-btn",
                             children="Como preencher o modelo?",
-                            variant="subtle",
+                            leftIcon=DashIconify(
+                                icon="fluent:open-20-regular", width=20
+                            ),
+                            color="dark",
                         ),
                     ]
                 ),
