@@ -26,7 +26,7 @@ def layout():
         className="center-container index-vela",
         children=[
             dmc.Text("Seja bem-vindo ao", weight=300),
-            dmc.Text("Assessment Vendedor Boopt.", weight=700),
+            dmc.Text("Vela Assessment", weight=700),
             dmc.Image(
                 src=get_asset_url("assets/vela/promo-vela.png"),
                 mb="1rem",
@@ -44,7 +44,6 @@ def layout():
                                 ultima_aplicacao
                                 and not ultima_aplicacao.get("resposta")
                             ),
-                            classNames={"root": "btn-vela"},
                         ),
                         href=f"/app/vela/teste/{ultima_aplicacao['id']}"
                         if ultima_aplicacao and not ultima_aplicacao.get("resposta")
@@ -53,8 +52,8 @@ def layout():
                     dmc.Anchor(
                         dmc.Button(
                             children="Ver resultado",
-                            disabled=not ultima_resposta_id,
-                            color="BooptLaranja",
+                            disabled=not ultima_aplicacao,
+                            color="dark",
                         ),
                         href=f"/app/vela/report/{usr_atual.id}/{ultima_resposta_id}"
                         if ultima_resposta_id
@@ -63,33 +62,21 @@ def layout():
                 ],
             ),
             html.Div(
-                className="card card-videos-av",
+                className="card",
                 children=dmc.Group(
                     spacing="xl",
                     children=[
-                        DashIconify(
-                            icon="fluent:play-48-filled",
-                            color="#fff",
-                            className="play-videos-av",
-                        ),
-                        html.Div(
-                            children=[
-                                dcc.Markdown(
-                                    "Acesse a nossa plataforma de vídeos **após realizar o teste do Assessment Boopt**"
+                        html.P("Acesse aqui a nossa plataforma de vídeos"),
+                        dmc.Anchor(
+                            href="/app/vela/videos",
+                            children=dmc.Button(
+                                children="Acessar",
+                                leftIcon=DashIconify(
+                                    icon="fluent:filmstrip-play-16-regular",
+                                    width=16,
                                 ),
-                                dmc.Anchor(
-                                    href="/app/vela/videos",
-                                    children=dmc.Button(
-                                        children="Acessar",
-                                        leftIcon=DashIconify(
-                                            icon="fluent:filmstrip-play-16-regular",
-                                            width=16,
-                                        ),
-                                        className="btn-borda-gradiente",
-                                        disabled=not ultima_resposta_id,
-                                    ),
-                                ),
-                            ],
+                                disabled=not ultima_resposta_id,
+                            ),
                         ),
                     ],
                 ),

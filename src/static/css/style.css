@@ -3,7 +3,7 @@
     --laranja-boopt: #FF7730;
     --roxo-boopt: #88469B;
     --preto-sv: #171C24;
-    --input-bg: #fff;
+    --cinza-claro: #ccc;
     --off-white: #f3f3f3;
     --amarelo-vela: #FAC82C;
     --max-size: 1200px;
@@ -37,6 +37,8 @@ body:not(.index-body) {
     max-width: 100vw;
 }
 
+
+
 a {
     color: var(--azul-sv);
 }
@@ -51,6 +53,19 @@ h2 {
     font-size: 20px;
     font-weight: 600;
     margin: 0rem
+}
+
+p,
+td,
+input,
+button,
+span,
+div {
+    font-weight: 500;
+}
+
+p {
+    margin: 0;
 }
 
 p.bold {

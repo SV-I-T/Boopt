@@ -51,8 +51,8 @@ def layout():
                         children=[
                             dmc.Group(
                                 children=[
-                                    DashIconify(icon=module["icon"], width=48),
-                                    dmc.Text(module["label"], weight=500),
+                                    DashIconify(icon=module["icon"], width=32),
+                                    html.P(module["label"]),
                                 ],
                                 align="center",
                             ),

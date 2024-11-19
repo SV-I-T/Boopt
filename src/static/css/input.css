@@ -1,8 +1,10 @@
 input,
 .mantine-PasswordInput-input,
 .mantine-TextInput-input,
-.mantine-Select-input {
-    border-radius: 40px !important;
+.mantine-MultiSelect-input,
+.mantine-Select-input,
+textarea {
+    border-radius: 9px !important;
 }
 
 input.input {

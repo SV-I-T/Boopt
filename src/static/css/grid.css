@@ -1,9 +1,9 @@
 div.grid {
     display: grid;
-    column-gap: 2rem;
-    row-gap: .5rem;
+    gap: 1rem;
     margin-bottom: 1rem;
     align-items: start;
+    margin: 1rem 0;
 }
 
 div.grid.grid-a-end {

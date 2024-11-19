@@ -1,14 +1,12 @@
 button {
-    border-radius: 100px !important;
+    border-radius: 9px !important;
 }
 
 .btn {
-    border-radius: 100px;
     text-align: center;
     padding-left: 3rem;
     padding-right: 3rem;
     line-height: 34px;
-    font-weight: 400;
     cursor: pointer;
     background-size: 100%;
     transition: background-size 300ms ease 0s;
@@ -52,24 +50,6 @@ button {
     border: none;
 }
 
-
-.btn-borda-gradiente {
-    background:
-        linear-gradient(90deg, #fff 0%, #fff 100%) padding-box,
-        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
-    border: 2px solid transparent;
-    color: #000;
-    transition: all 100ms ease-out 0s;
-    width: 100%;
-}
-
-.btn-borda-gradiente:hover {
-    background:
-        linear-gradient(90deg, var(--azul-sv) 0%, var(--laranja-boopt) 100%) border-box;
-    background-color: white;
-    color: #fff;
-}
-
 .btn-link {
     background: none;
     color: var(--azul-sv);
@@ -82,25 +62,5 @@ button {
 }
 
 .mantine-Button-label {
-    font-weight: 400;
-}
-
-.btn-vela {
-    background-color: transparent;
-    background: linear-gradient(90deg, var(--laranja-boopt), var(--amarelo-vela)) no-repeat border-box;
-    color: #fff;
-}
-
-.btn-vela:hover {
-    background-size: 200%;
-}
-
-.btn-vela-iniciar {
-    height: 64px;
-    width: 230px;
-}
-
-.btn-vela-iniciar span {
-    font-size: 24px;
-    font-weight: 700;
+    font-weight: 500;
 }
