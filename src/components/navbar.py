@@ -24,6 +24,7 @@ def layout():
                 href="/app/vela",
             ),
             html.Div(id="menu-usr", children=menu_usuario(usr)),
+            html.Img(src=get_asset_url("assets/sv/tag-h-azul.svg")),
         ],
         id="navbar",
     )

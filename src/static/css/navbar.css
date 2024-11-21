@@ -9,16 +9,15 @@
     border-radius: 0 2rem 0 0;
     border: 1px solid var(--cinza-claro);
     box-shadow: 3px 4px 17.4px 9px rgba(0, 0, 0, 0.05);
-    padding: 2rem 1rem;
+    padding: 2rem 1rem 1rem;
     transition: transform 100ms ease-in;
     width: var(--navbar-width);
-
+    display: flex;
+    gap: 1rem;
 }
 
 #navbar img {
-    width: auto;
-    height: 70px;
-    margin-bottom: 2rem;
+    width: 100%;
 }
 
 #navbar #menu-usr {
