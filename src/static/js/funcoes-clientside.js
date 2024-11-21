@@ -123,7 +123,9 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
 
             let frase_atual = frases[String(ordem[ordem_atual])];
             let totalFrases = ordem.length;
-            let progresso = 100 * (ordem_atual + 1) / totalFrases;
+            let totalRespostas = Object.values(frases).map(v => v.valor).filter(v => v !== null).length
+            let progresso = 100 * totalRespostas / totalFrases;
+
             switch (ordem_atual) {
                 case null:
                     disable_next = window.dash_clientside.no_update;
