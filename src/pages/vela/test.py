@@ -52,8 +52,8 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
     usr = Usuario.atual()
 
     if secao == "instrucoes":
-        return html.Div(
-            style={"display": "flex", "flex-direction": "column", "height": "100%"},
+        return dmc.Stack(
+            spacing="2rem",
             children=[
                 dmc.Group(
                     children=[
@@ -75,46 +75,39 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                     EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
                 ),
                 html.Div(
-                    style={"width": 350, "align-self": "center", "margin": "2rem"},
+                    className="vela-radio",
                     children=[
+                        html.P(
+                            "Discordo totalmente",
+                            className="label-teste",
+                        ),
                         html.Div(className="vela-nota-demo", children=[html.Div()] * 5),
-                        html.Div(
-                            className="labels-teste",
-                            children=[
-                                html.P(
-                                    "Discordo totalmente",
-                                    className="label-teste",
-                                ),
-                                html.P(
-                                    "Concordo totalmente",
-                                    className="label-teste",
-                                ),
-                            ],
+                        html.P(
+                            "Concordo totalmente",
+                            className="label-teste",
                         ),
                     ],
                 ),
-                dmc.Group(
-                    style={"margin-top": "auto", "margin-bottom": "2rem"},
-                    position="apart",
-                    children=[
-                        dmc.Stack(
-                            spacing=0,
-                            children=[
-                                dmc.Text("Pronto para começar?", weight=700, size=40),
-                                dmc.Text(
-                                    "Vamos lá, sua jornada de autoavaliação está prestes a começar.",
-                                ),
-                            ],
-                        ),
-                        dmc.Anchor(
-                            href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
-                            children=dmc.Button(
-                                "Iniciar o teste",
-                                classNames={"root": "btn-vela"},
-                                className="btn-vela-iniciar shadow",
+                html.Div(
+                    className="card",
+                    children=dmc.Group(
+                        position="apart",
+                        children=[
+                            dmc.Stack(
+                                spacing=0,
+                                children=[
+                                    html.H2("Pronto para começar?"),
+                                    html.P(
+                                        "Vamos lá, sua jornada de autoavaliação está prestes a começar.",
+                                    ),
+                                ],
                             ),
-                        ),
-                    ],
+                            dmc.Anchor(
+                                href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
+                                children=dmc.Button("Iniciar o teste"),
+                            ),
+                        ],
+                    ),
                 ),
             ],
         )
@@ -138,7 +131,7 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
 
         frase_atual = frases[str(ordem[0])]
 
-        return html.Div(
+        return dmc.Stack(
             className="center-container test-vela",
             children=[
                 dcc.Store(
@@ -156,11 +149,15 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                     children=frase_atual["frase"],
                 ),
                 html.Div(
-                    style={"width": 350},
+                    className="vela-radio",
                     children=[
+                        html.P(
+                            "Discordo totalmente",
+                            className="label-teste",
+                        ),
                         dcc.RadioItems(
                             id="score-vela",
-                            className="radio-score-vela",
+                            className="vela-nota",
                             options=[
                                 {"value": i, "label": ""}
                                 for i in ["1", "2", "3", "4", "5"]
@@ -168,23 +165,13 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                             inline=True,
                             value=None,
                         ),
-                        html.Div(
-                            className="labels-teste",
-                            children=[
-                                html.P(
-                                    "Discordo totalmente",
-                                    className="label-teste",
-                                ),
-                                html.P(
-                                    "Concordo totalmente",
-                                    className="label-teste",
-                                ),
-                            ],
+                        html.P(
+                            "Concordo totalmente",
+                            className="label-teste",
                         ),
                     ],
                 ),
                 dmc.Group(
-                    mb="1rem",
                     position="center",
                     children=[
                         dmc.Button(
@@ -218,8 +205,13 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
     elif secao == "enviado":
         return [
             html.H1("Obrigado!"),
-            dcc.Markdown(
-                "Você pode conferir seu resultado agora mesmo clicando [aqui](/app/vela)"
+            html.P(
+                children=[
+                    "Você pode conferir seu resultado agora mesmo",
+                    dmc.Anchor(" voltando à pagina do Vela ", href="/app/vela"),
+                    " e clicando em ",
+                    dmc.Button("Ver resultado", color="dark"),
+                ]
             ),
         ]
 
@@ -285,17 +277,16 @@ def habilitar_envio(status_pronto, id_aplicacao):
     if not status_pronto:
         raise PreventUpdate
     else:
-        return (
-            dmc.Group(
-                style={"margin-top": "auto", "flex-wrap": "nowrap"},
+        return html.Div(
+            className="card",
+            children=dmc.Group(
                 position="apart",
                 children=[
-                    dmc.Stack(
-                        spacing=0,
+                    html.Div(
                         children=[
-                            dmc.Text("Tudo pronto!", weight=700, size=40),
-                            dmc.Text(
-                                "Você pode revisar suas respostas ou enviá-las agora mesmo.",
+                            html.H2("Tudo pronto!"),
+                            html.P(
+                                "Você pode revisar suas respostas ou enviá-las agora mesmo."
                             ),
                         ],
                     ),
@@ -304,7 +295,9 @@ def habilitar_envio(status_pronto, id_aplicacao):
                         children=dmc.Button(
                             id="btn-enviar",
                             children="Enviar",
-                            classNames={"root": "btn-vela"},
+                            leftIcon=DashIconify(
+                                icon="fluent:checkmark-20-regular", width=20
+                            ),
                         ),
                     ),
                 ],
