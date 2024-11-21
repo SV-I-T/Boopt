@@ -187,10 +187,11 @@ dash = Dash(
         "https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0",
     ],
     external_stylesheets=[
-        "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap",
     ],
     meta_tags=[{"name": "theme-color", "content": "#f2f2f2"}],
     assets_folder="static",
+    serve_locally=False,
 )
 
 mongo.init_app(server)
