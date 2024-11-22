@@ -66,9 +66,8 @@ div.test-vela {
 .label-teste {
     width: auto;
     font-weight: 500;
-    max-width: min-content;
-    min-width: 100%;
     height: min-content;
+    display: table;
 }
 
 p.label-teste:first-child {
