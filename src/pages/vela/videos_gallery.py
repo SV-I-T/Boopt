@@ -6,6 +6,7 @@ from dash import (
     State,
     clientside_callback,
     dcc,
+    get_asset_url,
     html,
     register_page,
 )
@@ -17,7 +18,13 @@ register_page(__name__, path="/app/vela/videos", title="Vela - Videos")
 
 def layout():
     return [
-        html.H1("Vídeos"),
+        html.H1(
+            [
+                dcc.Link("", href="/app/vela", title="Voltar"),
+                "Vídeos",
+                html.Img(src=get_asset_url("assets/vela/tag_ass.svg")),
+            ]
+        ),
         html.Div(
             className="video-gallery",
             children=[

@@ -1,6 +1,7 @@
 :root {
     --azul-sv: #1618ff;
     --laranja-boopt: #FF7730;
+    --laranja-vela: #f88f28;
     --roxo-boopt: #88469B;
     --preto-sv: #171C24;
     --cinza-claro: #ccc;
@@ -46,6 +47,7 @@ h1 {
     margin-bottom: 2rem;
     display: inline-flex;
     justify-content: flex-start;
+    align-items: center;
 }
 
 h1>a {
@@ -70,6 +72,11 @@ h1>a:hover {
 h1>svg {
     height: 100%;
     margin-right: 0.5rem;
+}
+
+h1>img {
+    height: 40px;
+    margin-left: auto;
 }
 
 h2 {

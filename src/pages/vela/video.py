@@ -4,6 +4,7 @@ from dash import (
     Output,
     State,
     clientside_callback,
+    dcc,
     html,
     register_page,
 )
@@ -18,7 +19,7 @@ def layout(id_video: str):
     video = Video.consultar(id_video=id_video)
 
     return [
-        html.H1(video.titulo),
+        html.H1([dcc.Link("", href="/app/vela/videos", title="Voltar"), video.titulo]),
         DashPlayer(
             id="vela-video",
             className="video-player",
