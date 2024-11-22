@@ -41,16 +41,19 @@ div:has(>#_pages_content) {
 }
 
 #burger-header {
-    background-color: var(--off-white);
     display: flex;
-    gap: 1rem;
+    align-items: center;
     position: fixed;
-    top: 0px;
-    left: 0px;
-    width: 100vw;
-    height: calc(var(--burger-header-height));
+    top: 1rem;
+    left: 1rem;
+    width: calc(100% - 2rem);
+    height: var(--burger-header-height);
     padding: 0.5rem;
     z-index: 1000;
+    background-color: color-mix(in srgb, var(--off-white), transparent 30%);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: 9px;
     transition: left 100ms ease-in;
 }
 
