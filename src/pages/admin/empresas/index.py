@@ -1,12 +1,5 @@
 import dash_mantine_components as dmc
-from dash import (
-    Input,
-    Output,
-    State,
-    callback,
-    html,
-    register_page,
-)
+from dash import Input, Output, State, callback, dcc, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
@@ -22,7 +15,7 @@ register_page(__name__, path="/app/admin/empresas", title="Empresas")
 def layout():
     corpo_tabela = consultar_dados_tabela_empresas("")
     return [
-        html.H1("Empresas"),
+        html.H1([dcc.Link("", href="/app/admin", title="Voltar"), "Empresas"]),
         dmc.Stack(
             [
                 dmc.Group(

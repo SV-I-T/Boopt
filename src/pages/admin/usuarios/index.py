@@ -30,7 +30,7 @@ def layout(q: str = "", page: str = "1"):
     page = int(page)
 
     return [
-        html.H1("Usuários"),
+        html.H1([dcc.Link("", href="/app/admin", title="Voltar"), "Usuários"]),
         dmc.Stack(
             [
                 dmc.Group(

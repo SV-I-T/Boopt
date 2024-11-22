@@ -1,7 +1,7 @@
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
 from bson import ObjectId
-from dash import Input, Output, State, callback, html, register_page
+from dash import Input, Output, State, callback, dcc, html, register_page
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
@@ -20,7 +20,7 @@ def layout():
         )
     )
     return [
-        html.H1("Consultores"),
+        html.H1([dcc.Link("", href="/app/admin", title="Voltar"), "Consultores"]),
         dmc.Stack(
             children=[
                 dmc.Select(

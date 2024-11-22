@@ -45,7 +45,12 @@ def layout():
     data_role = [r.value for r in roles_edit]
 
     return [
-        html.H1("Cadastro em massa"),
+        html.H1(
+            [
+                dcc.Link("", href="/app/admin/usuarios", title="Voltar"),
+                "Cadastro em massa",
+            ]
+        ),
         dmc.Stack(
             [
                 html.P(

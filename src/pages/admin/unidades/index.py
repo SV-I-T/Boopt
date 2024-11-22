@@ -41,7 +41,7 @@ def layout():
     )
 
     return [
-        html.H1("Unidades"),
+        html.H1([dcc.Link("", href="/app/admin", title="Voltar"), "Unidades"]),
         dmc.Stack(
             [
                 dmc.Select(

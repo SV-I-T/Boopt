@@ -35,7 +35,12 @@ def layout(id_usuario: str = None):
 
     if id_usuario == "novo":
         return [
-            html.H1("Novo usuário"),
+            html.H1(
+                [
+                    dcc.Link("", href="/app/admin/usuarios", title="Voltar"),
+                    "Novo usuário",
+                ]
+            ),
             *layout_edicao_usr(usr_atual),
         ]
 
@@ -46,11 +51,11 @@ def layout(id_usuario: str = None):
 
     return [
         html.H1(
-            children=[
+            [
+                dcc.Link("", href="/app/admin/usuarios", title="Voltar"),
                 DashIconify(icon="fluent:edit-28-regular", width=28, color="#777"),
                 usr.nome,
-            ],
-            className="titulo-pagina",
+            ]
         ),
         *layout_edicao_usr(usr_atual, usr),
     ]

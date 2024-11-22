@@ -60,7 +60,12 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
         assessment = Vela()
 
     return [
-        html.H1(assessment.descricao or "Novo Vela Assessment"),
+        html.H1(
+            [
+                dcc.Link("", href=f"/app/admin/vela?empresa={empresa}", title="Voltar"),
+                assessment.descricao or "Novo Vela Assessment",
+            ]
+        ),
         html.Div(
             children=[
                 dmc.Select(

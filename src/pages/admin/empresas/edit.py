@@ -33,13 +33,15 @@ def layout(id_empresa: str = None, **kwargs):
     else:
         empresa = Empresa.consultar("_id", id_empresa)
         texto_titulo = [
-            DashIconify(icon="fluent:edit-28-filled", width=28, color="#777"),
+            DashIconify(icon="fluent:edit-28-regular", width=28, color="#777"),
             empresa.nome,
         ]
         layout_edicao = layout_nova_empresa(empresa.nome, empresa.segmento)
 
     return [
-        html.H1(texto_titulo),
+        html.H1(
+            [dcc.Link("", href="/app/admin/empresas", title="Voltar"), *texto_titulo]
+        ),
         *layout_edicao,
     ]
 

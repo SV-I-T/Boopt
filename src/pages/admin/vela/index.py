@@ -1,5 +1,4 @@
 import locale
-from math import ceil
 
 import dash_mantine_components as dmc
 from bson import ObjectId
@@ -8,12 +7,11 @@ from dash import (
     Input,
     Output,
     State,
-    callback,
     clientside_callback,
+    dcc,
     html,
     register_page,
 )
-from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
 from utils import Role, Usuario, checar_perfil, db
@@ -37,7 +35,12 @@ def layout(empresa: str = None):
     corpo_tabela = construir_tabela_vela(id_empresa, usr)
 
     return [
-        html.H1("Vela Assessment"),
+        html.H1(
+            [
+                dcc.Link("", href="/app/admin", title="Voltar"),
+                "Vela Assessment",
+            ]
+        ),
         dmc.Stack(
             [
                 dmc.Group(
