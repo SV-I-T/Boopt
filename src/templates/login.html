@@ -1,11 +1,10 @@
 {% extends "login_base.html" %}
 
-{% block container %}
+{% block content %}
 <div class="login-container">
     <div class="login-form">
         <h1>LOGIN</h1>
-        <form onsubmit="javascript:void(0);" hx-post="{{ post_url }}" hx-target="#login-feedback-container"
-            hx-swap="innerHTML">
+        <form method="post" action="/login">
             <div class="user-input">
                 <label for="login">CPF OU E-MAIL</label>
                 <div class="user-field">
@@ -36,8 +35,14 @@
 
             <button class="btn btn-gradiente" type="submit" id="login-btn">Enviar</button>
         </form>
-
-        <div id="login-feedback-container"></div>
+        {% if mensagem %}
+        <div id="login-feedback-container">
+            <div id="login-feedback" class="{{ status }}">
+                <h1>Ops!</h1>
+                <p>{{ mensagem }}</p>
+            </div>
+        </div>
+        {% endif %}
         <div class="primeiro-acesso">
             <p>Primeiro acesso?</p>
             <p>Por padrão, sua senha é a sua data de nascimento no formato DDMMAAAA (exemplo: 22032024). Não se

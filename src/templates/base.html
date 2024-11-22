@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Boopt
+        {% endblock %}
+    </title>
+
+    <!-- FAVICON -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- FOLHAS DE ESTILO -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lp.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/botoes.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iconify.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/promo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/input.css') }}" />
+    <!-- FONTE -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {% endblock %}
+</head>
+
+<body class="index-body">
+    {% block body %}
+    {% endblock %}
+</body>

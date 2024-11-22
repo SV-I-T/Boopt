@@ -28,8 +28,8 @@ server.config.from_prefixed_env()
 
 
 @server.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
+def landing_page():
+    return render_template("lp.html")
 
 
 @server.route("/login", methods=["GET"])
@@ -53,15 +53,11 @@ def login_post():
         usr = Usuario.consultar(identificador=identificador, valor=login)
         usr.validar_senha(senha)
     except AssertionError as e:
-        return render_template(
-            "erro_login.html", mensagem=str(e), status="status-error"
-        )
+        return render_template("login.html", mensagem=str(e), status="status-error")
     else:
         login_user(usr, remember=lembrar, force=True)
         next_url = request.args.get("next", None) or "/app/dashboard"
-        response = Response(
-            "", status=302, headers={"HX-Redirect": next_url, "HX-Refresh": True}
-        )
+        response = redirect(next_url)
         return response
 
 
@@ -114,19 +110,19 @@ def forgot_password_post():
     except AssertionError:
         if identificador == "email":
             return render_template(
-                "erro_login.html",
+                "recover_password.html",
                 mensagem="Não encontramos um cadastro com este e-mail. Por favor, tente novamente com o seu CPF.",
                 status="status-error",
             )
         else:
             return render_template(
-                "erro_login.html",
+                "recover_password.html",
                 mensagem="Não encontramos um cadastro com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
                 status="status-error",
             )
     if not usr.email:
         return render_template(
-            "erro_login.html",
+            "recover_password.html",
             mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha ao padrão. Recomendamos que adicione um e-mail após recuperar seu acesso.",
             status="status-error",
         )
@@ -153,7 +149,7 @@ def forgot_password_post():
         usr.email,
     )
     return render_template(
-        "erro_login.html",
+        "recover_password.html",
         mensagem=f"Enviamos um link para redefinição da senha no e-mail {email_obfuscado}.",
         status="status-info",
     )

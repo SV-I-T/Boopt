@@ -3,13 +3,16 @@ button {
 }
 
 .btn {
+    font-size: 14px;
     text-align: center;
-    padding-left: 3rem;
-    padding-right: 3rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
     line-height: 34px;
     cursor: pointer;
     background-size: 100%;
     transition: background-size 300ms ease 0s;
+    box-shadow: 3px 4px 5px 0px rgba(0, 0, 0, 0.05);
+
 }
 
 .btn:hover {
@@ -21,7 +24,7 @@ button {
 }
 
 .btn-gradiente {
-    background-image: linear-gradient(90deg, var(--azul-sv), var(--laranja-boopt));
+    background-image: linear-gradient(75deg, var(--azul-sv) -10%, var(--laranja-boopt) 110%);
     color: #fff;
     border: none;
 }

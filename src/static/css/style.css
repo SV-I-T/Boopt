@@ -1,12 +1,12 @@
 :root {
     --azul-sv: #1618ff;
     --laranja-boopt: #FF7730;
-    --laranja-vela: #f88f28;
     --roxo-boopt: #88469B;
     --preto-sv: #171C24;
-    --cinza-claro: #ccc;
+    --laranja-vela: #f88f28;
+    --amarelo-vela: #FBB72D;
     --off-white: #f2f2f2;
-    --amarelo-vela: #FAC82C;
+    --cinza-claro: #ccc;
     --max-size: 1200px;
     --navbar-width: 16rem;
     --burger-header-height: 4rem;
@@ -18,8 +18,8 @@ html {
 }
 
 body.index-body,
-body.login-body,
-.input {
+.input,
+button {
     background-color: var(--off-white);
     font-family: 'Montserrat',
         -apple-system,

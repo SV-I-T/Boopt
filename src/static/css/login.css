@@ -11,7 +11,7 @@
     text-align: center;
 }
 
-body.login-body {
+div.login {
     background-color: var(--off-white) !important;
     height: 100vh;
     margin: 0px;
@@ -40,8 +40,6 @@ body.login-body {
 }
 
 .login-form h1 {
-    font-size: 30px;
-    font-weight: 500;
     text-align: start;
 }
 
@@ -54,16 +52,10 @@ body.login-body {
     margin-top: 1rem;
 }
 
-.user-input label,
-.password-input label {
-    font-weight: 300;
-}
-
 .user-input input,
 .password-input input {
-    font-weight: 500;
     width: 100%;
-    padding-left: 34px;
+    padding-left: 34px !important;
     box-sizing: border-box;
 }
 
@@ -128,13 +120,14 @@ body.login-body {
 
 .primeiro-acesso p:first-child {
     color: var(--azul-sv);
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 1rem;
 }
 
 .primeiro-acesso p:last-child {
     color: #5c5c5c;
-    font-weight: 300;
+    font-weight: 400;
+    font-size: 14px;
 }
 
 div#login-feedback {
