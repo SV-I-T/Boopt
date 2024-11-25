@@ -92,88 +92,94 @@ Para que todos os usuários sejam validados e cadastrados, é necessário que o 
 * Por padrão, a **Senha** do usuário será definida como sua data de aniversário no formato **DDMMAAAA**, mas poderá ser alterada pelo mesmo."""),
                 ),
                 dmc.Divider(),
-                html.H2("Importe o modelo preenchido"),
-                dcc.Upload(
-                    id="upload-cadastro-massa",
-                    className="container-upload",
-                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    style_active={},
-                    style_reject={},
-                    className_active="upload-ativo",
-                    className_reject="upload-negado",
-                    max_size=5e6,
-                    children=[
-                        "Arraste aqui ou ",
-                        html.A("selecione um arquivo"),
-                        # DashIconify(
-                        #     icon="fluent:document-add-48-regular",
-                        #     width=48,
-                        #     color="#1717FF",
-                        # ),
-                        dmc.Text(
-                            "Tamanho máximo: 5MB",
-                            size=14,
-                            opacity=0.5,
-                        ),
-                        html.Div(
-                            id="div-usr-massa-arquivo",
-                            children=[
-                                dmc.Divider(w="100%"),
-                                dmc.Group(
-                                    children=[
-                                        DashIconify(
-                                            icon="vscode-icons:file-type-excel",
-                                            width=24,
+                dmc.LoadingOverlay(
+                    overlayBlur=2,
+                    overlayColor="#f2f2f2",
+                    children=dmc.Stack(
+                        [
+                            html.H2("Importe o modelo preenchido"),
+                            dcc.Upload(
+                                id="upload-cadastro-massa",
+                                className="container-upload",
+                                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                style_active={},
+                                style_reject={},
+                                className_active="upload-ativo",
+                                className_reject="upload-negado",
+                                max_size=5e6,
+                                children=[
+                                    "Arraste aqui ou ",
+                                    html.A("selecione um arquivo"),
+                                    dmc.Text(
+                                        "Tamanho máximo: 5MB",
+                                        size=14,
+                                        opacity=0.5,
+                                    ),
+                                    html.Div(
+                                        id="div-usr-massa-arquivo",
+                                        children=[
+                                            dmc.Divider(w="100%"),
+                                            dmc.Group(
+                                                children=[
+                                                    DashIconify(
+                                                        icon="vscode-icons:file-type-excel",
+                                                        width=24,
+                                                    ),
+                                                    dmc.Text(id="usr-massa-arquivo"),
+                                                ],
+                                            ),
+                                        ],
+                                        style={"display": "none"},
+                                    ),
+                                ],
+                            ),
+                            dmc.Group(
+                                [
+                                    dmc.Select(
+                                        id="empresa-usr-massa",
+                                        label="Empresa dos usuários",
+                                        icon=DashIconify(
+                                            icon="fluent:building-20-regular", width=20
                                         ),
-                                        dmc.Text(id="usr-massa-arquivo"),
-                                    ],
-                                ),
-                            ],
-                            style={"display": "none"},
-                        ),
-                    ],
-                ),
-                dmc.Group(
-                    [
-                        dmc.Select(
-                            id="empresa-usr-massa",
-                            label="Empresa dos usuários",
-                            icon=DashIconify(
-                                icon="fluent:building-20-regular", width=20
+                                        name="empresa",
+                                        data=data_empresas,
+                                        value=str(usr_atual.empresa),
+                                        placeholder="Selecione uma empresa",
+                                        searchable=True,
+                                        nothingFound="Não encontramos nada",
+                                        w=300,
+                                        display="none"
+                                        if usr_atual.role == Role.ADM
+                                        else "block",
+                                    ),
+                                    dmc.Select(
+                                        id="perfil-usr-massa",
+                                        label="Perfil dos usuários",
+                                        icon=DashIconify(
+                                            icon="fluent:person-passkey-20-regular",
+                                            width=20,
+                                        ),
+                                        name="perfil",
+                                        data=data_role,
+                                        value=None,
+                                        placeholder="Selecione um perfil",
+                                        w=300,
+                                    ),
+                                ]
                             ),
-                            name="empresa",
-                            data=data_empresas,
-                            value=str(usr_atual.empresa),
-                            placeholder="Selecione uma empresa",
-                            searchable=True,
-                            nothingFound="Não encontramos nada",
-                            w=300,
-                            display="none" if usr_atual.role == Role.ADM else "block",
-                        ),
-                        dmc.Select(
-                            id="perfil-usr-massa",
-                            label="Perfil dos usuários",
-                            icon=DashIconify(
-                                icon="fluent:person-passkey-20-regular", width=20
+                            dmc.Group(
+                                dmc.Button(
+                                    "Enviar",
+                                    leftIcon=DashIconify(
+                                        icon="fluent:arrow-upload-20-regular", width=20
+                                    ),
+                                    id="btn-criar-usrs-batelada",
+                                )
                             ),
-                            name="perfil",
-                            data=data_role,
-                            value=None,
-                            placeholder="Selecione um perfil",
-                            w=300,
-                        ),
-                    ]
+                            html.Div(id="feedback-usr-massa"),
+                        ]
+                    ),
                 ),
-                dmc.Group(
-                    dmc.Button(
-                        "Enviar",
-                        leftIcon=DashIconify(
-                            icon="fluent:arrow-upload-20-regular", width=20
-                        ),
-                        id="btn-criar-usrs-batelada",
-                    )
-                ),
-                html.Div(id="feedback-usr-massa"),
             ]
         ),
     ]
@@ -188,7 +194,7 @@ def baixar_template_cadastro_massa(n):
     if not n:
         raise PreventUpdate
 
-    return dcc.send_file("./assets/template_cadastro.xlsx")
+    return dcc.send_file("./static/template_cadastro.xlsx")
 
 
 clientside_callback(

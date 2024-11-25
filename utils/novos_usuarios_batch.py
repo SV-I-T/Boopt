@@ -1,6 +1,7 @@
 import openpyxl
 from bson import ObjectId
 from pydantic import BaseModel, Field
+
 from utils.banco_dados import db
 from utils.novo_usuario import NovoUsuario
 from utils.role import Role
@@ -40,6 +41,8 @@ def verificar_unidades_cadastradas(usuarios: list[NovoUsuario]) -> None:
     unidades_empresa = buscar_unidades_empresa(usuarios[0].empresa)
     erros = []
     for linha, usuario in enumerate(usuarios, start=1):
+        if not usuario.unidades:
+            continue
         for unidade in usuario.unidades:
             if unidade not in unidades_empresa:
                 erros.append({"loc": linha, "unidade": unidade})
@@ -77,7 +80,7 @@ class NovosUsuariosBatelada(BaseModel):
                 "Data de Nascimento*",
                 "Email",
                 "Cargo/Função*",
-                "Unidade(s)*",
+                "Unidade(s)",
             ]
             == linhas[0]
         ), "O arquivo não está no modelo esperado. Certifique-se de não modificar o cabeçalho do modelo fornecido."
@@ -95,7 +98,7 @@ class NovosUsuariosBatelada(BaseModel):
                 "cargo": linha[4],
                 "empresa": empresa,
                 "role": role,
-                "unidades": str(linha[5]).split(";"),
+                "unidades": str(linha[5]).split(";") if linha[5] is not None else None,
             }
             for linha in linhas[1:]
         ]

@@ -4,9 +4,10 @@ from typing import Any, Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, ValidationInfo, computed_field, field_validator
+from werkzeug.security import generate_password_hash
+
 from utils.banco_dados import db
 from utils.role import Role
-from werkzeug.security import generate_password_hash
 
 
 class NovoUsuario(BaseModel):
@@ -63,6 +64,8 @@ class NovoUsuario(BaseModel):
     @field_validator("unidades", mode="before")
     @classmethod
     def validar_unidades_codigo(cls, unidades: list):
+        if not unidades:
+            return unidades
         try:
             unidades = [int(unidade) for unidade in unidades]
         except ValueError:

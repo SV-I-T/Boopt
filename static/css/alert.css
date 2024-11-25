@@ -1,0 +1,12 @@
+.mantine-Alert-root {
+    border: 1px solid var(--cinza-claro);
+}
+
+.mantine-Alert-message {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.mantine-Alert-label {
+    font-weight: 700;
+}
