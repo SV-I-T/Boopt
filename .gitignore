@@ -160,15 +160,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-CRONOGAMA BOOPT.txt
-testes.ipynb
-template_email.html
-.vscode/settings.json
-src/prod.env
-readme
-docker.md
-markdown.css
+*.ipynb
+*.env
 readme.md
+.vscode/
 .VSCodeCounter/
 arquivos/
-pdf/

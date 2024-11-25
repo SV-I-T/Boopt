@@ -5,15 +5,14 @@ from datetime import datetime, timedelta
 
 from dash import Dash
 from dotenv import load_dotenv
-from flask import Flask, Response, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 from flask_mail import Message
-from icecream import ic
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError
 from werkzeug.security import generate_password_hash
 
-from dash_app import layout
+from components.dash_app import layout
 from utils.banco_dados import mongo
 from utils.cache import cache, cache_simple
 from utils.email import attach_logo, mail
