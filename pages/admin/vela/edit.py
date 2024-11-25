@@ -207,6 +207,7 @@ def atualizar_assessment(
             descricao=descricao,
             empresa=id_empresa,
             participantes=id_users,
+            v_form=1,
         )
 
         assessment.salvar()
