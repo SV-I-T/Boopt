@@ -38,6 +38,8 @@ class Vela(BaseModel):
     @classmethod
     def consultar_aplicacao(cls, id_aplicacao: str | ObjectId = None):
         aplicacao = db("VelaAplicações").find_one({"_id": ObjectId(id_aplicacao)})
+        if not aplicacao:
+            return None
         return cls(**aplicacao)
 
     @classmethod

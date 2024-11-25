@@ -32,7 +32,7 @@ register_page(
 @checar_perfil(permitir=[Role.DEV, Role.CONS, Role.ADM, Role.GEST])
 def layout(id_vela: str = None, empresa: str = None, **kwargs):
     usr = Usuario.atual()
-    novo = id_vela == "novo"
+    novo = id_vela == "novo" or len(id_vela) != 24
 
     if empresa is not None:
         id_empresa = ObjectId(empresa)
@@ -54,8 +54,10 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
     data_empresas = usr.consultar_empresas()
 
     if not novo:
-        # assessment = consultar_assessment(id_aplicacao=id_vela)
         assessment = Vela.consultar_aplicacao(id_aplicacao=id_vela)
+        if assessment is None:
+            assessment = Vela()
+            novo = True
     else:
         assessment = Vela()
 
@@ -84,11 +86,11 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
                     display="none" if usr.role == Role.ADM else "block",
                 ),
                 dmc.TextInput(
-                    label="Descrição",
+                    label="Nome",
                     id="vela-desc",
                     required=True,
                     value=assessment.descricao
-                    if id_vela
+                    if not novo
                     else f'Vela - {datetime.now().strftime("%d/%m/%Y")}',
                     mb="1rem",
                 ),
@@ -139,7 +141,7 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
                     children=[
                         dmc.Button(
                             id="vela-salvar",
-                            children="Salvar" if id_vela else "Criar",
+                            children="Criar" if novo else "Salvar",
                             leftIcon=DashIconify(
                                 icon="fluent:checkmark-20-regular", width=20
                             ),
@@ -152,7 +154,7 @@ def layout(id_vela: str = None, empresa: str = None, **kwargs):
                                 icon="fluent:delete-20-regular", width=20
                             ),
                         )
-                        if id_vela
+                        if not novo
                         else None,
                         dcc.ConfirmDialog(
                             id="confirm-delete-av",
