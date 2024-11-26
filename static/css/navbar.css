@@ -77,6 +77,10 @@
     color: #fff;
 }
 
+#navbar .mantine-NavLink-root[data-active=true] .icone-vela {
+    background-color: #fff;
+}
+
 #navbar .mantine-NavLink-root:not([data-active=true]):hover {
     background-color: rgba(0, 0, 0, 0.07);
 }

@@ -49,14 +49,14 @@ def menu_usuario(usr: Usuario):
                 ),
             ),
             # dmc.NavLink(
-            #     label="Início",
+            #     label="Minha Boopt",
             #     href="/app/vela",
             #     icon=DashIconify(icon="fluent:home-24-regular", width=24),
             # ),
             dmc.NavLink(
-                label="Início",
+                label="Vela Assessment",
                 href="/app/vela",
-                icon=DashIconify(icon="fluent:home-24-regular", width=24),
+                icon=html.Span(className="icone-vela"),
             ),
             # dmc.NavLink(
             #     label="Raio-X",
