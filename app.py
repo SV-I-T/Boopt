@@ -3,7 +3,7 @@ import os
 import re
 from datetime import datetime, timedelta
 
-from dash import Dash
+from dash import CeleryManager, Dash, DiskcacheManager
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
@@ -165,6 +165,18 @@ def checar_acesso():
     return redirect(url_for("login_get", next=request.path))
 
 
+if "CELERY" in os.environ:
+    from celery import Celery
+
+    celery_app = Celery(
+        __name__, broker="redis://localhost:6379/0", backend="redis://localhost:6379/1"
+    )
+    background_callback_manager = CeleryManager(celery_app)
+else:
+    import diskcache
+
+    background_callback_manager = DiskcacheManager(diskcache.Cache("./cache"))
+
 dash = Dash(
     __name__,
     server=server,
@@ -186,7 +198,8 @@ dash = Dash(
     ],
     meta_tags=[{"name": "theme-color", "content": "#f2f2f2"}],
     assets_folder="static",
-    serve_locally=False,
+    serve_locally=os.environ["DASH_DEBUG"] == "true",
+    background_callback_manager=background_callback_manager,
 )
 
 mongo.init_app(server)
