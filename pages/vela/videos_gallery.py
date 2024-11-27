@@ -1,26 +1,14 @@
-import dash_mantine_components as dmc
-from dash import (
-    ClientsideFunction,
-    Input,
-    Output,
-    State,
-    clientside_callback,
-    dcc,
-    get_asset_url,
-    html,
-    register_page,
-)
+from dash import dcc, get_asset_url, html, register_page
 
 from utils.video import video_teste
 
-register_page(__name__, path="/app/vela/videos", title="Vela - Videos")
+register_page(__name__, path="/app/videos/vela", title="Biblioteca de Videos - Vela")
 
 
 def layout():
     return [
         html.H1(
             [
-                dcc.Link("", href="/app/vela", title="Voltar"),
                 "Vídeos",
                 html.Img(src=get_asset_url("assets/vela/tag_ass.svg")),
             ]
@@ -29,7 +17,7 @@ def layout():
             className="video-gallery",
             children=[
                 dcc.Link(
-                    href=f"/app/vela/videos/{video_teste.id_}",
+                    href=f"/app/videos/vela/{video_teste.id_}",
                     children=html.Div(
                         children=[
                             html.Div(

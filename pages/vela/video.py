@@ -12,14 +12,14 @@ from dash_player import DashPlayer
 
 from utils.video import Video
 
-register_page(__name__, path_template="/app/vela/videos/<id_video>")
+register_page(__name__, path_template="/app/videos/vela/<id_video>")
 
 
 def layout(id_video: str):
     video = Video.consultar(id_video=id_video)
 
     return [
-        html.H1([dcc.Link("", href="/app/vela/videos", title="Voltar"), video.titulo]),
+        html.H1([dcc.Link("", href="/app/videos/vela", title="Voltar"), video.titulo]),
         DashPlayer(
             id="vela-video",
             className="video-player",

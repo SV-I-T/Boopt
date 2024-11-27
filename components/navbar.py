@@ -58,11 +58,11 @@ def menu_usuario(usr: Usuario):
                 href="/app/vela",
                 icon=html.Span(className="icone-vela"),
             ),
-            # dmc.NavLink(
-            #     label="Raio-X",
-            #     href="/app/raiox/form",
-            #     icon=DashIconify(icon="fluent:home-24-regular", width=24),
-            # ),
+            dmc.NavLink(
+                label="Biblioteca de vídeos",
+                href="/app/videos/vela",
+                icon=DashIconify(icon="fluent:navigation-play-20-regular", width=24),
+            ),
             dmc.NavLink(
                 label="Gestão",
                 href="/app/admin",
