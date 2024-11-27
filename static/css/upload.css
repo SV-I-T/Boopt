@@ -3,7 +3,7 @@
     border-style: solid;
     border-color: var(--cinza-claro);
     border-width: 1px;
-    border-radius: 9px;
+    border-radius: var(--border-radius);
     padding: 1rem;
     flex-direction: column;
     width: 100%;

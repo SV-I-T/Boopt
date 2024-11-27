@@ -4,7 +4,7 @@ input,
 .mantine-MultiSelect-input,
 .mantine-Select-input,
 textarea {
-    border-radius: 9px !important;
+    border-radius: var(--border-radius) !important;
 }
 
 input.input {

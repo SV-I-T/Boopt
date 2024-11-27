@@ -10,6 +10,7 @@
     --max-size: 1200px;
     --navbar-width: 16rem;
     --burger-header-height: 4rem;
+    --border-radius: 15px
 }
 
 html {

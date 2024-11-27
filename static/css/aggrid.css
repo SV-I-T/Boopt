@@ -1,5 +1,5 @@
 .ag-root-wrapper {
-    border-radius: 9px;
+    border-radius: var(--border-radius);
 }
 
 .ag-theme-quartz .ag-cell:not(:last-child) {

@@ -55,7 +55,7 @@ div:has(>#_pages_content) {
     background-color: color-mix(in srgb, var(--off-white), transparent 30%);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border-radius: 9px;
+    border-radius: var(--border-radius);
     transition: left 100ms ease-in;
 }
 

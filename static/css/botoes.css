@@ -1,5 +1,5 @@
 button {
-    border-radius: 9px !important;
+    border-radius: var(--border-radius) !important;
 }
 
 .btn {

@@ -32,7 +32,7 @@
     background-color: var(--azul-sv);
     color: #fff;
     text-align: center;
-    border-radius: 9px;
+    border-radius: var(--border-radius);
     font-size: 20px;
     font-weight: 700;
     width: 56px;
@@ -64,7 +64,7 @@
 }
 
 #navbar .mantine-NavLink-root {
-    border-radius: 9px;
+    border-radius: var(--border-radius);
     margin-bottom: 0.5rem;
 }
 
