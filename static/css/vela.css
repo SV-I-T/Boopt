@@ -1,8 +1,24 @@
-.index-vela>.mantine-Text-root {
-    font-size: 32px;
-    text-align: center;
+.index-vela-promo {
+    width: 100%;
+    display: grid;
+    grid-template-areas: 'a';
+    height: 320px;
 }
 
-.index-vela>.mantine-Image-root {
-    border-radius: 30px;
+.index-vela-promo .barco {
+    grid-area: a;
+    height: inherit;
+    width: inherit;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    filter: brightness(60%);
+}
+
+.index-vela-promo .logo {
+    max-width: 300px;
+    grid-area: a;
+    align-self: flex-end;
+    justify-self: center;
+    margin-bottom: 2rem;
+    z-index: 10;
 }

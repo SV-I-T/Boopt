@@ -66,7 +66,8 @@ h1>a {
     transition: background-color 100ms ease;
 }
 
-h1>a:hover {
+h1>a:hover,
+h1>a:active {
     background-color: var(--azul-sv);
 }
 

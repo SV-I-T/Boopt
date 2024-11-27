@@ -22,19 +22,6 @@ from dash_iconify import DashIconify
 
 from utils import Usuario, Vela, checar_perfil, db, nova_notificacao
 
-EXPLICACAO_MD = """
-    Bem-vindo ao seu mapeamento de competências! Este é um passo importante para entender como você está se saindo nas habilidades cruciais para o sucesso nas vendas.
-
-    Antes de começar, procure um lugar tranquilo onde você não será interrompido. Isso ajuda a garantir que você se concentre totalmente e responda da forma mais precisa.
-
-    A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-lo a crescer.
-
-    **Não se preocupe, todo o processo será rápido - cerca de 20 minutos do seu tempo.**
-
-    Aqui está como funciona: Você encontrará afirmações que precisam ser avaliadas em uma escala de **Discordo totalmente** a **Concordo totalmente**.
-"""
-
-
 register_page(
     __name__,
     path_template="/app/vela/teste/<id_aplicacao>/",
@@ -71,8 +58,19 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                         ),
                     ]
                 ),
-                dcc.Markdown(
-                    EXPLICACAO_MD.format(vendedor=usr.primeiro_nome),
+                html.P(
+                    "A sinceridade é fundamental aqui. Responder com honestidade não só nos dará uma visão mais clara de onde você está, mas também como podemos ajudá-lo a crescer."
+                ),
+                html.P(
+                    "Não se preocupe, todo o processo será rápido - cerca de 20 minutos do seu tempo."
+                ),
+                html.P(
+                    [
+                        "Aqui está como funiona: Você encontrará afirmações que precisam ser avaliadas em uma escala de ",
+                        html.Strong("Discordo totalmente"),
+                        " a ",
+                        html.Strong("Concordo totalmente."),
+                    ]
                 ),
                 html.Div(
                     className="vela-radio",
@@ -88,23 +86,28 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                         ),
                     ],
                 ),
+                html.P(
+                    "Após finalizar o teste você será redirecionado para a página inicial do Vela, onde poderá ver seu resultado."
+                ),
+                html.Strong(
+                    "Atenção: você não poderá refazer esse teste novamente durante seis meses."
+                ),
                 html.Div(
                     className="card",
                     children=dmc.Group(
                         position="apart",
                         children=[
-                            dmc.Stack(
-                                spacing=0,
+                            html.Div(
                                 children=[
-                                    html.H2("Pronto para começar?"),
+                                    html.H2("Vamos lá?"),
                                     html.P(
-                                        "Vamos lá, sua jornada de autoavaliação está prestes a começar.",
+                                        "Sua jornada de autoavaliação está prestes a partir.",
                                     ),
                                 ],
                             ),
                             dmc.Anchor(
                                 href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
-                                children=dmc.Button("Iniciar o teste"),
+                                children=dmc.Button("Estou pronto"),
                             ),
                         ],
                     ),
@@ -202,18 +205,6 @@ def layout(id_aplicacao: str = None, secao: str = "instrucoes", **kwargs):
                 html.Div(id="send-container-vela"),
             ],
         )
-    elif secao == "enviado":
-        return [
-            html.H1("Obrigado!"),
-            html.P(
-                children=[
-                    "Você pode conferir seu resultado agora mesmo",
-                    dmc.Anchor(" voltando à pagina do Vela ", href="/app/vela"),
-                    " e clicando em ",
-                    dmc.Button("Ver resultado", color="dark"),
-                ]
-            ),
-        ]
 
 
 # CALLBACK PARA PREENCHER TODAS AS FRASES AUTOMATICAMENTE
@@ -290,15 +281,9 @@ def habilitar_envio(status_pronto, id_aplicacao):
                             ),
                         ],
                     ),
-                    dmc.Anchor(
-                        href=f"/app/vela/teste/{id_aplicacao}/?secao=frases",
-                        children=dmc.Button(
-                            id="btn-enviar",
-                            children="Enviar",
-                            leftIcon=DashIconify(
-                                icon="fluent:checkmark-20-regular", width=20
-                            ),
-                        ),
+                    dmc.Button(
+                        id="btn-enviar",
+                        children="Enviar",
                     ),
                 ],
             ),
@@ -307,7 +292,7 @@ def habilitar_envio(status_pronto, id_aplicacao):
 
 # ENVIAR RESPOSTA
 @callback(
-    Output("url", "search", allow_duplicate=True),
+    Output("url", "href", allow_duplicate=True),
     Output("notificacoes", "children", allow_duplicate=True),
     Input("btn-enviar", "n_clicks"),
     State("store-frases-vela", "data"),
@@ -331,7 +316,12 @@ def salvar_resposta(n, frases, id_aplicacao):
         resposta = db("VelaRespostas").insert_one(dados_resposta)
 
         if resposta.inserted_id:
-            return "?secao=enviado", no_update
+            # if True:
+            return "/app/vela", nova_notificacao(
+                id="envio-teste",
+                type="success",
+                message='Obrigado! Você poderá ver seu relatório clicando em "Ver meu resultado"',
+            )
         else:
             return no_update, nova_notificacao(
                 id="erro-envio-teste",
@@ -345,7 +335,9 @@ def calcular_nota(id_aplicacao: str, frases: dict[str, int]):
     df_competencias, df_etapas = dfs.competencias, dfs.etapas
 
     nota = (
-        pl.DataFrame(list(frases.items()), schema={"id": str, "nota": int})
+        pl.DataFrame(
+            list(frases.items()), schema={"id": str, "nota": int}, orient="row"
+        )
         .with_columns(pl.col("id").cast(pl.Int64))
         .join(df_competencias, on="id", how="left")
         .select(
