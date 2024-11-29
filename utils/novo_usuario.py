@@ -19,7 +19,7 @@ class NovoUsuario(BaseModel):
     empresa: ObjectId
     role: Role
     clientes: Optional[list[ObjectId]] = None
-    unidades: Optional[list[int]] = None
+    unidades: Optional[list[int]] = []
 
     class Config:
         arbitrary_types_allowed = True

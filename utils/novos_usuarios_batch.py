@@ -41,7 +41,8 @@ def verificar_unidades_cadastradas(usuarios: list[NovoUsuario]) -> None:
     unidades_empresa = buscar_unidades_empresa(usuarios[0].empresa)
     erros = []
     for linha, usuario in enumerate(usuarios, start=1):
-        if not usuario.unidades:
+        if usuario.unidades is None:
+            usuario.unidades = []
             continue
         for unidade in usuario.unidades:
             if unidade not in unidades_empresa:
