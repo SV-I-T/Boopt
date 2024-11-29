@@ -18,7 +18,8 @@ html {
     -webkit-font-smoothing: antialiased !important;
 }
 
-body.index-body,
+.index-body,
+.login-body,
 .input,
 button {
     background-color: var(--off-white);
@@ -30,7 +31,7 @@ button {
         system-ui;
 }
 
-body:not(.index-body) {
+body:not(.index-body, .login-body) {
     background-color: #fff;
     display: flex;
     flex-direction: column;

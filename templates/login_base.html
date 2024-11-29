@@ -5,25 +5,28 @@ Login
 {% endblock %}
 
 {% block body %}
-<!-- MOSTRAR/ESCONDER SENHA -->
-<script defer>
-    function showPassword() {
-        let input = document.getElementById("password");
-        let eye = document.getElementById("password-eye");
-        input.type = input.type === "password" ? "text" : "password";
-        eye.className = input.type === "password" ? "fluent--eye-24-filled input-icon" : "fluent--eye-off-24-filled input-icon";
-    };
-</script>
 
-<div class="login">
-    <div class="content">
-        <div class="promo-sidebar">
+<body class="login-body">
+    <!-- MOSTRAR/ESCONDER SENHA -->
+    <script defer>
+        function showPassword() {
+            let input = document.getElementById("password");
+            let eye = document.getElementById("password-eye");
+            input.type = input.type === "password" ? "text" : "password";
+            eye.className = input.type === "password" ? "fluent--eye-24-filled input-icon" : "fluent--eye-off-24-filled input-icon";
+        };
+    </script>
+
+    <div class="login">
+        <div class="content">
+            <div class="promo-sidebar">
+            </div>
+            {% block content %}
+
+            {% endblock %}
+
+
         </div>
-        {% block content %}
-
-        {% endblock %}
-
-
     </div>
-</div>
+</body>
 {% endblock %}
