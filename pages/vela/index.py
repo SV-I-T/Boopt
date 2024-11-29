@@ -87,8 +87,8 @@ def card_teste_disponivel(ultima_aplicacao):
 def card_teste_indisponivel():
     return html.Div(
         className="card",
-        children=html.H2(
-            "Você ainda não foi cadastrado para um teste Vela. Verifique com o seu RH."
+        children=html.P(
+            "Você ainda não foi cadastrado para um Assessment Vela. Verifique com o seu RH."
         ),
     )
 
