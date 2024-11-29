@@ -20,13 +20,21 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 from pymongo import UpdateMany
 
-from utils import Empresa, Role, Usuario, checar_perfil, db, nova_notificacao
+from utils import (
+    Empresa,
+    Role,
+    Usuario,
+    checar_perfil,
+    db,
+    nova_notificacao,
+    novo_aggrid,
+)
 
 register_page(__name__, path="/app/admin/unidades", title="Unidades")
 
 
 @checar_perfil(permitir=(Role.DEV, Role.CONS, Role.ADM))
-def layout():
+def layout(empresa: str = None, unidade: int = None):
     usr_atual = Usuario.atual()
 
     data_empresas = usr_atual.consultar_empresas()
@@ -36,7 +44,8 @@ def layout():
     data_usuarios = list(
         db("Usuários").find(
             {"empresa": usr_atual.empresa},
-            {"value": {"$toString": "$_id"}, "label": "$nome", "_id": 0},
+            {"value": {"$toString": "$_id"}, "_id": 0, "label": "$nome"},
+            sort={"label": 1},
         )
     )
 
@@ -49,33 +58,17 @@ def layout():
                     label="Empresa",
                     data=data_empresas,
                     value=str(usr_atual.empresa),
-                    display=usr_atual.role != Role.ADM and "block" or "none",
+                    display="block" if usr_atual.role != Role.ADM else "none",
                     icon=DashIconify(icon="fluent:building-20-regular", width=20),
                 ),
-                dmc.Modal(
-                    id="unidades-modal",
-                    title="Importar unidades",
-                    children=modal_importar_unidades(),
-                    zIndex=100000,
-                ),
-                dmc.Group(
-                    children=[
-                        dmc.Button(
-                            id="unidades-download-btn",
-                            children="Baixar unidades (.xlsx)",
-                            leftIcon=DashIconify(
-                                icon="fluent:arrow-download-20-filled", width=20
-                            ),
-                        ),
-                        dmc.Button(
-                            "Importar unidades",
-                            leftIcon=DashIconify(
-                                icon="fluent:open-20-regular", width=20
-                            ),
-                            color="dark",
-                            id="unidades-modal-btn",
-                        ),
-                    ]
+                modal_importar_unidades(),
+                html.Div(
+                    dmc.Button(
+                        "Importar unidades",
+                        leftIcon=DashIconify(icon="fluent:open-20-regular", width=20),
+                        color="dark",
+                        id="unidades-modal-btn",
+                    )
                 ),
                 dmc.Divider(),
                 html.H2("Editar usuários das unidades"),
@@ -84,13 +77,23 @@ def layout():
                     placeholder="Selecione uma unidade",
                     data=data_unidades,
                 ),
+                # novo_aggrid(
+                #     id="teste",
+                #     row_data=data_usuarios,
+                #     columns=["nome", "cargo"],
+                #     selected_ids=[
+                #         "6744de7f0de0a888802df8be",
+                #         "6744de7f0de0a888802df8d2",
+                #         "6744de7f0de0a888802df8d5",
+                #     ],
+                # ),
                 dmc.TransferList(
                     id="unidades-usuarios",
                     value=[data_usuarios, []],
                     titles=["Todos usuários", "Unidade"],
                     searchPlaceholder="Procure um usuário",
                     display="none",
-                    h=300,
+                    listHeight=200,
                 ),
                 dmc.Group(
                     dmc.Button(
@@ -107,57 +110,74 @@ def layout():
 
 
 def modal_importar_unidades():
-    return dmc.Stack(
-        [
-            dcc.Markdown("""
-Você pode adicionar novas unidades ou editar unidades já existentes por meio da importação de uma planilha excel (.xlsx). Para facilitar o processo, recomendamos que baixe a planilha pelo botão acima, edite a mesma e depois faça a importação. É importante que não haja nenhuma mudança nas colunas, caso contrário você receberá um erro.
-
-Cada unidade deve sempre conter um código único e numérico de identificação e um nome descritivo.
-
-Para a edição de unidades já existentes, você pode alterar o nome a vontade, porém recomendamos que o código sempre permaneca o mesmo, pois é a ele que vendedores e gerentes/supervisores estarão associados.
-"""),
-            dcc.Upload(
-                id="unidades-upload",
-                className="container-upload",
-                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                style_active={},
-                style_reject={},
-                className_active="upload-ativo",
-                className_reject="upload-negado",
-                max_size=2e6,
-                children=[
-                    "Arraste aqui ou ",
-                    html.A("selecione o arquivo"),
-                    dmc.Text(
-                        "Tamanho máximo: 2MB",
-                        size=14,
-                        opacity=0.5,
+    return dmc.Modal(
+        id="unidades-modal",
+        title="Importar unidades",
+        children=[
+            dmc.Stack(
+                [
+                    html.P(
+                        "Você pode adicionar novas unidades ou editar unidades já existentes por meio da importação de uma planilha excel (.xlsx). Para facilitar o processo, recomendamos que baixe as unidades no botão abaixo, edite-as e faça a importação. É importante que não haja nenhuma mudança nas colunas, caso contrário você receberá um erro."
                     ),
-                    html.Div(
-                        id="div-empresa-unidades-arquivo",
+                    dmc.Button(
+                        id="unidades-download-btn",
+                        children="Baixar unidades (.xlsx)",
+                        leftIcon=DashIconify(
+                            icon="fluent:arrow-download-20-filled", width=20
+                        ),
+                    ),
+                    html.P(
+                        "Cada unidade deve sempre conter um código único e numérico de identificação e um nome descritivo."
+                    ),
+                    html.P(
+                        "Para a edição de unidades já existentes, você pode alterar o nome a vontade, porém recomendamos que o código sempre permaneca o mesmo, pois é a ele que vendedores e gerentes/supervisores estão associados."
+                    ),
+                    dcc.Upload(
+                        id="unidades-upload",
+                        className="container-upload",
+                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        style_active={},
+                        style_reject={},
+                        className_active="upload-ativo",
+                        className_reject="upload-negado",
+                        max_size=2e6,
                         children=[
-                            dmc.Divider(w="100%"),
-                            dmc.Group(
+                            "Arraste aqui ou ",
+                            html.A("selecione o arquivo"),
+                            dmc.Text(
+                                "Tamanho máximo: 2MB",
+                                size=14,
+                                opacity=0.5,
+                            ),
+                            html.Div(
+                                id="div-empresa-unidades-arquivo",
                                 children=[
-                                    DashIconify(
-                                        icon="vscode-icons:file-type-excel",
-                                        width=24,
+                                    dmc.Divider(w="100%"),
+                                    dmc.Group(
+                                        children=[
+                                            DashIconify(
+                                                icon="vscode-icons:file-type-excel",
+                                                width=24,
+                                            ),
+                                            dmc.Text(id="unidades-arquivo"),
+                                        ],
                                     ),
-                                    dmc.Text(id="unidades-arquivo"),
                                 ],
+                                style={"display": "none"},
                             ),
                         ],
-                        style={"display": "none"},
                     ),
-                ],
-            ),
-            dmc.Button(
-                "Importar",
-                id="unidades-import-btn",
-                leftIcon=DashIconify(icon="fluent:arrow-upload-20-regular", width=20),
-            ),
-            html.Div(id="unidades-import-feedback"),
-        ]
+                    dmc.Button(
+                        "Importar",
+                        id="unidades-import-btn",
+                        leftIcon=DashIconify(
+                            icon="fluent:arrow-upload-20-regular", width=20
+                        ),
+                    ),
+                    html.Div(id="unidades-import-feedback"),
+                ]
+            )
+        ],
     )
 
 
@@ -185,6 +205,9 @@ def consultar_usuarios(
                 {"value": str(usuario["_id"]), "label": usuario["nome"]}
             )
 
+    lista_usuarios[0] = sorted(lista_usuarios[0], key=lambda x: x["label"])
+    lista_usuarios[1].sort(key=lambda x: x["label"])
+
     return lista_usuarios
 
 
@@ -192,6 +215,7 @@ clientside_callback(
     ClientsideFunction("interacoes", "ativar"),
     Output("unidades-modal", "opened"),
     Input("unidades-modal-btn", "n_clicks"),
+    prevent_initial_call=True,
 )
 
 
@@ -266,6 +290,8 @@ def atualizar_colaboradores_unidade(
         else:
             novo_data_usuarios[0].append(usuario)
 
+    novo_data_usuarios[0].sort(key=lambda x: x["label"])
+    novo_data_usuarios[1].sort(key=lambda x: x["label"])
     return novo_data_usuarios, "grid"
 
 
@@ -360,13 +386,17 @@ clientside_callback(
     Output("unidades-import-feedback", "children"),
     Output("notificacoes", "children", allow_duplicate=True),
     Output("unidades-modal", "opened", allow_duplicate=True),
+    Output("url", "pathname", allow_duplicate=True),
     Input("unidades-import-btn", "n_clicks"),
     State("unidades-upload", "contents"),
     State("unidades-upload", "filename"),
     State("unidades-select-empresa", "value"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str):
+def carregar_arquivo_unidades(
+    n: int, contents: str, nome: str, _id_empresa: str, pathname: str
+):
     if not n:
         raise PreventUpdate
 
@@ -384,6 +414,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
                 message="Você não é administrador dessa empresa",
             ),
             no_update,
+            no_update,
         )
 
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
@@ -394,6 +425,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
                 type="error",
                 message="Você não é consultor dessa empresa",
             ),
+            no_update,
             no_update,
         )
 
@@ -406,6 +438,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
             ),
             no_update,
             no_update,
+            no_update,
         )
 
     elif not nome.endswith(".xlsx"):
@@ -415,6 +448,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
                 children='O arquivo precisa ter a extensão ".xlsx".',
                 color="BooptLaranja",
             ),
+            no_update,
             no_update,
             no_update,
         )
@@ -460,6 +494,7 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
                 ),
                 no_update,
                 no_update,
+                no_update,
             )
 
         else:
@@ -471,4 +506,5 @@ def carregar_arquivo_unidades(n: int, contents: str, nome: str, _id_empresa: str
                     message="As unidades foram atualizadas com sucesso.",
                 ),
                 False,
+                pathname,
             )
