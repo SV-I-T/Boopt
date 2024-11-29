@@ -73,25 +73,23 @@ def layout():
                             disabled=True,
                         ),
                         dmc.TextInput(label="CPF", value=usr.cpf, disabled=True),
-                        dmc.LoadingOverlay(
-                            dmc.Group(
-                                align="end",
-                                spacing="xs",
-                                children=[
-                                    dmc.TextInput(
-                                        label="Email",
-                                        value=usr.email,
-                                        style={"flex-grow": "1"},
-                                        id="input-perfil-email",
-                                        disabled=True,
-                                    ),
-                                    dmc.Button(
-                                        "Editar",
-                                        id="btn-perfil-editar-email",
-                                        mb=8,
-                                    ),
-                                ],
-                            )
+                        dmc.Group(
+                            align="end",
+                            spacing="xs",
+                            children=[
+                                dmc.TextInput(
+                                    label="Email",
+                                    value=usr.email,
+                                    style={"flex-grow": "1"},
+                                    id="input-perfil-email",
+                                    disabled=True,
+                                ),
+                                dmc.Button(
+                                    "Editar",
+                                    id="btn-perfil-editar-email",
+                                    mb=8,
+                                ),
+                            ],
                         ),
                         dmc.TextInput(
                             label="Data de nascimento",
@@ -136,65 +134,61 @@ def layout():
                         ),
                     ],
                 ),
-                dmc.Divider(),
-                modal_alterar_senha(usr),
-                dmc.Button(
-                    id="modal-alterar-senha-btn",
-                    children="Alterar senha",
-                    leftIcon=DashIconify(icon="fluent:open-20-regular", width=20),
-                    color="dark",
-                ),
-                html.Small(
-                    "Para alterar sua senha, primeiro você precisa cadastrar um email",
-                    style={"margin-left": "1rem"},
-                ),
+                # dmc.Divider(),
+                # modal_alterar_senha(usr),
+                # dmc.Button(
+                #     id="btn-modal-alterar-senha",
+                #     children="Alterar senha",
+                #     leftIcon=DashIconify(icon="fluent:open-20-regular", width=20),
+                #     color="dark",
+                #     disabled=not bool(usr.email),
+                # ),
+                # html.Small(
+                #     "Para alterar sua senha, primeiro você precisa cadastrar um email",
+                #     style={"margin-left": "1rem"},
+                # )
+                # if not bool(usr.email)
+                # else None,
             ],
         ),
     ]
 
 
-def modal_alterar_senha(usr: Usuario):
-    return dmc.Modal(
-        title="Alterar senha",
-        children=dmc.Stack(
-            mb="1rem",
-            maw=400,
-            children=[
-                dmc.PasswordInput(
-                    id="input-perfil-senha-atual",
-                    label="Senha atual",
-                    disabled=not bool(usr.email),
-                ),
-                dmc.PasswordInput(
-                    id="input-perfil-senha-nova",
-                    label="Nova senha",
-                    disabled=not bool(usr.email),
-                ),
-                dmc.PasswordInput(
-                    id="input-perfil-senha-nova2",
-                    label="Confirmação da nova senha",
-                    disabled=not bool(usr.email),
-                ),
-                dmc.Button(
-                    id="btn-perfil-alterar-senha",
-                    children="Alterar senha",
-                    disabled=not bool(usr.email),
-                ),
-            ],
-        ),
-        opened=False,
-        id="modal-alterar-senha",
-    )
+# def modal_alterar_senha(usr: Usuario):
+#     return dmc.Modal(
+#         title="Alterar senha",
+#         children=dmc.Stack(
+#             mb="1rem",
+#             maw=400,
+#             children=[
+#                 dmc.PasswordInput(
+#                     id="input-perfil-senha-atual",
+#                     label="Senha atual",
+#                 ),
+#                 dmc.PasswordInput(
+#                     id="input-perfil-senha-nova",
+#                     label="Nova senha",
+#                 ),
+#                 dmc.PasswordInput(
+#                     id="input-perfil-senha-nova2",
+#                     label="Confirmação da nova senha",
+#                 ),
+#                 dmc.Button(
+#                     id="btn-perfil-alterar-senha",
+#                     children="Alterar senha",
+#                 ),
+#             ],
+#         ),
+#         opened=False,
+#         id="modal-alterar-senha",
+#     )
 
 
 @callback(
     Output("notificacoes", "children", allow_duplicate=True),
-    Output("input-perfil-email", "disabled"),
+    # Output("btn-modal-alterar-senha", "disabled"),
     Output("btn-perfil-editar-email", "children"),
-    Output("input-perfil-senha-atual", "disabled"),
-    Output("input-perfil-senha-nova", "disabled"),
-    Output("input-perfil-senha-nova2", "disabled"),
-    Output("modal-alterar-senha-btn", "disabled"),
+    Output("input-perfil-email", "disabled"),
     Input("btn-perfil-editar-email", "n_clicks"),
     State("btn-perfil-editar-email", "children"),
     State("input-perfil-email", "value"),
@@ -204,10 +198,13 @@ def editar_email(n: int, acao: str, email: str):
     if not n or not current_user.is_authenticated:
         raise PreventUpdate
 
-    DISABLED_ALTERAR_SENHA = [not bool(email)] * 4
-
     if acao == "Editar":
-        return no_update, False, "Salvar", *DISABLED_ALTERAR_SENHA
+        return (
+            no_update,
+            # no_update,
+            "Salvar",
+            False,
+        )
 
     elif acao == "Salvar":
         if not re.compile(
@@ -219,10 +216,7 @@ def editar_email(n: int, acao: str, email: str):
                     message="E-mail inválido. Verifique e tente novamente",
                     type="error",
                 ),
-                no_update,
-                no_update,
-                no_update,
-                no_update,
+                # no_update,
                 no_update,
                 no_update,
             )
@@ -238,10 +232,7 @@ def editar_email(n: int, acao: str, email: str):
                     message="Não conseguimos alterar seu e-mail. Tente novamente mais tarde.",
                     type="error",
                 ),
-                no_update,
-                no_update,
-                no_update,
-                no_update,
+                # no_update,
                 no_update,
                 no_update,
             )
@@ -254,67 +245,68 @@ def editar_email(n: int, acao: str, email: str):
                 message="Email alterado com sucesso",
                 type="success",
             ),
-            True,
+            # False,
             "Editar",
-            *DISABLED_ALTERAR_SENHA,
+            True,
         )
     else:
         raise PreventUpdate
 
 
-clientside_callback(
-    ClientsideFunction("interacoes", "ativar"),
-    Output("modal-alterar-senha", "opened"),
-    Input("modal-alterar-senha-btn", "n_clicks"),
-    prevent_initial_call=True,
-)
+# clientside_callback(
+#     ClientsideFunction("interacoes", "ativar"),
+#     Output("modal-alterar-senha", "opened", allow_duplicate=True),
+#     Input("btn-modal-alterar-senha", "n_clicks"),
+#     prevent_initial_call=True,
+# )
 
 
-@callback(
-    Output("notificacoes", "children", allow_duplicate=True),
-    Input("btn-perfil-alterar-senha", "n_clicks"),
-    State("input-perfil-senha-atual", "value"),
-    State("input-perfil-senha-nova", "value"),
-    State("input-perfil-senha-nova2", "value"),
-    prevent_initial_call=True,
-)
-def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
-    usr = Usuario.atual()
-    if not n or not usr.is_authenticated:
-        raise PreventUpdate
+# @callback(
+#     Output("notificacoes", "children", allow_duplicate=True),
+#     Output("modal-alterar-senha", "opened", allow_duplicate=True),
+#     Input("btn-perfil-alterar-senha", "n_clicks"),
+#     State("input-perfil-senha-atual", "value"),
+#     State("input-perfil-senha-nova", "value"),
+#     State("input-perfil-senha-nova2", "value"),
+#     prevent_initial_call=True,
+# )
+# def alterar_senha(n: int, senha_atual: str, senha_nova: str, senha_nova2: str):
+#     usr = Usuario.atual()
+#     if not n or not usr.is_authenticated:
+#         raise PreventUpdate
 
-    if not senha_atual or not senha_nova or not senha_nova2:
-        return nova_notificacao(
-            id="notificacao-senha-alterada",
-            message="Preencha todos os campos. Tente novamente.",
-            type="error",
-        )
+#     if not senha_atual or not senha_nova or not senha_nova2:
+#         return nova_notificacao(
+#             id="notificacao-senha-alterada",
+#             message="Preencha todos os campos. Tente novamente.",
+#             type="error",
+#         ), no_update
 
-    if senha_nova != senha_nova2:
-        return nova_notificacao(
-            id="notificacao-senha-alterada",
-            message="As senhas digitadas devem ser iguais. Tente novamente.",
-            type="error",
-        )
+#     if senha_nova != senha_nova2:
+#         return nova_notificacao(
+#             id="notificacao-senha-alterada",
+#             message="As senhas digitadas devem ser iguais. Tente novamente.",
+#             type="error",
+#         ), no_update
 
-    if not check_password_hash(usr.senha_hash, senha_atual):
-        return nova_notificacao(
-            id="notificacao-senha-alterada",
-            message="Senha atual inválida. Tente novamente.",
-            type="error",
-        )
+#     if not check_password_hash(usr.senha_hash, senha_atual):
+#         return nova_notificacao(
+#             id="notificacao-senha-alterada",
+#             message="Senha atual inválida. Tente novamente.",
+#             type="error",
+#         ), no_update
 
-    try:
-        usr.atualizar({"senha_hash": generate_password_hash(senha_nova)})
-    except ValidationError as e:
-        return nova_notificacao(
-            id="notificacao-senha-alterada",
-            message=str(e),
-            type="error",
-        )
+#     try:
+#         usr.atualizar({"senha_hash": generate_password_hash(senha_nova)})
+#     except ValidationError as e:
+#         return nova_notificacao(
+#             id="notificacao-senha-alterada",
+#             message=str(e),
+#             type="error",
+#         ), no_update
 
-    return nova_notificacao(
-        id="notificacao-senha-alterada",
-        message="Senha alterada com sucesso",
-        type="success",
-    )
+#     return nova_notificacao(
+#         id="notificacao-senha-alterada",
+#         message="Senha alterada com sucesso",
+#         type="success",
+#     ), False

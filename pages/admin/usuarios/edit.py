@@ -206,24 +206,24 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                 )
                 if usr
                 else None,
-                dmc.Button(
-                    id="btn-reset-usr-password",
-                    children="Redefinir senha",
-                    disabled=desabilitar_edicao,
-                    leftIcon=DashIconify(
-                        icon="fluent:arrow-reset-20-regular", width=20
-                    ),
-                    ml="auto",
-                    color="dark",
-                )
-                if usr
-                else None,
+                # dmc.Button(
+                #     id="btn-reset-usr-password",
+                #     children="Redefinir senha",
+                #     disabled=desabilitar_edicao,
+                #     leftIcon=DashIconify(
+                #         icon="fluent:arrow-reset-20-regular", width=20
+                #     ),
+                #     ml="auto",
+                #     color="dark",
+                # )
+                # if usr
+                # else None,
             ],
         ),
-        dcc.ConfirmDialog(
-            id="confirm-reset-usr-password",
-            message=f"A senha do usuário {usr.primeiro_nome if usr else None} será redefinida para {usr.data.strftime('%d%m%Y') if usr else None} (Data de aniversário). Tem certeza que deseja redefinir a senha?",
-        ),
+        # dcc.ConfirmDialog(
+        #     id="confirm-reset-usr-password",
+        #     message=f"A senha do usuário {usr.primeiro_nome if usr else None} será redefinida para {usr.data.strftime('%d%m%Y') if usr else None} (Data de aniversário). Tem certeza que deseja redefinir a senha?",
+        # ),
         dcc.ConfirmDialog(
             id="confirm-delete-usr",
             message=f"Tem certeza que deseja excluir o usuário {usr.nome if usr else None}? Essa ação não pode ser revertida.",
@@ -480,58 +480,58 @@ def excluir_usuario(n: int, endpoint: str):
     ), "/app/admin/usuarios"
 
 
-clientside_callback(
-    ClientsideFunction("interacoes", "ativar"),
-    Output("confirm-reset-usr-password", "displayed"),
-    Input("btn-reset-usr-password", "n_clicks"),
-    prevent_initial_call=True,
-)
+# clientside_callback(
+#     ClientsideFunction("interacoes", "ativar"),
+#     Output("confirm-reset-usr-password", "displayed"),
+#     Input("btn-reset-usr-password", "n_clicks"),
+#     prevent_initial_call=True,
+# )
 
 
-@callback(
-    Output("notificacoes", "children", allow_duplicate=True),
-    Input("confirm-reset-usr-password", "submit_n_clicks"),
-    State("url", "pathname"),
-    prevent_initial_call=True,
-)
-def redefinir_senha(n: int, endpoint: str):
-    if not n:
-        raise PreventUpdate
+# @callback(
+#     Output("notificacoes", "children", allow_duplicate=True),
+#     Input("confirm-reset-usr-password", "submit_n_clicks"),
+#     State("url", "pathname"),
+#     prevent_initial_call=True,
+# )
+# def redefinir_senha(n: int, endpoint: str):
+#     if not n:
+#         raise PreventUpdate
 
-    usr_atual = Usuario.atual()
+#     usr_atual = Usuario.atual()
 
-    if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
-        raise PreventUpdate
+#     if usr_atual.role not in (Role.DEV, Role.CONS, Role.ADM):
+#         raise PreventUpdate
 
-    id_usr = UrlUtils.parse_pparams(endpoint, "usuarios")
-    usr = Usuario.consultar("_id", id_usr)
-    nova_senha = usr.data.strftime("%d%m%Y")
+#     id_usr = UrlUtils.parse_pparams(endpoint, "usuarios")
+#     usr = Usuario.consultar("_id", id_usr)
+#     nova_senha = usr.data.strftime("%d%m%Y")
 
-    filter = {"_id": ObjectId(id_usr)}
-    update = {"$set": {"senha_hash": generate_password_hash(nova_senha)}}
+#     filter = {"_id": ObjectId(id_usr)}
+#     update = {"$set": {"senha_hash": generate_password_hash(nova_senha)}}
 
-    if usr_atual.role == Role.CONS:
-        filter["empresa"] = {"$in": usr_atual.clientes}
-    elif usr_atual.role == Role.ADM:
-        filter["empresa"] = usr_atual.empresa
+#     if usr_atual.role == Role.CONS:
+#         filter["empresa"] = {"$in": usr_atual.clientes}
+#     elif usr_atual.role == Role.ADM:
+#         filter["empresa"] = usr_atual.empresa
 
-    r = db("Usuários").update_one(filter=filter, update=update)
+#     r = db("Usuários").update_one(filter=filter, update=update)
 
-    if not r.acknowledged:
-        return nova_notificacao(
-            id="feedback-senha",
-            type="error",
-            message="Houve um erro ao tentar redefinir a senha. Tente novamente mais tarde.",
-        )
-    elif r.modified_count == 0:
-        return nova_notificacao(
-            id="feedback-senha",
-            type="error",
-            message="Este usuário não existe ou você não tem permissao para alterar a senha dele.",
-        )
+#     if not r.acknowledged:
+#         return nova_notificacao(
+#             id="feedback-senha",
+#             type="error",
+#             message="Houve um erro ao tentar redefinir a senha. Tente novamente mais tarde.",
+#         )
+#     elif r.modified_count == 0:
+#         return nova_notificacao(
+#             id="feedback-senha",
+#             type="error",
+#             message="Este usuário não existe ou você não tem permissao para alterar a senha dele.",
+#         )
 
-    return nova_notificacao(
-        id="feedback-usr",
-        type="success",
-        message=f"A senha do usuário {usr.nome} foi redefinida com sucesso",
-    )
+#     return nova_notificacao(
+#         id="feedback-usr",
+#         type="success",
+#         message=f"A senha do usuário {usr.nome} foi redefinida com sucesso",
+#     )

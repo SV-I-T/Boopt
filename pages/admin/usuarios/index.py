@@ -167,8 +167,8 @@ def consultar_dados_tabela_usuarios(
 
 def construir_linha_usuario(usr_atual: Usuario, usuario: Usuario) -> html.Tr:
     if usr_atual.role == Role.ADM and usuario.role not in [
-        Role.usuario,
-        Role.candidato,
+        Role.USR,
+        Role.CAND,
     ]:
         col_usr = usuario.nome
     else:

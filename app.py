@@ -69,89 +69,89 @@ def logout_post():
     return redirect("/")
 
 
-@server.route("/forgot-password", methods=["GET"])
-def forgot_password_get():
-    return render_template("recover_password.html")
+# @server.route("/forgot-password", methods=["GET"])
+# def forgot_password_get():
+#     return render_template("recover_password.html")
 
 
-@server.route("/forgot-password/<string:token>", methods=["GET"])
-def forgot_password_get_token(token: str):
-    try:
-        payload = jwt.decode(
-            token, key=os.environ["FLASK_SECRET_KEY"], algorithms="HS256"
-        )
-    except ExpiredSignatureError:
-        return render_template(
-            "recover_password.html", success=False, message="Este link expirou."
-        )
-    try:
-        usr_id: str = payload["id"]
-        usr = Usuario.consultar("_id", usr_id)
-        nova_senha = usr.data.strftime("%d%m%Y")
-        usr.atualizar({"senha_hash": generate_password_hash(nova_senha)})
-    except Exception:
-        render_template(
-            "recover_password.html",
-            success=False,
-            message="Desculpe, algo de errado aconteceu. Por favor, tente novamente.",
-        )
+# @server.route("/forgot-password/<string:token>", methods=["GET"])
+# def forgot_password_get_token(token: str):
+#     try:
+#         payload = jwt.decode(
+#             token, key=os.environ["FLASK_SECRET_KEY"], algorithms="HS256"
+#         )
+#     except ExpiredSignatureError:
+#         return render_template(
+#             "recover_password.html", success=False, message="Este link expirou."
+#         )
+#     try:
+#         usr_id: str = payload["id"]
+#         usr = Usuario.consultar("_id", usr_id)
+#         nova_senha = usr.data.strftime("%d%m%Y")
+#         usr.atualizar({"senha_hash": generate_password_hash(nova_senha)})
+#     except Exception:
+#         render_template(
+#             "recover_password.html",
+#             success=False,
+#             message="Desculpe, algo de errado aconteceu. Por favor, tente novamente.",
+#         )
 
-    return render_template("recover_password.html", success=True)
+#     return render_template("recover_password.html", success=True)
 
 
-@server.route("/forgot-password", methods=["POST"])
-def forgot_password_post():
-    login = request.form["login"]
-    identificador = "email" if "@" in login else "cpf"
+# @server.route("/forgot-password", methods=["POST"])
+# def forgot_password_post():
+#     login = request.form["login"]
+#     identificador = "email" if "@" in login else "cpf"
 
-    try:
-        usr = Usuario.consultar(identificador=identificador, valor=login)
-    except AssertionError:
-        if identificador == "email":
-            return render_template(
-                "recover_password.html",
-                mensagem="Não encontramos um cadastro com este e-mail. Por favor, tente novamente com o seu CPF.",
-                status="status-error",
-            )
-        else:
-            return render_template(
-                "recover_password.html",
-                mensagem="Não encontramos um cadastro com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
-                status="status-error",
-            )
-    if not usr.email:
-        return render_template(
-            "recover_password.html",
-            mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha ao padrão. Recomendamos que adicione um e-mail após recuperar seu acesso.",
-            status="status-error",
-        )
+#     try:
+#         usr = Usuario.consultar(identificador=identificador, valor=login)
+#     except AssertionError:
+#         if identificador == "email":
+#             return render_template(
+#                 "recover_password.html",
+#                 mensagem="Não encontramos um cadastro com este e-mail. Por favor, tente novamente com o seu CPF.",
+#                 status="status-error",
+#             )
+#         else:
+#             return render_template(
+#                 "recover_password.html",
+#                 mensagem="Não encontramos um cadastro com este CPF. Por favor, entre em contato com o seu gestor/responsável.",
+#                 status="status-error",
+#             )
+#     if not usr.email:
+#         return render_template(
+#             "recover_password.html",
+#             mensagem="Este cadastro não possui um e-mail vinculado para recuperar a senha. Por favor, solicite para o seu gestor/responsável a redefinição da sua senha ao padrão. Recomendamos que adicione um e-mail após recuperar seu acesso.",
+#             status="status-error",
+#         )
 
-    now = datetime.now()
-    exp = now + timedelta(hours=1)
-    payload = {"id": usr.id, "iat": now.timestamp(), "exp": exp.timestamp()}
-    token = jwt.encode(payload, key=os.environ["FLASK_SECRET_KEY"])
+#     now = datetime.now()
+#     exp = now + timedelta(hours=1)
+#     payload = {"id": usr.id, "iat": now.timestamp(), "exp": exp.timestamp()}
+#     token = jwt.encode(payload, key=os.environ["FLASK_SECRET_KEY"])
 
-    msg = Message(
-        subject="Boopt - Recuperação de senha",
-        html=render_template(
-            "email/recover_password.html",
-            nome=usr.nome,
-            link=f"{request.host_url}forgot-password/{token}",
-        ),
-        recipients=[usr.email],
-    )
-    attach_logo(msg)
-    mail.send(msg)
-    email_obfuscado = re.sub(
-        r"(?<=.)[^@](?=[^@]*?[^@]@)|(?:(?<=@.)|(?!^)\\G(?=[^@]*$)).(?=.*[^@]\\.)",
-        "*",
-        usr.email,
-    )
-    return render_template(
-        "recover_password.html",
-        mensagem=f"Enviamos um link para redefinição da senha no e-mail {email_obfuscado}.",
-        status="status-info",
-    )
+#     msg = Message(
+#         subject="Boopt - Recuperação de senha",
+#         html=render_template(
+#             "email/recover_password.html",
+#             nome=usr.nome,
+#             link=f"{request.host_url}forgot-password/{token}",
+#         ),
+#         recipients=[usr.email],
+#     )
+#     attach_logo(msg)
+#     mail.send(msg)
+#     email_obfuscado = re.sub(
+#         r"(?<=.)[^@](?=[^@]*?[^@]@)|(?:(?<=@.)|(?!^)\\G(?=[^@]*$)).(?=.*[^@]\\.)",
+#         "*",
+#         usr.email,
+#     )
+#     return render_template(
+#         "recover_password.html",
+#         mensagem=f"Enviamos um link para redefinição da senha no e-mail {email_obfuscado}.",
+#         status="status-info",
+#     )
 
 
 @server.before_request
@@ -206,7 +206,7 @@ mongo.init_app(server)
 cache.init_app(server)
 cache_simple.init_app(server)
 login_manager.init_app(server)
-mail.init_app(server)
+# mail.init_app(server)
 
 dash.layout = layout
 dash.enable_dev_tools(debug=None)
