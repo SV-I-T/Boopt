@@ -13,6 +13,6 @@ class Role(str, Enum):
         if self == Role.DEV:
             return [r for r in Role]
         elif self == Role.CONS:
-            return [Role.ADM, Role.GEST, Role.USR, Role.CAND]
+            return [Role.ADM, Role.GEST, Role.USR]
         elif self == Role.ADM:
-            return [Role.GEST, Role.USR, Role.CAND]
+            return [Role.GEST, Role.USR]

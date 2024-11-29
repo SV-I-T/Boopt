@@ -38,7 +38,7 @@ class Usuario(BaseModel, UserMixin):
     data: Optional[datetime] = None
     cpf: Optional[str] = None
     email: Optional[str] = None
-    role: Optional[Role] = Role.CAND
+    role: Optional[Role] = Role.USR
     empresa: Optional[ObjectId] = None
     clientes: Optional[list[ObjectId]] = Field(default_factory=list)
     cargo: Optional[str] = None

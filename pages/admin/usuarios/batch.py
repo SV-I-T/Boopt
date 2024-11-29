@@ -38,9 +38,9 @@ def layout():
     if usr_atual.role == Role.DEV:
         roles_edit = [r for r in Role]
     elif usr_atual.role == Role.CONS:
-        roles_edit = [Role.ADM, Role.GEST, Role.USR, Role.CAND]
+        roles_edit = [Role.ADM, Role.GEST, Role.USR]
     elif usr_atual.role == Role.ADM:
-        roles_edit = [Role.GEST, Role.USR, Role.CAND]
+        roles_edit = [Role.GEST, Role.USR]
 
     data_role = [r.value for r in roles_edit]
 
