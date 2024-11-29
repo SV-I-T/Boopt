@@ -56,9 +56,10 @@ def controles_vela():
 
     if ultima_aplicacao and not ultima_aplicacao.get("resposta"):
         controles.append(card_teste_disponivel(ultima_aplicacao))
-    if not ultima_resposta_id:
+    elif not ultima_resposta_id:
         controles.append(card_teste_indisponivel())
-    else:
+
+    if ultima_resposta_id:
         controles.append(botao_ver_resultado(ultima_resposta_id, usr_atual))
 
     return controles
