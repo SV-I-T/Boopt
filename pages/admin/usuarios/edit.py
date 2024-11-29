@@ -155,6 +155,7 @@ def layout_edicao_usr(usr_atual: Usuario, usr: Usuario = None) -> list:
                     nothingFound="Não encontramos nada",
                     value=str(usr.empresa if usr else usr_atual.empresa),
                     disabled=desabilitar_edicao or usr_atual.role == Role.ADM,
+                    display="none" if usr_atual.role == Role.ADM else "block",
                 ),
                 dmc.Select(
                     id="cargo-edit-usr",
@@ -250,7 +251,7 @@ def atualizar_data_unidades(_id_empresa: str):
     if usr_atual.role == Role.CONS and id_empresa not in usr_atual.clientes:
         raise PreventUpdate
 
-    return Empresa.consultar_unidades(id_empresa)
+    return Empresa(id_=id_empresa).consultar_unidades()
 
 
 @callback(
