@@ -1,6 +1,5 @@
-input,
+input:not(.mantine-TransferList-transferListSearch),
 .mantine-PasswordInput-input,
-.mantine-TextInput-input,
 .mantine-MultiSelect-input,
 .mantine-Select-input,
 textarea {
