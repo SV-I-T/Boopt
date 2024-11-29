@@ -74,7 +74,7 @@ def menu_usuario(usr: Usuario):
             dmc.NavLink(
                 label="Suporte",
                 href="/app/support",
-                icon=DashIconify(icon="fluent:chat-help-24-regular", width=24),
+                icon=DashIconify(icon="fluent:person-feedback-24-regular", width=24),
             ),
             # if usr.role in (Role.DEV, Role.CONST, Role.ADM, Role.GEST)
             # else None,

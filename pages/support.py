@@ -9,8 +9,6 @@ def layout():
         html.H1("Suporte"),
         dcc.Markdown(
             children="""
-            aqui vc pode pedir ajuda ou nos contatar etc
-
-            [suporte@boopt.com.br](mailto:suporte@boopt.com.br?subject=Teste&body=Corpo%20do%20texto)""",
+            Encontrou algum problema? Tem alguma sugestão? Contate-nos através de [suporte@boopt.com.br](mailto:suporte@boopt.com.br?subject=Teste&body=Corpo%20do%20texto).""",
         ),
     ]
